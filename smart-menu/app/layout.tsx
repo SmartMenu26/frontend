@@ -1,22 +1,43 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import RegisterSW from "./_components/RegisterSW";
+import { Rubik, Birthstone,Inter } from "next/font/google";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+export const rubik = Rubik({
   subsets: ["latin"],
+  weight: ["300", "400", "500", "700", "900"],
+  variable: "--font-rubik",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+export const birthstone = Birthstone({
+  weight: "400",
   subsets: ["latin"],
+  variable: "--font-birthstone",
+  display: "swap",
+});
+
+export const inter = Inter({
+  subsets: ["latin"],
+  weight: [
+    "100",
+    "200",
+    "300",
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+    "900",
+  ],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Smart Menu",
   description: "AI powered digital menu for restaurants",
-  manifest: "/manifest.json", // 👈 THIS LINE
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -26,7 +47,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${inter.variable} ${rubik.variable} ${birthstone.variable}`}>
         <RegisterSW />
         {children}
       </body>
