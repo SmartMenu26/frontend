@@ -3,7 +3,11 @@
 import { useState } from "react";
 import HamburgerButton from "@/app/components/ui/HamburgerButton";
 
-export default function RestaurantHeader() {
+type Props = {
+  showName?: boolean;
+};
+
+export default function RestaurantHeader({ showName = true }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -16,9 +20,11 @@ export default function RestaurantHeader() {
           className="absolute top-6 right-6 z-100"
         />
 
-        <h1 className="mx-6 md:px-0 text-8xl text-[#6B2E2E] font-birthstone">
-          Bakal
-        </h1>
+        {showName && (
+          <h1 className="mx-6 md:px-0 text-8xl text-[#6B2E2E] font-birthstone">
+            Bakal
+          </h1>
+        )}
       </div>
 
       {/* BACKDROP */}

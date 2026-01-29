@@ -1,13 +1,20 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import ChipsRow, { ChipItem } from "../ui/ChipsRow";
 import { Star, ChefHat, Drumstick, Leaf, Dice5, Flame } from "lucide-react";
 
 type AiSuggestionProps = {
   className?: string;
+  restaurantId?: string;
 };
 
-export default function AiSuggestion({ className = "" }: AiSuggestionProps) {
+export default function AiSuggestion({
+  className = "",
+  restaurantId,
+}: AiSuggestionProps) {
+  const router = useRouter();
+
   const chips: ChipItem[] = [
     {
       id: "ask-bakal",
@@ -47,7 +54,10 @@ export default function AiSuggestion({ className = "" }: AiSuggestionProps) {
 
   const handleChipClick = (id: string) => {
     if (id === "ask-bakal") {
-      console.log("Open AI modal");
+      const target = restaurantId
+        ? `/restaurant/${restaurantId}/ai-assistant`
+        : "/ai-assistant";
+      router.push(target);
       return;
     }
     if (id === "protein") {

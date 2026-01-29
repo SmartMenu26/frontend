@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import RegisterSW from "./_components/RegisterSW";
-import { Rubik, Birthstone,Inter } from "next/font/google";
+import { Rubik, Birthstone,Inter, Great_Vibes } from "next/font/google";
 
 export const rubik = Rubik({
   subsets: ["latin"],
@@ -16,6 +16,14 @@ export const birthstone = Birthstone({
   variable: "--font-birthstone",
   display: "swap",
 });
+
+export const great_vibes = Great_Vibes({
+  weight: "400",
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-great-vibes",
+  display: "swap",
+});
+
 
 export const inter = Inter({
   subsets: ["latin"],
@@ -47,7 +55,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${rubik.variable} ${birthstone.variable}`}>
+      <body className={`${inter.variable} ${rubik.variable} ${birthstone.variable} ${great_vibes.variable}`}>
         <RegisterSW />
         {children}
       </body>

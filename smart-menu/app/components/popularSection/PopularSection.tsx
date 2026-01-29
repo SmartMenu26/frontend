@@ -5,6 +5,7 @@ import Card from "../ui/Card";
 import { DUMMY_ITEMS } from "@/app/data/dummyMenuItems";
 import type { MealKind } from "@/app/data/dummyMenuCategories";
 import { PopularSkeletonCard } from "../skeletons/popularItemsSkeleton";
+import { useRouter } from "next/navigation";
 
 type MenuItem = {
   id: string;
@@ -24,6 +25,8 @@ export default function PopularSection({
   mealType,
   className = "",
 }: PopularSectionProps) {
+  const router = useRouter();
+
   const [popularItems, setPopularItems] = useState<MenuItem[]>([]);
   const [loadingPopular, setLoadingPopular] = useState(false);
 
@@ -93,7 +96,7 @@ export default function PopularSection({
                 [&::-webkit-scrollbar]:hidden
               "
             >
-              <div className="flex gap-6 pb-4 pt-12 overflow-visible">
+              <div className="flex gap-6 pb-4 pt-8 overflow-visible">
                 {loadingPopular
                   ? Array.from({ length: 5 }).map((_, idx) => (
                     <PopularSkeletonCard key={idx} />
@@ -104,6 +107,7 @@ export default function PopularSection({
                       title={it.title}
                       imageUrl={it.imageUrl}
                       priceLabel={`${it.price}ден`}
+                      onClick={() => router.push(`/restaurant/${restaurantId}/menuItem/${it.id}`)}
                       variant="popular"
                       className="shrink-0"
                     />

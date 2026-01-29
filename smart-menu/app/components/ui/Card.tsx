@@ -35,13 +35,13 @@ export default function Card({
 
   const imageClasses =
     variant === "popular"
-      ? "-top-8 h-[100px] w-[100px]"
-      : "-top-10 h-[120px] w-[120px]";
+      ? "-top-5 h-[90px] w-[90px]"
+      : "-top-4 h-[105px] w-[105px]";
 
 const titleClasses =
   variant === "popular"
     ? "mt-2 text-sm font-regular line-clamp-2"
-    : "mt-4 text-md font-regular line-clamp-2";
+    : "mt-[26px] text-[14px] font-regular line-clamp-2";
 
   return (
     <button
@@ -56,7 +56,7 @@ const titleClasses =
       {/* CARD */}
       <div
         className={[
-          "flex items-center justify-center relative rounded-[28px]",
+          "flex items-center justify-center relative rounded-[21px]",
           "pt-20 pb-6 px-4 overflow-visible",
           sizeClasses,
           bg,
@@ -76,10 +76,10 @@ const titleClasses =
           <Image
             src={imageUrl}
             alt={title}
-            width={variant === "popular" ? 100 : 130}
-            height={variant === "popular" ? 100 : 130}
+            width={variant === "popular" ? 100 : 100}
+            height={variant === "popular" ? 100 : 100}
             priority={index !== undefined && index < 3}
-            sizes={variant === "popular" ? "100px" : "130px"}
+            sizes={variant === "popular" ? "100px" : "100px"}
             className={[
               "rounded-full absolute left-1/2 -translate-x-1/2 object-cover",
               imageClasses,
@@ -102,7 +102,7 @@ const titleClasses =
       {/* PRICE */}
       {priceLabel && (
         <div className="mt-2 flex justify-center">
-          <div className={["rounded-full border px-2 py-1 font-normal", border, text].join(" ")}>
+          <div className={["rounded-full border px-2 py-1 font-normal text-sm", border, text].join(" ")}>
             {priceLabel}
           </div>
         </div>

@@ -8,6 +8,7 @@ import MealTypeToggle from "../mealTypeToggle/MealTypeToggle";
 import type { MealKind, Category } from "@/app/data/dummyMenuCategories";
 import { SkeletonCard } from "../skeletons/cardSkeleton";
 import { CategorySkeleton } from "../skeletons/categorySkeleton";
+import { useRouter } from "next/navigation";
 
 type MenuItem = {
     id: string;
@@ -24,6 +25,8 @@ type Props = {
 
 
 export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }: Props) {
+    const router = useRouter();
+
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
     const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>("all");
@@ -188,7 +191,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
 
 
     return (
-        <div className="bg-[#F7F7F7] min-h-[60vh]">
+        <div className="bg-[#F7F7F7] min-h-[50vh] flex flex-col justify-center items-center">
             <div className="container mx-auto space-y-1 py-8 pl-4">
 
                 <MealTypeToggle value={mealType} onChange={onMealTypeChange} className="ml-auto" />
@@ -231,6 +234,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                         items={chipItems}
                         activeId={selectedSubcategoryId}
                         onChipClick={(id) => setSelectedSubcategoryId(id)}
+                        className="gap-1!"
                     />
                 )}
 
@@ -255,7 +259,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                                     title={it.title}
                                     imageUrl={it.imageUrl}
                                     priceLabel={`${it.price}ден`}
-                                    onClick={() => console.log("open item", it.id)}
+                                    onClick={() => router.push(`/restaurant/${restaurantId}/menuItem/${it.id}`)}
                                     className="shrink-0"
                                     index={index}
                                 />

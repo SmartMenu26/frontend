@@ -15,7 +15,7 @@ export default async function RestaurantPage({ params }: PageProps) {
     <div className="pt-8 flex flex-col gap-6">
       <RestaurantHeader />
 
-      <AiSuggestion />
+      <AiSuggestion restaurantId={restaurantId} />
 
       <RestaurantContent restaurantId={restaurantId} />
     </div>
