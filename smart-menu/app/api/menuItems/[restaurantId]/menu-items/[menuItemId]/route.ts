@@ -8,6 +8,8 @@ export async function GET(
   const { restaurantId, menuItemId } = await ctx.params;
 
   const backendBase = process.env.BACKEND_URL;
+  console.log("BACKEND_URL:", process.env.BACKEND_URL);
+
   if (!backendBase) {
     return NextResponse.json(
       { ok: false, message: "BACKEND_URL is not set" },

@@ -53,7 +53,7 @@ const ChipsRow = forwardRef<HTMLDivElement, ChipsRowProps>(
           const isActive = item.id === activeId;
 
           const base =
-            "inline-flex items-center gap-2 rounded-full px-4 py-1 text-xs font-semibold " +
+            "inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold " +
             "transition" +
             "shrink-0 snap-start";
 

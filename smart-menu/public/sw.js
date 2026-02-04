@@ -26,3 +26,9 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   event.waitUntil(clients.openWindow("/"));
 });
+
+// Minimal fetch handler so Chrome sees this SW as controlling network requests
+self.addEventListener("fetch", (event) => {
+  // pass-through response keeps the SW installable without custom caching yet
+  event.respondWith(fetch(event.request));
+});

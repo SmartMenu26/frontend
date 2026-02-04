@@ -1,14 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import HamburgerButton from "@/app/components/ui/HamburgerButton";
 
 type Props = {
   showName?: boolean;
+  name?: string;
 };
 
-export default function RestaurantHeader({ showName = true }: Props) {
+export default function RestaurantHeader({ showName = true, name }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const displayName = name?.trim() || "Bakal";
+  const headingSizeClass = useMemo(() => {
+    const charThreshold = 14;
+    return displayName.length > charThreshold
+      ? "text-7xl md:text-6xl leading-none pt-6"
+      : "text-8xl md:text-9xl";
+  }, [displayName]);
 
   return (
     <>
@@ -21,8 +29,10 @@ export default function RestaurantHeader({ showName = true }: Props) {
         />
 
         {showName && (
-          <h1 className="mx-6 md:px-0 text-8xl text-[#6B2E2E] font-birthstone">
-            Bakal
+          <h1
+            className={`mx-6 md:mx-0 ${headingSizeClass} text-[#6B2E2E] font-birthstone`}
+          >
+            {displayName}
           </h1>
         )}
       </div>

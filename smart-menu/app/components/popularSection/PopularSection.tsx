@@ -91,7 +91,7 @@ export default function PopularSection({
             <div
               className="
                 overflow-x-auto overflow-y-visible
-                scroll-smooth touch-pan-x
+                scroll-smooth
                 [-webkit-overflow-scrolling:touch]
                 [&::-webkit-scrollbar]:hidden
               "

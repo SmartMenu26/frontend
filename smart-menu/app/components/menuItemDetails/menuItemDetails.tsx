@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { ArrowLeft, Heart } from "lucide-react";
@@ -19,73 +19,41 @@ type Allergen = {
 
 
 type Props = {
+  id: string;
   name: string;
   description?: string;
   imageUrl: string;
   allergens?: Allergen[];
+  restaurantId?: string;
 };
 
 export default function MenuItemDetails({
+  id,
   name,
   description,
   imageUrl,
   allergens = [],
+  restaurantId,
 }: Props) {
   const router = useRouter();
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const favoritesKey = useMemo(
+    () => (restaurantId ? `favorites:${restaurantId}` : "favorites:default"),
+    [restaurantId]
+  );
 
   useEffect(() => {
     setActiveTooltip(null);
   }, [allergens]);
 
-  useEffect(() => {
-    setImageLoaded(false);
-  }, [imageUrl]);
-
   return (
     <div className="min-h-dvh bg-[#3F5D50]">
-      {/* TOP IMAGE AREA */}
-      <div className="flex justify-center items-center relative h-[45vh] w-full">
-        {/* back button */}
-        <button
-          type="button"
-          onClick={() => router.back()}
-          aria-label="Back"
-          className="cursor-pointer absolute left-4 top-4 z-10 rounded-md bg-black/40 p-1.5 backdrop-blur"
-        >
-          <ArrowLeft className="h-5 w-5 text-white" />
-        </button>
-
-        {/* image */}
-        <div className="relative grid h-70 w-70 place-items-center">
-          <Image
-            src={menuItemPlaceholder}
-            alt=""
-            aria-hidden="true"
-            priority
-            className={clsx(
-              "absolute inset-0 h-70 w-70 rounded-full object-cover transition-opacity duration-300",
-              imageLoaded ? "opacity-0" : "opacity-100"
-            )}
-          />
-          <Image
-            width={400}
-            height={400}
-            priority
-            quality={100}
-            src={imageUrl}
-            alt={name}
-            loading="eager"
-            onLoadingComplete={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(true)}
-            className={clsx(
-              "relative! h-70 w-70 rounded-full object-cover transition-opacity duration-300",
-              imageLoaded ? "opacity-100" : "opacity-0"
-            )}
-          />
-        </div>
-      </div>
+      <MenuItemHero
+        name={name}
+        imageUrl={imageUrl}
+        onBack={() => router.back()}
+      />
 
       {/* BOTTOM SHEET */}
       <div className="h-[55vh] rounded-t-[40px] bg-[#F7F7F7] px-6 pb-10 pt-10 shadow-[0_-20px_60px_rgba(0,0,0,0.25)]">
@@ -94,7 +62,7 @@ export default function MenuItemDetails({
         </h1>
 
         {!!description && (
-          <p className="mt-4 text-base leading-relaxed text-[#2F3A37]/80">
+          <p className="mt-4 text-lg leading-relaxed text-[#2F3A37]/80">
             {description}
           </p>
         )}
@@ -178,26 +146,173 @@ export default function MenuItemDetails({
           <button
             type="button"
             className="flex-1 cursor-pointer rounded-full bg-[#1B1F1E] py-4 text-sm font-semibold text-white shadow-lg"
+            onClick={() => {
+              if (!restaurantId) return;
+              const prompt = `Што оди со ${name}?`;
+              const params = new URLSearchParams({ prompt });
+              router.push(`/restaurant/${restaurantId}/ai-assistant?${params.toString()}`);
+            }}
           >
             AI ПРЕПОРАКА
           </button>
 
-          <button
-            type="button"
-            aria-label="Add to favorites"
-            className="cursor-pointer grid h-14 w-14 place-items-center rounded-full bg-[#FF4D9D] shadow-lg"
-          >
-            <Heart className="h-5 w-5 text-white" />
-          </button>
+          <FavoriteButton itemId={id} storageKey={favoritesKey} />
         </div>
 
         <button
           type="button"
-          className="cursor-pointer mt-6 w-full text-center text-xs text-[#2F3A37]/70 underline underline-offset-4"
+          className="cursor-pointer mt-6 pb-6 w-full text-center text-xs text-[#2F3A37]/70 underline underline-offset-4"
         >
           Сподели твое мислење
         </button>
       </div>
     </div>
+  );
+}
+
+type FavoriteButtonProps = {
+  itemId: string;
+  storageKey: string;
+};
+
+type MenuItemHeroProps = {
+  name: string;
+  imageUrl: string;
+  onBack: () => void;
+};
+
+const MenuItemHero = memo(function MenuItemHero({
+  name,
+  imageUrl,
+  onBack,
+}: MenuItemHeroProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [imageUrl]);
+
+  return (
+    <div className="flex justify-center items-center relative h-[45vh] w-full">
+      <button
+        type="button"
+        onClick={onBack}
+        aria-label="Back"
+        className="cursor-pointer absolute left-4 top-4 z-10 rounded-md bg-black/40 p-1.5 backdrop-blur"
+      >
+        <ArrowLeft className="h-5 w-5 text-white" />
+      </button>
+
+      <div className="relative grid h-70 w-70 place-items-center">
+        <Image
+          src={menuItemPlaceholder}
+          alt=""
+          aria-hidden="true"
+          priority
+          className={clsx(
+            "absolute inset-0 h-70 w-70 rounded-full object-cover transition-opacity duration-300",
+            imageLoaded ? "opacity-0" : "opacity-100"
+          )}
+        />
+        <Image
+          width={400}
+          height={400}
+          priority
+          quality={100}
+          src={imageUrl}
+          alt={name}
+          loading="eager"
+          onLoadingComplete={() => setImageLoaded(true)}
+          onError={() => setImageLoaded(true)}
+          className={clsx(
+            "relative! h-70 w-70 rounded-full object-cover transition-opacity duration-300",
+            imageLoaded ? "opacity-100" : "opacity-0"
+          )}
+        />
+      </div>
+    </div>
+  );
+});
+
+function FavoriteButton({ itemId, storageKey }: FavoriteButtonProps) {
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteBurst, setFavoriteBurst] = useState(false);
+  const burstTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !itemId) return;
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) {
+        setIsFavorite(false);
+        return;
+      }
+      const parsed: string[] = JSON.parse(raw);
+      setIsFavorite(parsed.includes(itemId));
+    } catch {
+      setIsFavorite(false);
+    }
+  }, [storageKey, itemId]);
+
+  useEffect(
+    () => () => {
+      if (burstTimeoutRef.current) {
+        clearTimeout(burstTimeoutRef.current);
+      }
+    },
+    []
+  );
+
+  const handleToggle = () => {
+    if (typeof window === "undefined" || !itemId) return;
+    setIsFavorite((prev) => {
+      const next = !prev;
+      try {
+        const raw = localStorage.getItem(storageKey);
+        const parsed: string[] = raw ? JSON.parse(raw) : [];
+        const set = new Set(parsed);
+        if (next) {
+          set.add(itemId);
+        } else {
+          set.delete(itemId);
+        }
+        localStorage.setItem(storageKey, JSON.stringify(Array.from(set)));
+      } catch {
+        // ignore storage errors
+      }
+
+      if (burstTimeoutRef.current) {
+        clearTimeout(burstTimeoutRef.current);
+      }
+      if (next) {
+        setFavoriteBurst(true);
+        burstTimeoutRef.current = setTimeout(() => {
+          setFavoriteBurst(false);
+        }, 400);
+      } else {
+        setFavoriteBurst(false);
+      }
+      return next;
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      aria-label={isFavorite ? "Отстрани од омилени" : "Додај во омилени"}
+      aria-pressed={isFavorite}
+      onClick={handleToggle}
+      className="cursor-pointer grid h-14 w-14 place-items-center rounded-full bg-[#FF4D9D] shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+    >
+      <span className="relative inline-flex h-5 w-5 items-center justify-center">
+        {favoriteBurst && (
+          <span className="absolute inset-0 rounded-full bg-white/70 animate-ping" />
+        )}
+        <Heart
+          className="h-5 w-5 text-white"
+          fill={isFavorite ? "currentColor" : "none"}
+        />
+      </span>
+    </button>
   );
 }

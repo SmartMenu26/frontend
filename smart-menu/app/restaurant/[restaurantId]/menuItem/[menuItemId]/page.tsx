@@ -66,6 +66,7 @@ export default async function MenuItemPage({ params, searchParams }: Props) {
   const item = json?.data ?? json;
 
   const mapped = {
+    id: item?._id ?? item?.id ?? menuItemId,
     name: item?.name?.mk ?? "Item",
     description: item?.description?.mk ?? "",
     imageUrl: item?.image?.url ?? "/placeholder.jpg",
@@ -108,6 +109,7 @@ export default async function MenuItemPage({ params, searchParams }: Props) {
               Boolean(a?.label)
           )
       : [],
+    restaurantId,
   };
 
   return <MenuItemDetails {...mapped} />;

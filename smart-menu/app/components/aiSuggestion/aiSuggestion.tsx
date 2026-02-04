@@ -24,50 +24,47 @@ export default function AiSuggestion({
     },
     {
       id: "protein",
-      label: "ПРОТЕИНСКО",
+      label: "Протеинско",
       icon: <Drumstick size={16} />,
       variant: "solid",
-      colorClassName: "bg-[#B4654A] text-white hover:bg-red-600",
+      colorClassName: "uppercase bg-[#B4654A] text-white hover:bg-[#B4654A]/90",
     },
     {
       id: "low-cal",
-      label: "ПОMАЛКУ КАЛОРИИ",
+      label: "Помалку калории",
       icon: <Leaf size={16} />,
       variant: "solid",
-      colorClassName: "bg-[#70B77E] text-white hover:bg-emerald-500",
+      colorClassName: "uppercase bg-[#70B77E] text-white hover:bg-[#70B77E]/90",
     },
     {
       id: "protein2",
-      label: "ИЗНЕНАДИ МЕ",
+      label: "Изненади ме",
       icon: <Dice5 size={16} />,
       variant: "solid",
-      colorClassName: "bg-[#7EA0B7] text-white hover:bg-red-600",
+      colorClassName: "uppercase bg-[#7EA0B7] text-white hover:bg-[#7EA0B7]/90",
     },
     {
       id: "protein3",
-      label: "ЛУТО",
+      label: "Луто",
       icon: <Flame size={16} />,
       variant: "solid",
-      colorClassName: "bg-[#C33149] text-white hover:bg-red-600",
+      colorClassName: "uppercase bg-[#C33149] text-white hover:bg-[#C33149]/90",
     },
   ];
 
-  const handleChipClick = (id: string) => {
-    if (id === "ask-bakal") {
-      const target = restaurantId
-        ? `/restaurant/${restaurantId}/ai-assistant`
-        : "/ai-assistant";
-      router.push(target);
-      return;
-    }
-    if (id === "protein") {
-      console.log("Apply protein filter");
-      return;
-    }
-    if (id === "low-cal") {
-      console.log("Apply low calories filter");
-      return;
-    }
+  const handleChipClick = (chipId: string) => {
+    const base = restaurantId
+      ? `/restaurant/${restaurantId}/ai-assistant`
+      : "/ai-assistant";
+
+    const chip = chips.find((c) => c.id === chipId);
+    const prompt = chip && chip.id !== "ask-bakal" ? chip.label : undefined;
+    const target =
+      prompt?.trim() && chip?.id !== "ask-bakal"
+        ? `${base}?prompt=${encodeURIComponent(prompt.trim())}`
+        : base;
+
+    router.push(target);
   };
 
   return (

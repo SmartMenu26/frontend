@@ -1,6 +1,44 @@
+import InstallAppButton from "@/app/_components/InstallAppButton";
 import AiSuggestion from "@/app/components/aiSuggestion/aiSuggestion";
 import RestaurantContent from "@/app/components/restaurant/RestaurantContext";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
+
+async function fetchRestaurantName(restaurantId: string) {
+  const origin =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
+    "http://localhost:3000";
+
+  try {
+    const res = await fetch(
+      `${origin}/api/restaurants/${restaurantId}`,
+      { cache: "no-store" }
+    );
+
+    if (!res.ok) {
+      console.error("Failed to fetch restaurant:", res.status, res.statusText);
+      return null;
+    }
+
+    const payload = await res.json().catch(() => null);
+    const data = payload?.data ?? payload;
+
+    if (!data) return null;
+
+    if (typeof data.name === "string") {
+      return data.name;
+    }
+
+    if (typeof data.name === "object") {
+      return data.name?.mk ?? data.name?.en ?? data.name?.sq ?? null;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error fetching restaurant:", error);
+    return null;
+  }
+}
 
 type PageProps = { 
   params: Promise<{ restaurantId: string }> // Update type to Promise
@@ -8,12 +46,12 @@ type PageProps = {
 
 export default async function RestaurantPage({ params }: PageProps) {
   const { restaurantId } = await params;
-  
-  console.log("RestaurantPage restaurantId:", restaurantId);
+  const restaurantName = await fetchRestaurantName(restaurantId);
 
   return (
-    <div className="pt-8 flex flex-col gap-6">
-      <RestaurantHeader />
+    <div className="py-8 flex flex-col gap-6">
+      <InstallAppButton />
+      <RestaurantHeader name={restaurantName ?? undefined} />
 
       <AiSuggestion restaurantId={restaurantId} />
 

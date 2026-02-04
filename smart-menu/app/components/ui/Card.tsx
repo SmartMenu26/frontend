@@ -13,6 +13,7 @@ type CardProps = {
   className?: string;
   variant?: CardVariant;
   index?: number;
+  kind?: string;
 };
 
 export default function Card({
@@ -23,10 +24,28 @@ export default function Card({
   className = "",
   variant = "default",
   index,
+  kind,
 }: CardProps) {
-  const bg = variant === "popular" ? "bg-[#A16B00]" : "bg-[#355B4B]";
-  const text = variant === "popular" ? "text-[#A16B00]" : "text-[#355B4B]";
-  const border = variant === "popular" ? "border-[#A16B00]" : "border-[#355B4B]";
+  const normalizedKind = kind?.toLowerCase();
+  const isDrink = variant !== "popular" && normalizedKind === "drink";
+  const bg =
+    variant === "popular"
+      ? "bg-[#A16B00]"
+      : isDrink
+      ? "bg-[#6B2E2E]"
+      : "bg-[#355B4B]";
+  const text =
+    variant === "popular"
+      ? "text-[#A16B00]"
+      : isDrink
+      ? "text-[#6B2E2E]"
+      : "text-[#355B4B]";
+  const border =
+    variant === "popular"
+      ? "border-[#A16B00]"
+      : isDrink
+      ? "border-[#6B2E2E]"
+      : "border-[#355B4B]";
   
   const sizeClasses =
     variant === "popular"
@@ -78,10 +97,11 @@ const titleClasses =
             alt={title}
             width={variant === "popular" ? 100 : 100}
             height={variant === "popular" ? 100 : 100}
-            priority={index !== undefined && index < 3}
+            priority
+            quality={60}
             sizes={variant === "popular" ? "100px" : "100px"}
             className={[
-              "rounded-full absolute left-1/2 -translate-x-1/2 object-cover",
+              "rounded-full absolute left-1/2 -translate-x-1/2 object-cover shadow-[0_0_12px_-4px_rgba(63,93,80,0.35)]",
               imageClasses,
             ].join(" ")}
           />

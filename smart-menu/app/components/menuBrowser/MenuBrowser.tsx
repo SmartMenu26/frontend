@@ -15,6 +15,7 @@ type MenuItem = {
     title: string;
     imageUrl: string;
     price: number;
+    kind?: string;
 };
 
 type Props = {
@@ -167,6 +168,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                     title: m?.name?.mk ?? m?.name ?? m?.title ?? "Item",
                     imageUrl: m?.image?.url ?? m?.imageUrl ?? "",
                     price: m?.price ?? 0,
+                    kind: m?.kind ?? m?.baseCategory ?? m?.type,
                 }));
 
                 setItems(mapped);
@@ -229,27 +231,38 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
 
 
                 {/* SUBCATEGORY CHIPS */}
-                {!!selectedCategory && (
-                    <ChipsRow
-                        items={chipItems}
-                        activeId={selectedSubcategoryId}
-                        onChipClick={(id) => setSelectedSubcategoryId(id)}
-                        className="gap-1!"
-                    />
+                {loadingCategories ? (
+                    <div className="flex gap-2 mt-3">
+                        {Array.from({ length: 4 }).map((_, idx) => (
+                            <div
+                                key={idx}
+                                className="h-4 w-24 rounded-full bg-black/10 animate-pulse"
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    !!selectedCategory && (
+                        <ChipsRow
+                            items={chipItems}
+                            activeId={selectedSubcategoryId}
+                            onChipClick={(id) => setSelectedSubcategoryId(id)}
+                            className="gap-1!"
+                        />
+                    )
                 )}
 
                 {/* CARDS */}
                 <div
                     className="
             overflow-x-auto overflow-y-visible
-            scroll-smooth touch-pan-x
+            scroll-smooth
             [-webkit-overflow-scrolling:touch]
             [&::-webkit-scrollbar]:hidden mt-4
           "
                 >
                     {/* INNER STRIP */}
                     <div className="flex gap-6 pb-4 pt-12 overflow-visible">
-                        {loadingItems
+                        {(loadingItems || loadingCategories)
                             ? Array.from({ length: 6 }).map((_, idx) => (
                                 <SkeletonCard key={idx} />
                             ))
@@ -259,6 +272,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                                     title={it.title}
                                     imageUrl={it.imageUrl}
                                     priceLabel={`${it.price}ден`}
+                                    kind={it.kind}
                                     onClick={() => router.push(`/restaurant/${restaurantId}/menuItem/${it.id}`)}
                                     className="shrink-0"
                                     index={index}
