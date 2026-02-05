@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import HamburgerButton from "@/app/components/ui/HamburgerButton";
 
@@ -10,12 +11,13 @@ type Props = {
 
 export default function RestaurantHeader({ showName = true, name }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const displayName = name?.trim() || "Bakal";
+  const displayName = name?.trim() || "Restaurant";
   const headingSizeClass = useMemo(() => {
-    const charThreshold = 14;
-    return displayName.length > charThreshold
-      ? "text-7xl md:text-6xl leading-none pt-6"
-      : "text-8xl md:text-9xl";
+    if (displayName.length > 28) return "text-4xl md:text-5xl";
+    if (displayName.length > 22) return "text-5xl md:text-6xl";
+    if (displayName.length > 16) return "text-6xl md:text-7xl";
+    if (displayName.length > 7) return "text-5xl md:text-8xl";
+    return "text-7xl md:text-9xl";
   }, [displayName]);
 
   return (
@@ -25,12 +27,12 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
         <HamburgerButton
           open={menuOpen}
           onToggle={() => setMenuOpen((v) => !v)}
-          className="absolute top-6 right-6 z-100"
+          className="absolute top-5 right-6 z-100"
         />
 
         {showName && (
           <h1
-            className={`mx-6 md:mx-0 ${headingSizeClass} text-[#6B2E2E] font-birthstone`}
+            className={`pt-3 mx-6 md:mx-0 ${headingSizeClass} text-[#6B2E2E] font-great-vibes leading-tight whitespace-nowrap`}
           >
             {displayName}
           </h1>
@@ -59,7 +61,12 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
         ].join(" ")}
       >
         <div className="pt-24 px-6">
-          <p className="text-lg font-medium mb-4">Menu item 1</p>
+          <p className="text-lg font-medium mb-4">        <Link
+          href="/"
+          className="text-[#6B2E2E] hover:underline"
+        >
+          Home
+        </Link></p>
           <p className="text-lg font-medium mb-4">Menu item 2</p>
           <p className="text-lg font-medium mb-4">Menu item 3</p>
         </div>

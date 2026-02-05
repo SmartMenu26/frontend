@@ -1,6 +1,26 @@
 "use server";
 
-import webpush from "web-push";
+import webpush, { type PushSubscription as WebPushSubscription } from "web-push";
+
+export type SubscriptionPayload = {
+  endpoint: string;
+  expirationTime?: number | null;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+};
+
+function toWebPushSubscription(sub: SubscriptionPayload): WebPushSubscription {
+  return {
+    endpoint: sub.endpoint,
+    expirationTime: sub.expirationTime ?? null,
+    keys: {
+      p256dh: sub.keys.p256dh,
+      auth: sub.keys.auth,
+    },
+  };
+}
 
 webpush.setVapidDetails(
   "mailto:your-email@example.com",
@@ -8,10 +28,10 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!
 );
 
-let subscription: PushSubscription | null = null;
+let subscription: WebPushSubscription | null = null;
 
-export async function subscribeUser(sub: PushSubscription) {
-  subscription = sub;
+export async function subscribeUser(sub: SubscriptionPayload) {
+  subscription = toWebPushSubscription(sub);
   return { success: true };
 }
 
@@ -28,7 +48,7 @@ export async function sendNotification(message: string) {
     JSON.stringify({
       title: "Smart Menu",
       body: message,
-      icon: "/icons/icon-192.png",
+      icon: "/icons/logo-512x512.png",
     })
   );
 

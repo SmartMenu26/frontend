@@ -31,9 +31,9 @@ export default function HamburgerButton({
       {/* top line */}
       <span
         className={clsx(
-          "absolute h-[2px] w-6 rounded-full bg-current",
+          "absolute h-0.5 w-6 rounded-full bg-current",
           "transition-transform duration-300 ease-out",
-          open ? "translate-y-0 rotate-45" : "-translate-y-[6px] rotate-0"
+          open ? "translate-y-0 rotate-45" : "-translate-y-1.5 rotate-0"
         )}
       />
       {/* bottom line */}

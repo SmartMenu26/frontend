@@ -131,6 +131,19 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         setSelectedSubcategoryId("all");
     }, [selectedCategoryId]);
 
+    // keep active category centered in scroll container
+    useEffect(() => {
+        if (!selectedCategoryId) return;
+        const target = categoryRefs.current[selectedCategoryId];
+        if (!target) return;
+
+        target.scrollIntoView({
+            behavior: "smooth",
+            inline: "center",
+            block: "nearest",
+        });
+    }, [selectedCategoryId]);
+
     useEffect(() => {
         if (!selectedCategoryId) return;
 
@@ -193,13 +206,13 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
 
 
     return (
-        <div className="bg-[#F7F7F7] min-h-[50vh] flex flex-col justify-center items-center">
+        <div className="bg-[#F7F7F7] min-h-[50vh] max-h-125 flex flex-col justify-center items-center">
             <div className="container mx-auto space-y-1 py-8 pl-4">
 
                 <MealTypeToggle value={mealType} onChange={onMealTypeChange} className="ml-auto" />
                 <div
                     ref={categoryContainerRef}
-                    className="flex gap-8 overflow-x-auto [&::-webkit-scrollbar]:hidden scroll-smooth"
+                    className="pr-2 flex gap-4 overflow-x-auto [&::-webkit-scrollbar]:hidden scroll-smooth"
                 >
                     {loadingCategories ? (
                         Array.from({ length: 5 }).map((_, idx) => (
@@ -213,11 +226,6 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                                 active={cat.id === selectedCategoryId}
                                 onClick={() => {
                                     setSelectedCategoryId(cat.id);
-                                    categoryRefs.current[cat.id]?.scrollIntoView({
-                                        behavior: "smooth",
-                                        inline: "center",
-                                        block: "nearest",
-                                    });
                                 }}
                                 className="shrink-0"
                                 ref={(el) => {
@@ -261,7 +269,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
           "
                 >
                     {/* INNER STRIP */}
-                    <div className="flex gap-6 pb-4 pt-12 overflow-visible">
+                    <div className="flex gap-6 pb-4 pt-12 overflow-visible min-h-45">
                         {(loadingItems || loadingCategories)
                             ? Array.from({ length: 6 }).map((_, idx) => (
                                 <SkeletonCard key={idx} />

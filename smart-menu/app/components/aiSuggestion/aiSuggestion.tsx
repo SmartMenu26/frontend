@@ -7,20 +7,26 @@ import { Star, ChefHat, Drumstick, Leaf, Dice5, Flame } from "lucide-react";
 type AiSuggestionProps = {
   className?: string;
   restaurantId?: string;
+  assistantName?: string;
 };
 
 export default function AiSuggestion({
   className = "",
   restaurantId,
+  assistantName,
 }: AiSuggestionProps) {
   const router = useRouter();
+  const assistantLabel = assistantName?.trim()
+    ? `Прашај го ${assistantName.trim()}`
+    : "Прашај го асистентот";
 
   const chips: ChipItem[] = [
     {
       id: "ask-bakal",
-      label: "ПРАШАЈ ГО БАКАЛ",
+      label: assistantLabel,
       icon: <ChefHat size={16} />,
       variant: "outline",
+      colorClassName:"uppercase"
     },
     {
       id: "protein",
@@ -69,7 +75,7 @@ export default function AiSuggestion({
 
   return (
     <section className={`container mx-auto${className}`}>
-      <div className=" space-y-3 md:px-0 pl-6 py-5 ">
+      <div className="space-y-3 md:px-0 pl-6 py-5 ">
         <div className="flex items-center gap-2 text-xs font-semibold">
           <Star size={14} fill="currentColor" className="text-[#E0D14E]" />
           <span className="uppercase text-[#4D4747]">БРЗИ AI ПРЕПОРАКИ ЗА ТЕБЕ</span>

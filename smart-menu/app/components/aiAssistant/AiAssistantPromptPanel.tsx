@@ -14,6 +14,7 @@ type Props = {
   suggestionPrompts: Suggestion[];
   initialMessage?: string;
   restaurantId: string;
+  restaurantName?: string;
   onStatusChange?: (status: "idle" | "loading" | "error" | "success") => void;
   onResult?: (payload: any) => void;
 };
@@ -22,6 +23,7 @@ export default function AiAssistantPromptPanel({
   suggestionPrompts,
   initialMessage = "",
   restaurantId,
+  restaurantName,
   onStatusChange,
   onResult,
 }: Props) {
@@ -88,16 +90,27 @@ export default function AiAssistantPromptPanel({
     lastAutoPromptRef.current = trimmed;
 
     setMessage(trimmed);
-    submitPrompt(trimmed).catch(() => {});
+    submitPrompt(trimmed)
+      .catch(() => {})
+      .finally(() => {
+        setMessage("");
+      });
   }, [initialMessage, submitPrompt]);
 
   useEffect(() => {
     onStatusChange?.(status);
   }, [status, onStatusChange]);
 
-  const handleSuggestionClick = (label: string) => {
-    setMessage(label);
-  };
+  const handleSuggestionClick = useCallback(
+    (label: string) => {
+      const trimmed = label.trim();
+      setMessage(trimmed);
+      if (trimmed) {
+        sendPrompt(trimmed).catch(() => {});
+      }
+    },
+    [sendPrompt]
+  );
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -113,7 +126,7 @@ export default function AiAssistantPromptPanel({
               key={prompt.id}
               type="button"
               onClick={() => handleSuggestionClick(prompt.label)}
-              className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-white px-2 py-1 text-[10px] font-medium tracking-wide text-[#656C73] shadow-sm transition hover:border-black/40 hover:text-[#1E1F24]"
+              className="cursor-pointer inline-flex items-center gap-1 rounded-full border border-black/10 bg-white px-2 py-1 text-[14px] font-medium tracking-wide text-[#656C73] shadow-sm transition hover:border-black/40 hover:text-[#1E1F24]"
             >
               <Image
                 src={prompt.icon}
@@ -143,7 +156,7 @@ export default function AiAssistantPromptPanel({
               sendPrompt().catch(() => {});
             }
           }}
-          className="flex-1 bg-transparent px-2 text-sm text-[#1E1F24] placeholder:text-[#7B7E86] focus:outline-none"
+          className="flex-1 bg-transparent px-2 text-[15px] text-[#1E1F24] placeholder:text-[#7B7E86] focus:outline-none"
         />
         <button
           type="submit"
@@ -163,9 +176,11 @@ export default function AiAssistantPromptPanel({
         </button>
       </form>
 
-      <p className="mx-auto mt-4 flex w-fit items-center gap-1 text-[11px] text-[#7B7E86] italic">
+      <p className="mx-auto mt-4 flex w-fit items-center gap-1 text-[11px] text-[#7B7E86] italic text-center">
         <Info size={18} />
-        Препораките се базирани на менито на Бакал
+        {restaurantName
+          ? `Препораките се базирани на менито на ${restaurantName}`
+          : "Препораките се базирани на дигиталното мени."}
       </p>
     </div>
   );
