@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const buildDefaultRouterUrl = () => {
+  const backend = process.env.BACKEND_URL?.trim().replace(/\/$/, "");
+  if (backend) {
+    return `${backend}/api/ai/router`;
+  }
+  return "http://localhost:5000/api/ai/router";
+};
+
 const routerServiceUrl =
-  process.env.AI_ROUTER_SERVICE_URL ?? "http://localhost:5000/api/ai/router";
+  process.env.AI_ROUTER_SERVICE_URL ?? buildDefaultRouterUrl();
 
 export async function POST(req: NextRequest) {
   const targetUrl = routerServiceUrl.trim();
