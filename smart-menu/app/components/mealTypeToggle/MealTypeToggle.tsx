@@ -41,7 +41,7 @@ export default function MealTypeToggle({ value, onChange, className = "" }: Prop
         onClick={() => onChange("drink")}
         className={[base, value === "drink" ? active : inactive].join(" ")}
       >
-        <span className="text-md flex gap-1 justify-center items-center"><Wine size={20}/>Пиење</span>
+        <span className="text-md flex gap-1 justify-center items-center"><Wine size={20}/>Пијалоци</span>
       </button>
     </div>
   );
