@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import RegisterSW from "./_components/RegisterSW";
 import Footer from "./components/ui/Footer";
-import { Rubik, Birthstone,Inter, Great_Vibes } from "next/font/google";
+import { Rubik, Birthstone, Inter, Great_Vibes } from "next/font/google";
+import Script from "next/script";
 
 export const rubik = Rubik({
   subsets: ["latin"],
@@ -56,6 +57,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-SX57E0RGSR"
+        strategy="afterInteractive"
+      />
+      <Script id="ga-gtag" strategy="afterInteractive">
+        {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-SX57E0RGSR');
+          `}
+      </Script>
       <body className={`${inter.variable} ${rubik.variable} ${birthstone.variable} ${great_vibes.variable}`}>
         <RegisterSW />
         {children}

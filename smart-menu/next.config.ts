@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+    // Align quality list with the values used by Card.tsx image requests.
+    qualities: [60, 70, 75, 100],
   },
 };
 
