@@ -42,6 +42,7 @@ export default function AiAssistantContent({
   );
   const [assistantText, setAssistantText] = useState("");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
 
   const handleResult = useCallback((payload?: any) => {
     const text =
@@ -194,6 +195,14 @@ export default function AiAssistantContent({
             </div>
           ) : null}
 
+          {pendingMessage ? (
+            <div className="mb-3 flex justify-end">
+              <div className="max-w-[75%] rounded-3xl bg-[#E7F3EC] px-4 py-3 text-right text-sm font-medium text-[#1E1F24] shadow-[0_8px_20px_rgba(15,24,21,0.12)]">
+                {pendingMessage}
+              </div>
+            </div>
+          ) : null}
+
           <AiAssistantPromptPanel
             suggestionPrompts={suggestionPrompts}
             initialMessage={prompt}
@@ -201,6 +210,8 @@ export default function AiAssistantContent({
             restaurantName={restaurantDisplayName}
             onStatusChange={setStatus}
             onResult={handleResult}
+            onPromptPending={setPendingMessage}
+            onPromptSettled={() => setPendingMessage(null)}
           />
         </div>
       </div>

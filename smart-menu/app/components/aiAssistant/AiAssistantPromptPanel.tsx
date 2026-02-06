@@ -17,6 +17,8 @@ type Props = {
   restaurantName?: string;
   onStatusChange?: (status: "idle" | "loading" | "error" | "success") => void;
   onResult?: (payload: any) => void;
+  onPromptPending?: (message: string) => void;
+  onPromptSettled?: () => void;
 };
 
 export default function AiAssistantPromptPanel({
@@ -26,8 +28,10 @@ export default function AiAssistantPromptPanel({
   restaurantName,
   onStatusChange,
   onResult,
+  onPromptPending,
+  onPromptSettled,
 }: Props) {
-  const [message, setMessage] = useState(initialMessage);
+  const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "success">(
     "idle"
   );
@@ -38,6 +42,7 @@ export default function AiAssistantPromptPanel({
     async (payload: string) => {
       setStatus("loading");
       setErrorMessage(null);
+      onPromptPending?.(payload);
       try {
         const res = await fetch("/api/ai/router", {
           method: "POST",
@@ -59,9 +64,11 @@ export default function AiAssistantPromptPanel({
       } catch (err: any) {
         setErrorMessage(err?.message ?? "Не можам да одговорам сега.");
         setStatus("error");
+      } finally {
+        onPromptSettled?.();
       }
     },
-    [restaurantId, onResult]
+    [restaurantId, onResult, onPromptPending, onPromptSettled]
   );
 
   const sendPrompt = useCallback(
@@ -69,15 +76,11 @@ export default function AiAssistantPromptPanel({
       const payload = (overrideMessage ?? message).trim();
       if (!payload) return;
       if (status === "loading" && !overrideMessage) return;
-      await submitPrompt(payload);
       setMessage("");
+      await submitPrompt(payload);
     },
     [message, status, submitPrompt]
   );
-
-  useEffect(() => {
-    setMessage(initialMessage);
-  }, [initialMessage]);
 
   useEffect(() => {
     const trimmed = initialMessage.trim();
@@ -89,7 +92,6 @@ export default function AiAssistantPromptPanel({
     if (lastAutoPromptRef.current === trimmed) return;
     lastAutoPromptRef.current = trimmed;
 
-    setMessage(trimmed);
     submitPrompt(trimmed)
       .catch(() => {})
       .finally(() => {
@@ -104,7 +106,6 @@ export default function AiAssistantPromptPanel({
   const handleSuggestionClick = useCallback(
     (label: string) => {
       const trimmed = label.trim();
-      setMessage(trimmed);
       if (trimmed) {
         sendPrompt(trimmed).catch(() => {});
       }
