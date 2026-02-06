@@ -57,7 +57,7 @@ export default function MenuItemDetails({
       />
 
       {/* BOTTOM SHEET */}
-      <div className="flex flex-col justify-between md:container md:mx-auto h-[50dvh] rounded-t-[40px] bg-[#F7F7F7] px-6 pb-10 pt-8 shadow-[0_-20px_60px_rgba(0,0,0,0.25)]">
+      <div className="flex flex-col justify-between gap-6 md:container md:mx-auto min-h-[55dvh] rounded-t-[40px] bg-[#F7F7F7] px-6 pb-10 pt-8 shadow-[0_-20px_60px_rgba(0,0,0,0.25)] md:min-h-[45dvh]">
         <section>
           <h1 className="font-great-vibes text-5xl leading-tight text-[#2F3A37]">
             {name}
@@ -197,7 +197,7 @@ const MenuItemHero = memo(function MenuItemHero({
   }, [imageUrl]);
 
   return (
-    <div className="flex justify-center items-center relative h-[50dvh] w-full">
+    <div className="flex justify-center items-center relative min-h-[45dvh] w-full px-4 sm:min-h-[50dvh]">
       <button
         type="button"
         onClick={onBack}
@@ -207,14 +207,14 @@ const MenuItemHero = memo(function MenuItemHero({
         <ArrowLeft className="h-5 w-5 text-white" />
       </button>
 
-      <div className="relative grid h-80 w-80 place-items-center">
+      <div className="py-2 relative grid aspect-square w-full max-w-xs place-items-center sm:max-w-sm">
         <Image
           src={menuItemPlaceholder}
           alt=""
           aria-hidden="true"
           priority
           className={clsx(
-            "absolute inset-0 h-80 w-80 rounded-full object-cover transition-opacity duration-300",
+            "absolute inset-0 h-full w-full rounded-full object-cover transition-opacity duration-300",
             imageLoaded ? "opacity-0" : "opacity-100"
           )}
         />
@@ -231,7 +231,7 @@ const MenuItemHero = memo(function MenuItemHero({
           }}
           onError={() => setImageLoaded(true)}
           className={clsx(
-            "relative! h-80 w-80 rounded-full object-cover transition-opacity duration-300",
+            "relative aspect-square h-full w-full rounded-full object-cover transition-opacity duration-300",
             imageLoaded ? "opacity-100" : "opacity-0"
           )}
         />
