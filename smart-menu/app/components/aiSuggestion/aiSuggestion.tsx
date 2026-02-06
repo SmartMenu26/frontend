@@ -37,7 +37,7 @@ export default function AiSuggestion({
     },
     {
       id: "low-cal",
-      label: "Помалку калории",
+      label: "Здрава храна",
       icon: <Leaf size={16} />,
       variant: "solid",
       colorClassName: "uppercase bg-[#70B77E] text-white hover:bg-[#70B77E]/90",

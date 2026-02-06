@@ -1,6 +1,7 @@
 import InstallAppButton from "@/app/_components/InstallAppButton";
 import AiSuggestion from "@/app/components/aiSuggestion/aiSuggestion";
 import RestaurantContent from "@/app/components/restaurant/RestaurantContext";
+import Footer from "@/app/components/ui/Footer";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
 
 async function fetchRestaurantName(restaurantId: string) {
@@ -51,13 +52,15 @@ export default async function RestaurantPage({ params }: PageProps) {
   const restaurantName = await fetchRestaurantName(restaurantId);
   console.log("restaurantName:", restaurantName);
   return (
-    <div className="py-8 flex flex-col gap-6">
+    <div className="pt-8 flex flex-col gap-6">
       <InstallAppButton />
       <RestaurantHeader name={restaurantName ?? undefined} />
 
       <AiSuggestion restaurantId={restaurantId} />
 
       <RestaurantContent restaurantId={restaurantId} />
+
+      <Footer />
     </div>
   );
 }

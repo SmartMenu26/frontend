@@ -15,23 +15,20 @@ export default function Footer() {
             height={48}
             className="h-10 w-10 object-contain"
           />
-          <div>
-            <p className="text-lg font-semibold">Smart Menu</p>
-            <p className="text-sm opacity-70">AI powered digital menu</p>
+          <div className="flex gap-3">
+            <Link href="/" className="hover:text-[#074128]">
+              Почетна
+            </Link>
+            <a
+              href="mailto:contact@smartmenu.app"
+              className="hover:text-[#074128]"
+            >
+              Контакт
+            </a>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 text-sm font-medium">
-          <Link href="/" className="hover:text-[#074128]">
-            Почетна
-          </Link>
-          <a
-            href="mailto:contact@smartmenu.app"
-            className="hover:text-[#074128]"
-          >
-            Контакт
-          </a>
-        </div>
+
       </div>
     </footer>
   );

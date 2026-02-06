@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import RegisterSW from "./_components/RegisterSW";
-import Footer from "./components/ui/Footer";
 import { Rubik, Birthstone, Inter, Great_Vibes } from "next/font/google";
 import Script from "next/script";
 
@@ -72,7 +71,6 @@ export default function RootLayout({
       <body className={`${inter.variable} ${rubik.variable} ${birthstone.variable} ${great_vibes.variable}`}>
         <RegisterSW />
         {children}
-        <Footer />
       </body>
     </html>
   );
