@@ -42,7 +42,7 @@ const ChipsRow = forwardRef<HTMLDivElement, ChipsRowProps>(
         className={[
           "flex flex-nowrap gap-0.5 overflow-x-auto overflow-y-hidden",
           "whitespace-nowrap snap-x snap-mandatory",
-          "px-1 touch-pan-x",
+          "px-1",
           "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
           className,
         ].join(" ")}
