@@ -4,14 +4,16 @@ import RestaurantContent from "@/app/components/restaurant/RestaurantContext";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
 
 async function fetchRestaurantName(restaurantId: string) {
-  const origin =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
-    "http://localhost:3000";
+  const backendBase = process.env.BACKEND_URL?.trim().replace(/\/$/, "");
+
+  if (!backendBase) {
+    console.error("Failed to fetch restaurant: BACKEND_URL is missing");
+    return null;
+  }
 
   try {
     const res = await fetch(
-      `${origin}/api/restaurants/${restaurantId}`,
+      `${backendBase}/api/restaurants/${restaurantId}`,
       { cache: "no-store" }
     );
 
