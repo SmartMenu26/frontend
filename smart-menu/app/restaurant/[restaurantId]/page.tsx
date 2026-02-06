@@ -47,7 +47,7 @@ type PageProps = {
 export default async function RestaurantPage({ params }: PageProps) {
   const { restaurantId } = await params;
   const restaurantName = await fetchRestaurantName(restaurantId);
-
+  console.log("restaurantName:", restaurantName);
   return (
     <div className="py-8 flex flex-col gap-6">
       <InstallAppButton />
