@@ -64,7 +64,7 @@ async function loadRestaurants(): Promise<RestaurantRecord[]> {
     "http://localhost:3000";
 
   try {
-    const res = await fetch(`${origin}/api/restaurants`, { cache: "no-store" });
+    const res = await fetch(`${origin}/api/restaurants`);
     if (!res.ok) {
       console.warn("Failed to fetch restaurants:", res.status);
       return [];
