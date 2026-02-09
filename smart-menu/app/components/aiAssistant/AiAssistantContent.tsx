@@ -67,7 +67,6 @@ export default function AiAssistantContent({
   const heroImage = status === "loading" ? assistantThinking : assistantIllustration;
   const hasCredits =
     typeof aiCreditsRemaining === "number" ? aiCreditsRemaining > 0 : true;
-    console.log("AI Credits Remaining:", aiCreditsRemaining);
 
   return (
     <div className="min-h-dvh bg-[#F5F5F5] text-[#1E1F24]">
