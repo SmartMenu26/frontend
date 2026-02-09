@@ -32,11 +32,22 @@ export default async function AiAssistantPage({ params, searchParams }: Props) {
   const { restaurantId } = await params;
   const { prompt = "" } = (searchParams ? await searchParams : {}) ?? {};
 
+  const res = await fetch(
+    `${process.env.BACKEND_URL}/api/restaurants/${restaurantId}`,
+    { cache: "no-store" }
+  );
+
+  const restaurantData = await res.json();
+
+  const aiCreditsRemaining =
+    restaurantData?.data?.aiCredits?.remaining ?? 0;
+
   return (
     <AiAssistantContent
       restaurantId={restaurantId}
       suggestionPrompts={suggestionPrompts}
       prompt={prompt}
+      aiCreditsRemaining={aiCreditsRemaining}
     />
   );
 }
