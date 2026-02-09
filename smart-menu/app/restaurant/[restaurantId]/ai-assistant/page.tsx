@@ -32,21 +32,44 @@ export default async function AiAssistantPage({ params, searchParams }: Props) {
   const { restaurantId } = await params;
   const { prompt = "" } = (searchParams ? await searchParams : {}) ?? {};
 
-  const res = await fetch(
-    `${process.env.BACKEND_URL}/api/restaurants/${restaurantId}`,
-    { cache: "no-store" }
-  );
+  const base = process.env.BACKEND_URL?.replace(/\/$/, "");
 
-  const restaurantData = await res.json();
+  if (!base) {
+    console.error("AI assistant page error: BACKEND_URL missing");
+  }
 
+  const endpoint = base
+    ? `${base}/api/admin/restaurants/${restaurantId}`
+    : undefined;
+
+  const res = endpoint
+    ? await fetch(endpoint, { cache: "no-store" }).catch(() => null)
+    : null;
+
+  const payload = await res?.json().catch(() => null);
+  const restaurant = payload?.data ?? payload ?? null;
   const aiCreditsRemaining =
-    restaurantData?.data?.aiCredits?.remaining ?? 0;
+    typeof restaurant?.aiCredits?.remaining === "number"
+      ? restaurant.aiCredits.remaining
+      : 0;
 
   return (
     <AiAssistantContent
       restaurantId={restaurantId}
       suggestionPrompts={suggestionPrompts}
       prompt={prompt}
+      restaurantName={
+        typeof restaurant?.name === "string"
+          ? restaurant.name
+          : restaurant?.name?.mk ?? restaurant?.name?.en ?? restaurant?.name?.sq
+      }
+      assistantName={
+        typeof restaurant?.aiAssistantName === "string"
+          ? restaurant.aiAssistantName
+          : restaurant?.aiAssistantName?.mk ??
+          restaurant?.aiAssistantName?.en ??
+          restaurant?.aiAssistantName?.sq
+      }
       aiCreditsRemaining={aiCreditsRemaining}
     />
   );
