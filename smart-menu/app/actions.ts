@@ -48,7 +48,7 @@ export async function sendNotification(message: string) {
     JSON.stringify({
       title: "Smart Menu",
       body: message,
-      icon: "/icons/logo-512x512.png",
+      icon: "/icons/smart-logo-512x512.png",
     })
   );
 

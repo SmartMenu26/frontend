@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="container mx-auto flex flex-col gap-4 px-6 text-[#2F3A37] md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
           <Image
-            src="/icons/logo-512x512.png"
+            src="/icons/smart-logo-512x512.png"
             alt="Smart Menu logo"
             width={48}
             height={48}
