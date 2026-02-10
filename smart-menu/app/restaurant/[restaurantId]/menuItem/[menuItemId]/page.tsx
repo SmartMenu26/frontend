@@ -41,6 +41,24 @@ const extractAllergenCode = (allergen: any): string => {
   return "";
 };
 
+const parsePrice = (value: unknown): number | undefined => {
+  if (typeof value === "number" && !Number.isNaN(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number.parseFloat(value);
+    if (!Number.isNaN(parsed)) return parsed;
+  }
+  if (typeof value === "object" && value !== null) {
+    const maybeValue =
+      (value as { amount?: number })?.amount ??
+      (value as { value?: number })?.value ??
+      (value as { mk?: number })?.mk;
+    if (typeof maybeValue === "number" && !Number.isNaN(maybeValue)) {
+      return maybeValue;
+    }
+  }
+  return undefined;
+};
+
 export default async function MenuItemPage({ params, searchParams }: Props) {
   const { restaurantId, menuItemId } = await params;
   const { kind } = (searchParams ? await searchParams : {}) ?? {};
@@ -70,6 +88,7 @@ export default async function MenuItemPage({ params, searchParams }: Props) {
     name: item?.name?.mk ?? "Item",
     description: item?.description?.mk ?? "",
     imageUrl: item?.image?.url ?? "/placeholder.jpg",
+    price: parsePrice(item?.price),
     allergens: Array.isArray(item?.allergens)
       ? item.allergens
           .map((a: any, idx: number) => {

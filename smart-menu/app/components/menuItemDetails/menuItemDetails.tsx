@@ -25,6 +25,7 @@ type Props = {
   imageUrl: string;
   allergens?: Allergen[];
   restaurantId?: string;
+  price?: number;
 };
 
 export default function MenuItemDetails({
@@ -34,6 +35,7 @@ export default function MenuItemDetails({
   imageUrl,
   allergens = [],
   restaurantId,
+  price,
 }: Props) {
   const router = useRouter();
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
@@ -48,6 +50,13 @@ export default function MenuItemDetails({
     setActiveTooltip(null);
   }, [allergens]);
 
+  const priceLabel = useMemo(() => {
+    if (typeof price !== "number" || Number.isNaN(price)) return null;
+    return new Intl.NumberFormat("mk-MK", {
+      maximumFractionDigits: 2,
+    }).format(price);
+  }, [price]);
+
   return (
     <div className="min-h-dvh bg-[#3F5D50]">
       <MenuItemHero
@@ -57,16 +66,21 @@ export default function MenuItemDetails({
       />
 
       {/* BOTTOM SHEET */}
-      <div className="flex flex-col justify-between gap-6 md:container md:mx-auto min-h-[55dvh] rounded-t-[40px] bg-[#F7F7F7] px-6 pb-10 pt-8 shadow-[0_-20px_60px_rgba(0,0,0,0.25)] md:min-h-[45dvh]">
-        <section>
+      <div className="flex flex-col justify-between gap-3 md:container md:mx-auto min-h-[55dvh] rounded-t-[40px] bg-[#F7F7F7] px-6 pb-10 pt-8 shadow-[0_-20px_60px_rgba(0,0,0,0.25)] md:min-h-[45dvh]">
+        <section className="flex flex-col gap-4">
           <h1 className="font-great-vibes text-5xl leading-tight text-[#2F3A37]">
             {name}
           </h1>
 
           {!!description && (
-            <p className="mt-3 text-lg leading-relaxed text-[#2F3A37]/80">
+            <p className="text-lg leading-relaxed text-[#2F3A37]/80">
               {description}
             </p>
+          )}
+          {priceLabel && (
+            <span className="border border-[#1B1F1E] border-solid rounded-full w-fit px-2 py-1 text-lg font-semibold text-[#1B1F1E] leading-tight">
+              {priceLabel} ден
+            </span>
           )}
         </section>
         <section>
@@ -227,7 +241,7 @@ const MenuItemHero = memo(function MenuItemHero({
           alt={name}
           loading="eager"
           onLoad={() => {
-           setImageLoaded(true);
+            setImageLoaded(true);
           }}
           onError={() => setImageLoaded(true)}
           className={clsx(
