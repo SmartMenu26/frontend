@@ -1,5 +1,5 @@
 import Link from "next/link";
-import InstallAppButton from "./_components/InstallAppButton";
+import InstallAppButton from "../_components/InstallAppButton";
 
 const highlights = [
   {
