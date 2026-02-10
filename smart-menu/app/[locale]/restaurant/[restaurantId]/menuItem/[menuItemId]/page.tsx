@@ -1,8 +1,9 @@
 import MenuItemDetails from "@/app/components/menuItemDetails/menuItemDetails";
 import { headers } from "next/headers";
+import { defaultLocale, locales, type Locale } from "@/i18n";
 
 type Props = {
-  params: Promise<{ restaurantId: string; menuItemId: string }>;
+  params: Promise<{ locale: Locale; restaurantId: string; menuItemId: string }>;
   searchParams?: Promise<{ kind?: string }>;
 };
 
@@ -60,7 +61,39 @@ const parsePrice = (value: unknown): number | undefined => {
 };
 
 export default async function MenuItemPage({ params, searchParams }: Props) {
-  const { restaurantId, menuItemId } = await params;
+  const { locale: routeLocale, restaurantId, menuItemId } = await params;
+  const resolvedLocale: Locale =
+    locales.find((candidate) => candidate === routeLocale) ?? defaultLocale;
+  const localePriority = Array.from(
+    new Set<Locale>([resolvedLocale, defaultLocale, "en" as Locale])
+  );
+
+  const pickLocalized = (
+    value?: Record<string, string> | string,
+    fallback = ""
+  ): string => {
+    if (!value) return fallback;
+    if (typeof value === "string") {
+      return value || fallback;
+    }
+
+    for (const key of localePriority) {
+      const candidate = value[key];
+      if (typeof candidate === "string" && candidate.trim()) {
+        return candidate;
+      }
+    }
+
+    return (
+      value[defaultLocale] ||
+      value.en ||
+      value.sq ||
+      value.mk ||
+      fallback ||
+      ""
+    );
+  };
+
   const { kind } = (searchParams ? await searchParams : {}) ?? {};
 
   const qs = new URLSearchParams();
@@ -85,9 +118,17 @@ export default async function MenuItemPage({ params, searchParams }: Props) {
 
   const mapped = {
     id: item?._id ?? item?.id ?? menuItemId,
-    name: item?.name?.mk ?? "Item",
-    description: item?.description?.mk ?? "",
+    name: pickLocalized(item?.name, "Item"),
+    description: pickLocalized(item?.description, ""),
     imageUrl: item?.image?.url ?? "/placeholder.jpg",
+    imageAlt: pickLocalized(
+      {
+        mk: item?.image?.altMk,
+        sq: item?.image?.altSq,
+        en: item?.image?.altEn,
+      },
+      pickLocalized(item?.name, "Item")
+    ),
     price: parsePrice(item?.price),
     allergens: Array.isArray(item?.allergens)
       ? item.allergens
@@ -106,14 +147,12 @@ export default async function MenuItemPage({ params, searchParams }: Props) {
             }
 
             const key = a?._id ?? a?.key ?? String(idx);
-            const label =
-              a?.label?.mk ??
-              a?.label?.en ??
-              a?.label ??
-              a?.name?.mk ??
-              a?.name?.en ??
-              a?.name ??
-              (typeof a?.key === "string" ? humanizeAllergen(a.key) : "");
+              const label =
+                pickLocalized(a?.label) ??
+                pickLocalized(a?.name) ??
+                (typeof a?.key === "string"
+                  ? humanizeAllergen(a.key)
+                  : "");
 
             if (!label) return null;
 

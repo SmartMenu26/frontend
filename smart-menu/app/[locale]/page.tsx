@@ -1,5 +1,7 @@
 import Link from "next/link";
-import InstallAppButton from "./_components/InstallAppButton";
+import { Suspense } from "react";
+import InstallAppButton from "../_components/InstallAppButton";
+import LanguageSwitcher from "../components/languageSwitcher/LanguageSwitcher";
 
 const highlights = [
   {
@@ -82,7 +84,8 @@ export default async function Home() {
   const restaurants = await loadRestaurants();
 
   return (
-    <div className="bg-[#F7F7F7] text-[#1B1F1E]">
+    <>
+      <div className="bg-[#F7F7F7] text-[#1B1F1E]">
       <section className="relative overflow-hidden bg-gradient-to-b from-[#F7F7F7] to-white">
         <div className="container mx-auto flex flex-col gap-10 px-4 pb-20 pt-24 md:flex-row md:items-center">
           <div className="max-w-2xl">
@@ -265,6 +268,12 @@ export default async function Home() {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+      <div className="pointer-events-auto fixed bottom-4 right-4 z-50">
+        <Suspense fallback={null}>
+          <LanguageSwitcher />
+        </Suspense>
+      </div>
+    </>
   );
 }

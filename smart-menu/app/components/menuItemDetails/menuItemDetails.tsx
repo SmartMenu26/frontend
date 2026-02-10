@@ -10,6 +10,7 @@ import {
 } from "./allergens/iconMap";
 import Image from "next/image";
 import menuItemPlaceholder from "@/public/images/menu-item-placeholder.png";
+import { useLocale, useTranslations } from "next-intl";
 
 type Allergen = {
   key: string;
@@ -23,6 +24,7 @@ type Props = {
   name: string;
   description?: string;
   imageUrl: string;
+  imageAlt?: string;
   allergens?: Allergen[];
   restaurantId?: string;
   price?: number;
@@ -33,11 +35,14 @@ export default function MenuItemDetails({
   name,
   description,
   imageUrl,
+  imageAlt,
   allergens = [],
   restaurantId,
   price,
 }: Props) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("menuItemDetails");
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const handleBack = useCallback(() => router.back(), [router]);
 
@@ -46,23 +51,62 @@ export default function MenuItemDetails({
     [restaurantId]
   );
 
+  const visibleAllergens = useMemo(
+    () =>
+      allergens.filter((a) => {
+        const label = a.label?.trim();
+        if (!label) return false;
+        const normalizedLabel = label.toLowerCase();
+        const normalizedCode = a.code?.trim().toLowerCase();
+        return normalizedLabel !== "none" && normalizedCode !== "none";
+      }),
+    [allergens]
+  );
+
   useEffect(() => {
     setActiveTooltip(null);
-  }, [allergens]);
+  }, [visibleAllergens]);
+
+  const intlLocale = useMemo(() => {
+    switch (locale) {
+      case "mk":
+        return "mk-MK";
+      case "sq":
+        return "sq-AL";
+      case "en":
+      default:
+        return "en-US";
+    }
+  }, [locale]);
 
   const priceLabel = useMemo(() => {
     if (typeof price !== "number" || Number.isNaN(price)) return null;
-    return new Intl.NumberFormat("mk-MK", {
+    return new Intl.NumberFormat(intlLocale, {
       maximumFractionDigits: 2,
     }).format(price);
-  }, [price]);
+  }, [price, intlLocale]);
+
+  const assistantPrompt = useMemo(
+    () => t("assistantPrompt", { dish: name }),
+    [t, name]
+  );
+  const assistantButtonLabel = t("assistantButton");
+  const shareLabel = t("shareCta");
+  const priceText = priceLabel ? t("priceLabel", { price: priceLabel }) : null;
+  const favoriteLabels = {
+    add: t("favorite.add"),
+    remove: t("favorite.remove"),
+  };
+  const backLabel = t("back");
 
   return (
     <div className="min-h-dvh bg-[#3F5D50]">
       <MenuItemHero
         name={name}
         imageUrl={imageUrl}
+        imageAlt={imageAlt}
         onBack={handleBack}
+        backLabel={backLabel}
       />
 
       {/* BOTTOM SHEET */}
@@ -77,22 +121,22 @@ export default function MenuItemDetails({
               {description}
             </p>
           )}
-          {priceLabel && (
+          {priceText && (
             <span className="border border-[#1B1F1E] border-solid rounded-full w-fit px-2 py-1 text-lg font-semibold text-[#1B1F1E] leading-tight">
-              {priceLabel} ден
+              {priceText}
             </span>
           )}
         </section>
         <section>
           {/* allergens */}
-          {allergens.length > 0 && (
+          {visibleAllergens.length > 0 && (
             <div className="mt-3">
               {/* <p className="text-xs font-semibold uppercase tracking-wide text-[#2F3A37]/60">
                 Алергени
               </p> */}
 
               <div className="mt-3 flex flex-wrap gap-3">
-                {allergens.map((a) => {
+                {visibleAllergens.map((a) => {
                   const iconEntry = getAllergenIconEntry(a.code);
                   const tooltipText = resolveTooltipLabel(a.label, iconEntry);
                   const tooltipId = `allergen-tooltip-${a.key}`;
@@ -165,22 +209,26 @@ export default function MenuItemDetails({
               className="flex-1 cursor-pointer rounded-full bg-[#1B1F1E] py-4 text-sm font-semibold text-white shadow-lg"
               onClick={() => {
                 if (!restaurantId) return;
-                const prompt = `Што оди со ${name}?`;
-                const params = new URLSearchParams({ prompt });
+                const params = new URLSearchParams({ prompt: assistantPrompt });
                 router.push(`/restaurant/${restaurantId}/ai-assistant?${params.toString()}`);
               }}
             >
-              AI ПРЕПОРАКА
+              {assistantButtonLabel}
             </button>
 
-            <FavoriteButton itemId={id} storageKey={favoritesKey} />
+            <FavoriteButton
+              itemId={id}
+              storageKey={favoritesKey}
+              addLabel={favoriteLabels.add}
+              removeLabel={favoriteLabels.remove}
+            />
           </div>
 
           <button
             type="button"
             className="cursor-pointer mt-6 pb-6 w-full text-center text-xs text-[#2F3A37]/70 underline underline-offset-4"
           >
-            Сподели твое мислење
+            {shareLabel}
           </button>
         </section>
       </div>
@@ -191,18 +239,24 @@ export default function MenuItemDetails({
 type FavoriteButtonProps = {
   itemId: string;
   storageKey: string;
+  addLabel: string;
+  removeLabel: string;
 };
 
 type MenuItemHeroProps = {
   name: string;
   imageUrl: string;
+  imageAlt?: string;
   onBack: () => void;
+  backLabel: string;
 };
 
 const MenuItemHero = memo(function MenuItemHero({
   name,
   imageUrl,
+  imageAlt,
   onBack,
+  backLabel,
 }: MenuItemHeroProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -215,7 +269,7 @@ const MenuItemHero = memo(function MenuItemHero({
       <button
         type="button"
         onClick={onBack}
-        aria-label="Back"
+        aria-label={backLabel}
         className="cursor-pointer absolute left-4 top-4 z-10 rounded-md bg-black/40 p-1.5 backdrop-blur"
       >
         <ArrowLeft className="h-5 w-5 text-white" />
@@ -238,7 +292,7 @@ const MenuItemHero = memo(function MenuItemHero({
           priority
           quality={100}
           src={imageUrl}
-          alt={name}
+          alt={imageAlt ?? name}
           loading="eager"
           onLoad={() => {
             setImageLoaded(true);
@@ -254,7 +308,7 @@ const MenuItemHero = memo(function MenuItemHero({
   );
 });
 
-function FavoriteButton({ itemId, storageKey }: FavoriteButtonProps) {
+function FavoriteButton({ itemId, storageKey, addLabel, removeLabel }: FavoriteButtonProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteBurst, setFavoriteBurst] = useState(false);
   const burstTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -319,7 +373,7 @@ function FavoriteButton({ itemId, storageKey }: FavoriteButtonProps) {
   return (
     <button
       type="button"
-      aria-label={isFavorite ? "Отстрани од омилени" : "Додај во омилени"}
+      aria-label={isFavorite ? removeLabel : addLabel}
       aria-pressed={isFavorite}
       onClick={handleToggle}
       className="cursor-pointer grid h-14 w-14 place-items-center rounded-full bg-[#FF4D9D] shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"

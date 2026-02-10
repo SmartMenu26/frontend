@@ -2,6 +2,7 @@
 
 import { Drumstick, Wine } from "lucide-react";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 type MealType = "food" | "drink";
 
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default function MealTypeToggle({ value, onChange, className = "" }: Props) {
+  const t = useTranslations("mealTypeToggle");
   const base =
     "cursor-pointer py-0.5 px-3 rounded-full flex items-center justify-center border transition " +
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20";
@@ -30,7 +32,7 @@ export default function MealTypeToggle({ value, onChange, className = "" }: Prop
         className={[base, value === "food" ? active : inactive].join(" ")}
       >
         {/* simple icon: meat/food */}
-        <span className="text-md flex gap-1 justify-center items-center"><Drumstick size={20}/>Храна</span>
+        <span className="text-md flex gap-1 justify-center items-center"><Drumstick size={20}/>{t("food")}</span>
       </button>
 
       {/* Drink */}
@@ -41,7 +43,7 @@ export default function MealTypeToggle({ value, onChange, className = "" }: Prop
         onClick={() => onChange("drink")}
         className={[base, value === "drink" ? active : inactive].join(" ")}
       >
-        <span className="text-md flex gap-1 justify-center items-center"><Wine size={20}/>Пијалоци</span>
+        <span className="text-md flex gap-1 justify-center items-center"><Wine size={20}/>{t("drink")}</span>
       </button>
     </div>
   );

@@ -1,0 +1,41 @@
+{
+  "aiSuggestion": {
+    "subtitle": "REKOMANDIME AI TË SHPEJTA PËR TY",
+    "title": "Çfarë keni dëshirë të hani?",
+    "chips": {
+      "askAssistant": "Pyete asistentin",
+      "askNamed": "Pyet {name}",
+      "protein": "Me proteina",
+      "healthy": "Ushqim i shëndetshëm",
+      "surprise": "Më befaso",
+      "spicy": "Djegs"
+    }
+  }
+  ,
+  "mealTypeToggle": {
+    "food": "Ushqim",
+    "drink": "Pije"
+  },
+  "popularSection": {
+    "title": {
+      "food": "Pjata të njohura",
+      "drink": "Pije të njohura"
+    },
+    "empty": "Nuk ka artikuj të njohur ende."
+  },
+  "footer": {
+    "home": "Kreu",
+    "contact": "Kontakt"
+  },
+  "menuItemDetails": {
+    "assistantButton": "Rekomandim AI",
+    "assistantPrompt": "Çfarë përshtatet me {dish}?",
+    "shareCta": "Ndaj mendimin tënd",
+    "priceLabel": "{price} den",
+    "favorite": {
+      "add": "Shto tek të preferuarat",
+      "remove": "Hiq nga të preferuarat"
+    },
+    "back": "Kthehu"
+  }
+}

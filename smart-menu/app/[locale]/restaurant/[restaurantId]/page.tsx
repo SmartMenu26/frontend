@@ -3,6 +3,7 @@ import AiSuggestion from "@/app/components/aiSuggestion/aiSuggestion";
 import RestaurantContent from "@/app/components/restaurant/RestaurantContext";
 import Footer from "@/app/components/ui/Footer";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
+import LanguageSwitcher from "@/app/components/languageSwitcher/LanguageSwitcher";
 
 async function fetchRestaurantName(restaurantId: string) {
   const backendBase = process.env.BACKEND_URL?.trim().replace(/\/$/, "");
@@ -52,15 +53,20 @@ export default async function RestaurantPage({ params }: PageProps) {
   const restaurantName = await fetchRestaurantName(restaurantId);
 
   return (
-    <div className="pt-8 flex flex-col gap-6">
-      <InstallAppButton />
-      <RestaurantHeader name={restaurantName ?? undefined} />
+    <>
+      <div className="pt-8 flex flex-col gap-6">
+        <InstallAppButton />
+        <RestaurantHeader name={restaurantName ?? undefined} />
 
-      <AiSuggestion restaurantId={restaurantId} />
+        <AiSuggestion restaurantId={restaurantId} />
 
-      <RestaurantContent restaurantId={restaurantId} />
+        <RestaurantContent restaurantId={restaurantId} />
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+      <div className="fixed bottom-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+    </>
   );
 }

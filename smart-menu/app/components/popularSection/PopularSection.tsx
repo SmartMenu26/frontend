@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Card from "../ui/Card";
 import { DUMMY_ITEMS } from "@/app/data/dummyMenuItems";
 import type { MealKind } from "@/app/data/dummyMenuCategories";
 import { PopularSkeletonCard } from "../skeletons/popularItemsSkeleton";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { defaultLocale, type Locale } from "@/i18n";
 
 type MenuItem = {
   id: string;
@@ -26,9 +28,31 @@ export default function PopularSection({
   className = "",
 }: PopularSectionProps) {
   const router = useRouter();
+  const locale = useLocale() as Locale;
+  const t = useTranslations("popularSection");
 
   const [popularItems, setPopularItems] = useState<MenuItem[]>([]);
   const [loadingPopular, setLoadingPopular] = useState(false);
+
+  const labelPriority = useMemo(() => {
+    const order: Locale[] = [];
+    if (locale) order.push(locale);
+    if (!order.includes(defaultLocale)) order.push(defaultLocale);
+    if (!order.includes("en" as Locale)) order.push("en" as Locale);
+    return order;
+  }, [locale]);
+
+  const resolveLocalizedTitle = useCallback(
+    (name?: Record<string, string>, fallback = "Item") => {
+      for (const key of labelPriority) {
+        const value = name?.[key];
+        if (value) return value;
+      }
+      const first = name ? Object.values(name).find(Boolean) : undefined;
+      return first ?? fallback;
+    },
+    [labelPriority]
+  );
 
   useEffect(() => {
     if (!restaurantId) return;
@@ -53,7 +77,7 @@ export default function PopularSection({
 
         const mapped: MenuItem[] = data.map((m: any) => ({
           id: m._id ?? m.id,
-          title: m?.name?.mk ?? m?.name ?? m?.title ?? "Item",
+          title: resolveLocalizedTitle(m?.name, m?.title ?? "Item"),
           imageUrl: m?.image?.url ?? m?.imageUrl ?? "",
           price: m?.price ?? 0,
         }));
@@ -75,18 +99,18 @@ export default function PopularSection({
     return () => {
       cancelled = true;
     };
-  }, [restaurantId, mealType]);
+  }, [restaurantId, mealType, resolveLocalizedTitle]);
 
   return (
     <section className={`bg-white ${className}`}>
       <div className="container mx-auto">
         <div className="md:px-0 pl-4">
           <h2 className="text-2xl font-semibold text-[#7A5A2A] mb-4">
-            {mealType === "food" ? "Популарни јадења" : "Популарни пијалоци"}
+            {mealType === "food" ? t("title.food") : t("title.drink")}
           </h2>
 
           {(!loadingPopular && popularItems.length === 0) ? (
-            <div className="text-slate-500">Нема популарни ставки.</div>
+            <div className="text-slate-500">{t("empty")}</div>
           ) : (
             <div
               className="
