@@ -51,9 +51,21 @@ export default function MenuItemDetails({
     [restaurantId]
   );
 
+  const visibleAllergens = useMemo(
+    () =>
+      allergens.filter((a) => {
+        const label = a.label?.trim();
+        if (!label) return false;
+        const normalizedLabel = label.toLowerCase();
+        const normalizedCode = a.code?.trim().toLowerCase();
+        return normalizedLabel !== "none" && normalizedCode !== "none";
+      }),
+    [allergens]
+  );
+
   useEffect(() => {
     setActiveTooltip(null);
-  }, [allergens]);
+  }, [visibleAllergens]);
 
   const intlLocale = useMemo(() => {
     switch (locale) {
@@ -117,14 +129,14 @@ export default function MenuItemDetails({
         </section>
         <section>
           {/* allergens */}
-          {allergens.length > 0 && (
+          {visibleAllergens.length > 0 && (
             <div className="mt-3">
               {/* <p className="text-xs font-semibold uppercase tracking-wide text-[#2F3A37]/60">
                 Алергени
               </p> */}
 
               <div className="mt-3 flex flex-wrap gap-3">
-                {allergens.map((a) => {
+                {visibleAllergens.map((a) => {
                   const iconEntry = getAllergenIconEntry(a.code);
                   const tooltipText = resolveTooltipLabel(a.label, iconEntry);
                   const tooltipId = `allergen-tooltip-${a.key}`;
