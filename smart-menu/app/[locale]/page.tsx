@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import InstallAppButton from "../_components/InstallAppButton";
 import LanguageSwitcher from "../components/languageSwitcher/LanguageSwitcher";
 
@@ -269,7 +270,9 @@ export default async function Home() {
       </section>
       </div>
       <div className="pointer-events-auto fixed bottom-4 right-4 z-50">
-        <LanguageSwitcher />
+        <Suspense fallback={null}>
+          <LanguageSwitcher />
+        </Suspense>
       </div>
     </>
   );
