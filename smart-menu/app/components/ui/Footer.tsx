@@ -3,8 +3,11 @@
 import type { SVGProps } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function Footer() {
+  const t = useTranslations("footer");
+
   return (
     <footer className="mt-1 border-t border-black/5 bg-[#F7F7F7] backdrop-blur">
       <div className="container mx-auto flex flex-col justify-center items-center gap-2 px-6 text-[#2F3A37] md:flex-row md:items-center md:justify-between pt-4 pb-2">
@@ -18,13 +21,13 @@ export default function Footer() {
           />
           <div className="flex gap-4">
             <Link href="/" className="hover:text-[#074128]">
-              Почетна
+              {t("home")}
             </Link>
             <a
               href="mailto:contact@smartmenu.app"
               className="hover:text-[#074128]"
             >
-              Контакт
+              {t("contact")}
             </a>
           </div>
         </div>

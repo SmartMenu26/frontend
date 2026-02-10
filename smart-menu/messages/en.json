@@ -1,1 +1,41 @@
-{}
+{
+  "aiSuggestion": {
+    "subtitle": "QUICK AI PICKS FOR YOU",
+    "title": "What are you in the mood to eat?",
+    "chips": {
+      "askAssistant": "Ask the assistant",
+      "askNamed": "Ask {name}",
+      "protein": "Protein-packed",
+      "healthy": "Healthy bites",
+      "surprise": "Surprise me",
+      "spicy": "Spicy"
+    }
+  }
+  ,
+  "mealTypeToggle": {
+    "food": "Food",
+    "drink": "Drinks"
+  },
+  "popularSection": {
+    "title": {
+      "food": "Popular dishes",
+      "drink": "Popular drinks"
+    },
+    "empty": "No popular items yet."
+  },
+  "footer": {
+    "home": "Home",
+    "contact": "Contact"
+  },
+  "menuItemDetails": {
+    "assistantButton": "AI Recommendation",
+    "assistantPrompt": "What pairs well with {dish}?",
+    "shareCta": "Share your thoughts",
+    "priceLabel": "{price} den",
+    "favorite": {
+      "add": "Add to favorites",
+      "remove": "Remove from favorites"
+    },
+    "back": "Back"
+  }
+}

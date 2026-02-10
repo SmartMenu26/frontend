@@ -1,1 +1,41 @@
-{}
+{
+  "aiSuggestion": {
+    "subtitle": "БРЗИ AI ПРЕПОРАКИ ЗА ТЕБЕ",
+    "title": "Што сте расположени да јадете?",
+    "chips": {
+      "askAssistant": "Прашај го асистентот",
+      "askNamed": "Прашај го {name}",
+      "protein": "Протеинско",
+      "healthy": "Здрава храна",
+      "surprise": "Изненади ме",
+      "spicy": "Луто"
+    }
+  }
+  ,
+  "mealTypeToggle": {
+    "food": "Храна",
+    "drink": "Пијалоци"
+  },
+  "popularSection": {
+    "title": {
+      "food": "Популарни јадења",
+      "drink": "Популарни пијалоци"
+    },
+    "empty": "Нема популарни ставки."
+  },
+  "footer": {
+    "home": "Почетна",
+    "contact": "Контакт"
+  },
+  "menuItemDetails": {
+    "assistantButton": "AI ПРЕПОРАКА",
+    "assistantPrompt": "Што оди со {dish}?",
+    "shareCta": "Сподели го твоето мислење",
+    "priceLabel": "{price} ден",
+    "favorite": {
+      "add": "Додај во омилени",
+      "remove": "Отстрани од омилени"
+    },
+    "back": "Назад"
+  }
+}
