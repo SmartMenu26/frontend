@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CategoryLink from "../ui/CategoryLink";
 import ChipsRow, { ChipItem } from "../ui/ChipsRow";
 import Card from "../ui/Card";
@@ -9,6 +9,8 @@ import type { MealKind, Category } from "@/app/data/dummyMenuCategories";
 import { SkeletonCard } from "../skeletons/cardSkeleton";
 import { CategorySkeleton } from "../skeletons/categorySkeleton";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { defaultLocale, type Locale } from "@/i18n";
 
 type MenuItem = {
     id: string;
@@ -27,8 +29,10 @@ type Props = {
 
 export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }: Props) {
     const router = useRouter();
+    const locale = useLocale() as Locale;
 
     const [categories, setCategories] = useState<Category[]>([]);
+    const [rawCategories, setRawCategories] = useState<any[]>([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
     const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>("all");
 
@@ -43,6 +47,45 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
     const selectedCategory = useMemo(
         () => categories.find((c) => c.id === selectedCategoryId),
         [categories, selectedCategoryId]
+    );
+
+    const labelPriority = useMemo(() => {
+        const order: string[] = [];
+        if (locale) order.push(locale);
+        if (!order.includes(defaultLocale)) order.push(defaultLocale);
+        if (!order.includes("en")) order.push("en");
+        return order;
+    }, [locale]);
+
+    const resolveLocalizedLabel = useCallback(
+        (name?: Record<string, string>, fallback = "Category") => {
+            for (const key of labelPriority) {
+                const value = name?.[key];
+                if (value) return value;
+            }
+            const first = name ? Object.values(name).find(Boolean) : undefined;
+            return first ?? fallback;
+        },
+        [labelPriority]
+    );
+
+    const mapCategories = useCallback(
+        (data: any[]): Category[] =>
+            data
+                .slice()
+                .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                .map((cat: any) => ({
+                    id: cat._id,
+                    label: resolveLocalizedLabel(cat.name, "Category"),
+                    subcategories: (cat.children ?? [])
+                        .slice()
+                        .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                        .map((sub: any) => ({
+                            id: sub._id,
+                            label: resolveLocalizedLabel(sub.name, "Subcategory"),
+                        })),
+                })),
+        [resolveLocalizedLabel]
     );
 
     useEffect(() => {
@@ -68,21 +111,8 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                 const data = json?.data ?? [];
 
                 // 👇 map backend → UI Category
-                const mapped: Category[] = data
-                    .slice()
-                    .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-                    .map((cat: any) => ({
-                        id: cat._id,
-                        label: cat.name?.mk ?? "Category",
-                        subcategories: (cat.children ?? [])
-                            .slice()
-                            .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-                            .map((sub: any) => ({
-                                id: sub._id,
-                                label: sub.name?.mk ?? "Subcategory",
-                            })),
-                    }));
-
+                const mapped = mapCategories(data);
+                setRawCategories(data);
                 setCategories(mapped);
                 setSelectedCategoryId(mapped[0]?.id ?? "");
                 setSelectedSubcategoryId("all");
@@ -105,8 +135,29 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         return () => {
             cancelled = true;
         };
-    }, [restaurantId, mealType]);
+    }, [restaurantId, mealType, mapCategories]);
 
+    useEffect(() => {
+        if (!rawCategories.length) return;
+        const mapped = mapCategories(rawCategories);
+        setCategories(mapped);
+        setSelectedCategoryId((prev) =>
+            prev && mapped.some((cat) => cat.id === prev) ? prev : mapped[0]?.id ?? ""
+        );
+    }, [rawCategories, mapCategories]);
+
+    const allChipLabel = useMemo(
+        () =>
+            resolveLocalizedLabel(
+                {
+                    mk: "Сите",
+                    sq: "Të gjitha",
+                    en: "All",
+                },
+                "All"
+            ),
+        [resolveLocalizedLabel]
+    );
 
     // 2) Chips for subcategories of selected category
     const chipItems: ChipItem[] = useMemo(() => {
@@ -114,7 +165,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         return [
             {
                 id: "all",
-                label: "Сите",
+                label: allChipLabel,
                 variant: "outline",
                 colorClassName: "bg-[#2F3A37] text-white hover:opacity-90",
             },
@@ -124,7 +175,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                 variant: "outline" as const,
             })),
         ];
-    }, [selectedCategory]);
+    }, [selectedCategory, allChipLabel]);
 
     // Reset subcategory when category changes
     useEffect(() => {
@@ -178,7 +229,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
 
                 const mapped: MenuItem[] = data.map((m: any) => ({
                     id: m._id ?? m.id,
-                    title: m?.name?.mk ?? m?.name ?? m?.title ?? "Item",
+                    title: resolveLocalizedLabel(m?.name, m?.title ?? "Item"),
                     imageUrl: m?.image?.url ?? m?.imageUrl ?? "",
                     price: m?.price ?? 0,
                     kind: m?.kind ?? m?.baseCategory ?? m?.type,
@@ -201,7 +252,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         return () => {
             cancelled = true;
         };
-    }, [restaurantId, selectedCategoryId, selectedSubcategoryId, mealType]);
+    }, [restaurantId, selectedCategoryId, selectedSubcategoryId, mealType, resolveLocalizedLabel]);
 
 
 
