@@ -1,36 +1,43 @@
 import AiAssistantContent from "@/app/components/aiAssistant/AiAssistantContent";
+import { getTranslations } from "next-intl/server";
 
 type Props = {
-  params: Promise<{ restaurantId: string }>;
+  params: Promise<{ locale: string; restaurantId: string }>;
   searchParams?: Promise<{ prompt?: string }>;
 };
 
-const suggestionPrompts = [
+const suggestionPromptConfigs = [
   {
     id: "no-lactose",
-    label: "Сакам храна без лактоза",
     icon: "/icons/sparkie.svg",
+    messageKey: "prompts.noLactose",
   },
   {
     id: "light",
-    label: "Нешто лесно",
     icon: "/icons/sparkie.svg",
+    messageKey: "prompts.light",
   },
   {
     id: "sport",
-    label: "Што да јадам за тренинг?",
     icon: "/icons/sparkie.svg",
+    messageKey: "prompts.sweet",
   },
   {
     id: "surprise",
-    label: "Изненади ме",
     icon: "/icons/sparkie.svg",
+    messageKey: "prompts.surprise",
   },
-];
+] as const;
 
 export default async function AiAssistantPage({ params, searchParams }: Props) {
-  const { restaurantId } = await params;
+  const { locale, restaurantId } = await params;
   const { prompt = "" } = (searchParams ? await searchParams : {}) ?? {};
+  const t = await getTranslations({ locale, namespace: "aiAssistantSuggestions" });
+
+  const suggestionPrompts = suggestionPromptConfigs.map(({ messageKey, ...config }) => ({
+    ...config,
+    label: t(messageKey),
+  }));
 
   const base = process.env.BACKEND_URL?.replace(/\/$/, "");
 
@@ -66,9 +73,7 @@ export default async function AiAssistantPage({ params, searchParams }: Props) {
       assistantName={
         typeof restaurant?.aiAssistantName === "string"
           ? restaurant.aiAssistantName
-          : restaurant?.aiAssistantName?.mk ??
-          restaurant?.aiAssistantName?.en ??
-          restaurant?.aiAssistantName?.sq
+          : restaurant?.aiAssistantName ?? undefined
       }
       aiCreditsRemaining={aiCreditsRemaining}
     />

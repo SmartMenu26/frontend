@@ -12,6 +12,39 @@
     }
   }
   ,
+  "aiAssistantPromptPanel": {
+    "input": {
+      "placeholder": "Shkruaj çfarë dëshiron të hash...",
+      "sendAriaLabel": "Dërgo kërkesën"
+    },
+    "info": {
+      "withRestaurant": "Rekomandimet bazohen në menynë e {restaurantName}.",
+      "generic": "Rekomandimet bazohen në menynë digjitale."
+    },
+    "errors": {
+      "generic": "Nuk mund të përgjigjem tani."
+    }
+  }
+  ,
+  "aiAssistantContent": {
+    "intro": {
+      "prefix": "Unë jam",
+      "suffix": "Si mund të ju ndihmoj në zgjedhjen tuaj?"
+    },
+    "loading": {
+      "caption": "Kuzhinieri po mendon"
+    }
+  }
+  ,
+  "aiAssistantSuggestions": {
+    "prompts": {
+      "noLactose": "Dua ushqim pa laktozë",
+      "light": "Diçka e lehtë",
+      "sweet": "Diçka e ëmbël",
+      "surprise": "Më befaso"
+    }
+  }
+  ,
   "mealTypeToggle": {
     "food": "Ushqim",
     "drink": "Pije"
