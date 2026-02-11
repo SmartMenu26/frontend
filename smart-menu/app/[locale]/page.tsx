@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { Instagram, Mail, PhoneCall } from "lucide-react";
 import InstallAppButton from "../_components/InstallAppButton";
 import LanguageSwitcher from "../components/languageSwitcher/LanguageSwitcher";
+import RestaurantHeader from "../components/ui/RestaurantHeader";
 
 const highlights = [
   {
@@ -20,32 +22,38 @@ const highlights = [
 
 const blogSnippets = [
   {
-    title: "Why digital menus convert better than PDFs",
+    title: "Why AI-powered menus outperform static QR menus",
     excerpt:
-      "A dynamic experience lets guests browse by mood, allergies, and cravings so they order with confidence.",
+      "Static QR menus only display dishes. Smart Menu actively guides guests with personalized recommendations, helping them decide faster and order more.",
     href: "/restaurant/6957e610dfe0f2ca815211f8",
   },
   {
-    title: "From QR codes to curated journeys",
-    excerpt: "How Smart Menu tells your brand story with cinematic imagery, pairing ideas, and chef notes.",
+    title: "Turn indecision into higher average orders",
+    excerpt:
+      "An AI assistant suggests dishes based on mood, dietary needs, and preferences — reducing hesitation and increasing upsells naturally.",
     href: "/restaurant/6957e610dfe0f2ca815211f8",
   },
 ];
 
+
 const contacts = [
   {
     label: "Email",
-    value: "team@smartmenu.app",
-    href: "mailto:team@smartmenu.app",
+    value: "restaurantsmart26@gmail.com",
+    href: "mailto:restaurantsmart26@gmail.com",
+    icon: Mail,
   },
   {
     label: "Phone / WhatsApp",
-    value: "+389 70 000 000",
-    href: "tel:+38970000000",
+    value: "+389 71 863 999",
+    href: "tel:+38971863999",
+    icon: PhoneCall,
   },
   {
-    label: "Visit our studio",
-    value: "Skopje · Remote-first",
+    label: "Visit our Instagram Profile",
+    value: "https://www.instagram.com/restaurantsmart26/",
+    href: "https://www.instagram.com/restaurantsmart26/",
+    icon: Instagram,
   },
 ];
 
@@ -86,8 +94,9 @@ export default async function Home() {
   return (
     <>
       <div className="bg-[#F7F7F7] text-[#1B1F1E]">
+      <RestaurantHeader showName={false} />
       <section className="relative overflow-hidden bg-gradient-to-b from-[#F7F7F7] to-white">
-        <div className="container mx-auto flex flex-col gap-10 px-4 pb-20 pt-24 md:flex-row md:items-center">
+        <div className="container mx-auto flex flex-col gap-[60px] md:gap-10 px-4 pb-20 pt-24 md:flex-row md:items-center">
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#7A5A2A]">
               Hospitality, reimagined
@@ -115,30 +124,16 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="relative flex-1">
-            <div className="rounded-[36px] border border-white/60 bg-white/80 p-6 shadow-[0_45px_90px_rgba(10,8,6,0.08)] backdrop-blur">
-              <p className="text-sm font-medium uppercase tracking-wide text-[#7A5A2A]">Live preview</p>
-              <p className="mt-3 text-2xl font-semibold text-[#2F3A37]">
-                Digital menus that feel like your restaurant.
-              </p>
-              <p className="mt-4 text-sm text-[#4A4D52]">
-                Card-based browsing, rich photography, allergen insight, and an AI recommendation concierge—everything powered by
-                Smart Menu.
-              </p>
-              <div className="mt-6 rounded-3xl bg-[#3F5D50] p-4 text-white shadow-inner">
-                <p className="text-xs uppercase tracking-[0.3em] text-white/70">What guests see</p>
-                <p className="mt-3 text-3xl font-semibold">“What should I pair with the house risotto?”</p>
-                <p className="mt-3 text-sm text-white/80">
-                  Smart Menu suggests perfect pairings, wine flights, and chef notes in Macedonian, English, or Albanian.
-                </p>
-              </div>
-            </div>
-          </div>
+            <img
+              src="/images/mock.png"
+              alt="Smart Menu preview on a smartphone"
+              className="mx-auto w-full p-4 rounded-4xl shadow-lg scale-120"
+            />
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white" />
       </section>
 
-      <section className="container mx-auto px-4 py-16">
+      <section id="why-us" className="container mx-auto px-4 py-16">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A5A2A]">
           Why restaurants choose us
         </p>
@@ -158,21 +153,16 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="bg-white py-16">
+      <section id="about-us" className="bg-white py-16">
         <div className="container mx-auto px-4">
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A5A2A]">From the journal</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A5A2A]">Growth Insights</p>
               <h2 className="mt-3 text-3xl font-semibold text-[#1B1F1E]">
-                Stories on crafting modern dining journeys.
+                The Future of Smart Restaurant Menus
               </h2>
             </div>
-            <Link
-              href="/restaurant/6957e610dfe0f2ca815211f8"
-              className="inline-flex items-center justify-center rounded-full border border-[#1B1F1E]/10 px-5 py-2 text-sm font-semibold uppercase tracking-wide text-[#1B1F1E] transition hover:bg-[#1B1F1E] hover:text-white"
-            >
-              Read more
-            </Link>
+
           </div>
 
           <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -184,12 +174,6 @@ export default async function Home() {
                 <p className="text-xs font-semibold uppercase tracking-[0.4em] text-[#7A5A2A]/80">Insight</p>
                 <h3 className="mt-3 text-2xl font-semibold text-[#2F3A37]">{post.title}</h3>
                 <p className="mt-3 text-sm text-[#4A4D52]">{post.excerpt}</p>
-                <Link
-                  href={post.href}
-                  className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#7A5A2A] hover:underline"
-                >
-                  Continue reading →
-                </Link>
               </article>
             ))}
           </div>
@@ -213,27 +197,23 @@ export default async function Home() {
                   typeof restaurant.name === "string"
                     ? restaurant.name
                     : restaurant.name?.mk ?? restaurant.name?.en ?? restaurant.name?.sq ?? "Ресторан";
-
-                const supports = restaurant.supportedLanguages?.length
-                  ? restaurant.supportedLanguages.join(", ")
-                  : "mk/sq/en";
+                const image = restaurant.imageUrl;
 
                 return (
                   <article
                     key={restaurant._id ?? restaurant.slug}
-                    className="rounded-3xl border border-black/5 bg-white p-5 shadow-[0_15px_40px_rgba(15,24,21,0.05)]"
+                    className="w-full md:w-fit flex gap-3 rounded-3xl border border-black/5 bg-gray p-2 shadow-[0_15px_40px_rgba(15,24,21,0.05)] transition-transform duration-300 hover:scale-[1.02]"
                   >
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#7A5A2A]/80">
-                      {restaurant.plan ?? "Premium"}
-                    </p>
-                    <h3 className="mt-2 text-2xl font-semibold text-[#1B1F1E]">{label}</h3>
-                    <p className="mt-1 text-sm text-[#4A4D52]">Languages: {supports}</p>
-                    <Link
-                      href={`/restaurant/${restaurant._id ?? restaurant.slug}`}
-                      className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#7A5A2A] hover:underline"
-                    >
-                      View menu →
-                    </Link>
+                    {image ? (
+                      <div className="relative w-full md:h-54 md:w-54 overflow-hidden rounded-2xl">
+                        <img
+                          src={image}
+                          alt={label}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    ) : null}
                   </article>
                 );
               })}
@@ -243,28 +223,37 @@ export default async function Home() {
       ) : null}
 
       <section id="contact" className="bg-[#1B1F1E] py-16 text-white">
-        <div className="container mx-auto grid gap-10 px-4 md:grid-cols-2">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/70">Let's talk</p>
-            <h2 className="mt-3 text-3xl font-semibold">Ready to serve your guests?</h2>
-            <p className="mt-4 text-sm text-white/80">
+        <div className="container mx-auto grid gap-12 px-4 lg:grid-cols-2">
+          <div className="text-center lg:text-left">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70 sm:text-sm">Let's talk</p>
+            <h2 className="mt-3 text-2xl font-semibold sm:text-3xl">Ready to serve your guests?</h2>
+            <p className="mt-4 text-sm text-white/80 sm:text-base">
               Tell us about your concept, audience, and challenges. We'll tailor a Smart Menu rollout that feels like a natural
               extension of your brand.
             </p>
           </div>
-          <div className="grid gap-4 text-sm">
-            {contacts.map((item) => (
-              <div key={item.label} className="rounded-2xl border border-white/15 bg-white/5 p-4">
-                <p className="text-xs uppercase tracking-[0.3em] text-white/60">{item.label}</p>
-                {item.href ? (
-                  <Link href={item.href} className="mt-1 block text-lg font-semibold text-white">
-                    {item.value}
-                  </Link>
-                ) : (
-                  <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
-                )}
-              </div>
-            ))}
+          <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            {contacts.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.label}
+                  className="w-full rounded-2xl border border-white/15 bg-white/5 p-4 text-center sm:text-left transition hover:bg-white/10"
+                >
+                  <div className="flex flex-col items-center gap-2 sm:flex-row sm:items-center">
+                    {Icon ? <Icon className="h-5 w-5 text-white" aria-hidden="true" /> : null}
+                    <p className="text-xs uppercase tracking-[0.3em] text-white/60">{item.label}</p>
+                  </div>
+                  {item.href ? (
+                    <Link href={item.href} className="mt-2 block text-lg font-semibold text-white break-words">
+                      {item.value}
+                    </Link>
+                  ) : (
+                    <p className="mt-2 text-lg font-semibold text-white break-words">{item.value}</p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

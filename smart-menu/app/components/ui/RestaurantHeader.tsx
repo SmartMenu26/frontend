@@ -12,6 +12,11 @@ type Props = {
 export default function RestaurantHeader({ showName = true, name }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const displayName = name?.trim() || "Restaurant";
+  const navLinks = [
+    { href: "#why-us", label: "Why us" },
+    { href: "#about-us", label: "About us" },
+    { href: "#contact", label: "Contact us" },
+  ];
   const headingSizeClass = useMemo(() => {
     if (displayName.length > 28) return "text-4xl md:text-5xl";
     if (displayName.length > 22) return "text-5xl md:text-6xl";
@@ -27,7 +32,8 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
         <HamburgerButton
           open={menuOpen}
           onToggle={() => setMenuOpen((v) => !v)}
-          className="absolute top-5 right-6 z-100"
+          className="absolute top-5 right-6 z-100 text-[#1B1F1E]"
+          ariaLabel="Toggle navigation menu"
         />
 
         {showName && (
@@ -46,6 +52,7 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
           "fixed inset-0 bg-black/30 z-40 transition-opacity duration-300",
           menuOpen ? "opacity-100" : "opacity-0 pointer-events-none",
         ].join(" ")}
+        aria-hidden={!menuOpen}
       />
       {/* SLIDE-IN MENU (glass) */}
       <div
@@ -60,16 +67,18 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
           "shadow-[20px_0_60px_rgba(0,0,0,0.18)]",
         ].join(" ")}
       >
-        <div className="pt-24 px-6">
-          <p className="text-lg font-medium mb-4">        <Link
-          href="/"
-          className="text-[#6B2E2E] hover:underline"
-        >
-          Home
-        </Link></p>
-          <p className="text-lg font-medium mb-4">Menu item 2</p>
-          <p className="text-lg font-medium mb-4">Menu item 3</p>
-        </div>
+        <nav className="pt-24 px-6 flex flex-col gap-4 text-lg font-semibold text-[#1B1F1E]">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMenuOpen(false)}
+              className="inline-flex items-center gap-2 hover:text-[#6B2E2E] transition"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
       </div>
 
     </>
