@@ -3,12 +3,16 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
-import AiAssistantPromptPanel from "@/app/components/aiAssistant/AiAssistantPromptPanel";
+import AiAssistantPromptPanel, {
+  type AiAssistantRouterResponse,
+} from "@/app/components/aiAssistant/AiAssistantPromptPanel";
 import assistantIllustration from "@/public/images/ai-assistant-cook.png";
 import assistantThinking from "@/public/images/ai-assistant-cook-thinking.png";
 import menuItemPlaceholder from "@/public/images/menu-item-placeholder.png";
 import noCreditsImage from "@/public/images/no-credits.png";
+import { type Locale } from "@/i18n";
 
 type Suggestion = {
   id: string;
@@ -16,19 +20,54 @@ type Suggestion = {
   icon: string;
 };
 
+type LocalizedField = Partial<Record<Locale, string>> | string;
+
 type Candidate = {
   _id?: string;
-  name?: { mk?: string; sq?: string; en?: string } | string;
-  description?: { mk?: string; sq?: string; en?: string } | string;
-  image?: { url?: string };
+  name?: LocalizedField;
+  description?: LocalizedField;
+  image?: {
+    url?: string;
+    alt?: Partial<Record<Locale, string>>;
+    altMk?: string;
+    altSq?: string;
+    altEn?: string;
+  };
 };
+
+const localeFallbackOrder: Locale[] = ["mk", "sq", "en"];
+type AiAssistantResponse = AiAssistantRouterResponse<Candidate>;
+const fallbackCandidateTitle: Record<Locale, string> = {
+  mk: "Предлог",
+  sq: "Sugjerim",
+  en: "Suggestion",
+};
+const fallbackCandidateDescription: Record<Locale, string> = {
+  mk: "Пробај го овој специјалитет.",
+  sq: "Provo këtë specialitet.",
+  en: "Give this special a try.",
+};
+
+function resolveLocalizedField(
+  value: LocalizedField | undefined,
+  locale: Locale
+) {
+  if (!value) return undefined;
+  if (typeof value === "string") return value;
+  const chain = [locale, ...localeFallbackOrder.filter((code) => code !== locale)];
+  for (const code of chain) {
+    const candidate = value[code];
+    if (candidate) return candidate;
+  }
+  return undefined;
+}
 
 type Props = {
   restaurantId: string;
   suggestionPrompts: Suggestion[];
   prompt: string;
   restaurantName?: string;
-  assistantName?: string;
+  assistantName?: LocalizedField;
   aiCreditsRemaining?: number;
 };
 
@@ -40,33 +79,43 @@ export default function AiAssistantContent({
   assistantName,
   aiCreditsRemaining,
 }: Props) {
+  const locale = useLocale() as Locale;
+  const t = useTranslations("aiAssistantContent");
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "success">(
     "idle"
   );
   const [assistantText, setAssistantText] = useState("");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const [resultLocale, setResultLocale] = useState<Locale | null>(null);
 
-  const handleResult = useCallback((payload?: any) => {
+  const handleResult = useCallback((payload?: AiAssistantResponse) => {
+    const dataBlock = payload?.data;
+    const nestedData = Array.isArray(dataBlock) ? undefined : dataBlock;
+    const nestedCandidates = Array.isArray(dataBlock)
+      ? dataBlock
+      : nestedData?.candidates;
+
     const text =
       payload?.router?.assistantText ??
-      payload?.data?.router?.assistantText ??
+      nestedData?.router?.assistantText ??
       "";
-    const items =
-      payload?.candidates ??
-      payload?.data?.candidates ??
-      payload?.data ??
-      [];
+    const items = payload?.candidates ?? nestedCandidates ?? [];
+    const routerLanguage =
+      payload?.router?.language ?? nestedData?.router?.language ?? null;
 
     setAssistantText(text);
     setCandidates(Array.isArray(items) ? items : []);
+    setResultLocale(routerLanguage ?? null);
   }, []);
 
-  const assistantDisplayName = assistantName?.trim() || "Бакал";
   const restaurantDisplayName = restaurantName?.trim();
   const heroImage = status === "loading" ? assistantThinking : assistantIllustration;
   const hasCredits =
     typeof aiCreditsRemaining === "number" ? aiCreditsRemaining > 0 : true;
+  const displayLocale = resultLocale ?? locale;
+  const assistantDisplayName =
+    resolveLocalizedField(assistantName, displayLocale) || "Асистентот";
 
   return (
     <div className="min-h-dvh bg-[#F5F5F5] text-[#1E1F24]">
@@ -98,10 +147,10 @@ export default function AiAssistantContent({
           <div className="pb-4 h-[95vh] text-center flex flex-col justify-around">
             {status === "idle" && (
               <p className="text-left text-[22px] leading-snug text-[#4B4F54]">
-                Јас сум{" "}
+                {t("intro.prefix")}{" "}
                 <span className="font-semibold text-[#1E1F24]">{assistantDisplayName}!</span>
                 <br />
-                Како можам да ви помогнам со изборот?
+                {t("intro.suffix")}
               </p>
             )}
 
@@ -117,7 +166,7 @@ export default function AiAssistantContent({
 
             {status === "loading" && (
               <div className="mt-4 flex flex-col items-center gap-1 text-sm font-medium text-[#4B4F54]">
-                <span className="text-md">Куварот размислува</span>
+                <span className="text-md">{t("loading.caption")}</span>
                 <span className="flex items-center gap-1">
                   {[0, 1, 2].map((idx) => (
                     <span
@@ -142,16 +191,23 @@ export default function AiAssistantContent({
                   candidates.map((item) => {
                     const id = item?._id ?? "";
                     const title =
-                      typeof item?.name === "string"
-                        ? item.name
-                        : item?.name?.mk ?? item?.name?.en ?? "Предлог";
+                      resolveLocalizedField(item?.name, displayLocale) ??
+                      fallbackCandidateTitle[displayLocale];
                     const description =
-                      typeof item?.description === "string"
-                        ? item.description
-                        : item?.description?.mk ??
-                        item?.description?.en ??
-                        "Пробај го овој специјалитет.";
+                      resolveLocalizedField(item?.description, displayLocale) ??
+                      fallbackCandidateDescription[displayLocale];
                     const img = item?.image?.url ?? menuItemPlaceholder.src;
+                    const imageAlt =
+                      resolveLocalizedField(item?.image?.alt, displayLocale) ??
+                      resolveLocalizedField(
+                        {
+                          mk: item?.image?.altMk,
+                          sq: item?.image?.altSq,
+                          en: item?.image?.altEn,
+                        },
+                        displayLocale
+                      ) ??
+                      title;
 
                     return (
                       <Link
@@ -165,7 +221,7 @@ export default function AiAssistantContent({
                       >
                         <Image
                           src={img}
-                          alt={title}
+                          alt={imageAlt}
                           width={56}
                           height={56}
                           className="h-14 w-14 rounded-2xl object-cover"
@@ -203,13 +259,13 @@ export default function AiAssistantContent({
 
             {pendingMessage ? (
               <div className="mb-3 flex justify-end">
-                <div className="max-w-[75%] rounded-3xl bg-[#E7F3EC] px-4 py-3 text-right text-sm font-medium text-[#1E1F24] shadow-[0_8px_20px_rgba(15,24,21,0.12)]">
+                <div className="max-w-[75%] rounded-3xl bg-[#E7F3EC] px-4 py-3 text-right text-sm font-medium text-[#1E1F24] shadow-[0_4px_12px_rgba(15,24,21,0.06)]">
                   {pendingMessage}
                 </div>
               </div>
             ) : null}
 
-            <AiAssistantPromptPanel
+            <AiAssistantPromptPanel<Candidate>
               suggestionPrompts={suggestionPrompts}
               initialMessage={prompt}
               restaurantId={restaurantId}

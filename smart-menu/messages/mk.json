@@ -12,6 +12,39 @@
     }
   }
   ,
+  "aiAssistantPromptPanel": {
+    "input": {
+      "placeholder": "Напиши што ти се јаде...",
+      "sendAriaLabel": "Испрати барање"
+    },
+    "info": {
+      "withRestaurant": "Препораките се базирани на менито на {restaurantName}.",
+      "generic": "Препораките се базирани на дигиталното мени."
+    },
+    "errors": {
+      "generic": "Не можам да одговорам сега."
+    }
+  }
+  ,
+  "aiAssistantContent": {
+    "intro": {
+      "prefix": "Јас сум",
+      "suffix": "Како можам да ви помогнам со изборот?"
+    },
+    "loading": {
+      "caption": "Куварот размислува"
+    }
+  }
+  ,
+  "aiAssistantSuggestions": {
+    "prompts": {
+      "noLactose": "Сакам храна без лактоза",
+      "light": "Нешто лесно",
+      "sweet": "Слатко",
+      "surprise": "Изненади ме"
+    }
+  }
+  ,
   "mealTypeToggle": {
     "food": "Храна",
     "drink": "Пијалоци"

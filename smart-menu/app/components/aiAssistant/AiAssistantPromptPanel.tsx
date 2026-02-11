@@ -3,6 +3,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Info, Send } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { Locale } from "@/i18n";
+
+export type AiAssistantRouterResponse<TCandidate = unknown> = {
+  ok?: boolean;
+  message?: string;
+  error?: string;
+  router?: {
+    assistantText?: string;
+    language?: Locale;
+  };
+  data?:
+    | {
+        router?: { assistantText?: string; language?: Locale };
+        candidates?: TCandidate[];
+      }
+    | TCandidate[];
+  candidates?: TCandidate[];
+};
 
 type Suggestion = {
   id: string;
@@ -10,18 +29,18 @@ type Suggestion = {
   icon: string;
 };
 
-type Props = {
+type Props<TCandidate = unknown> = {
   suggestionPrompts: Suggestion[];
   initialMessage?: string;
   restaurantId: string;
   restaurantName?: string;
   onStatusChange?: (status: "idle" | "loading" | "error" | "success") => void;
-  onResult?: (payload: any) => void;
+  onResult?: (payload: AiAssistantRouterResponse<TCandidate>) => void;
   onPromptPending?: (message: string) => void;
   onPromptSettled?: () => void;
 };
 
-export default function AiAssistantPromptPanel({
+export default function AiAssistantPromptPanel<TCandidate = unknown>({
   suggestionPrompts,
   initialMessage = "",
   restaurantId,
@@ -30,13 +49,15 @@ export default function AiAssistantPromptPanel({
   onResult,
   onPromptPending,
   onPromptSettled,
-}: Props) {
+}: Props<TCandidate>) {
+  const t = useTranslations("aiAssistantPromptPanel");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "success">(
     "idle"
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const lastAutoPromptRef = useRef<string | null>(null);
+  const defaultErrorMessage = t("errors.generic");
 
   const submitPrompt = useCallback(
     async (payload: string) => {
@@ -53,22 +74,26 @@ export default function AiAssistantPromptPanel({
           }),
         });
 
-        const json = await res.json().catch(() => null);
+        const json = (await res.json().catch(() => null)) as
+          | AiAssistantRouterResponse<TCandidate>
+          | null;
 
-        if (!res.ok || !json?.ok) {
-          throw new Error(json?.message ?? json?.error ?? "Не можам да одговорам сега.");
+        if (!res.ok || !json || !json.ok) {
+          throw new Error(json?.message ?? json?.error ?? defaultErrorMessage);
         }
 
         onResult?.(json);
         setStatus("success");
-      } catch (err: any) {
-        setErrorMessage(err?.message ?? "Не можам да одговорам сега.");
+      } catch (err: unknown) {
+        const fallbackError =
+          err instanceof Error ? err.message : defaultErrorMessage;
+        setErrorMessage(fallbackError);
         setStatus("error");
       } finally {
         onPromptSettled?.();
       }
     },
-    [restaurantId, onResult, onPromptPending, onPromptSettled]
+    [restaurantId, onResult, onPromptPending, onPromptSettled, defaultErrorMessage]
   );
 
   const sendPrompt = useCallback(
@@ -148,7 +173,7 @@ export default function AiAssistantPromptPanel({
       >
         <input
           type="text"
-          placeholder="Напиши што ти се јаде..."
+          placeholder={t("input.placeholder")}
           value={message}
           onChange={(event) => setMessage(event.target.value)}
           onKeyDown={(event) => {
@@ -167,7 +192,7 @@ export default function AiAssistantPromptPanel({
               ? "inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#3F5D50] text-white transition hover:bg-[#2b3f35]"
               : "inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#8E908F80] text-[#8E908F] transition"
           }
-          aria-label="Испрати барање"
+          aria-label={t("input.sendAriaLabel")}
         >
           <Send
             size={20}
@@ -177,11 +202,15 @@ export default function AiAssistantPromptPanel({
         </button>
       </form>
 
+      {status === "error" && errorMessage ? (
+        <p className="mt-2 text-center text-xs font-medium text-red-500">{errorMessage}</p>
+      ) : null}
+
       <p className="mx-auto mt-4 flex w-fit items-center gap-1 text-[11px] text-[#7B7E86] italic text-center">
         <Info size={18} />
         {restaurantName
-          ? `Препораките се базирани на менито на ${restaurantName}`
-          : "Препораките се базирани на дигиталното мени."}
+          ? t("info.withRestaurant", { restaurantName })
+          : t("info.generic")}
       </p>
     </div>
   );

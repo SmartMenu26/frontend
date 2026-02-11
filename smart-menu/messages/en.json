@@ -12,6 +12,39 @@
     }
   }
   ,
+  "aiAssistantPromptPanel": {
+    "input": {
+      "placeholder": "Tell the chef what you're craving...",
+      "sendAriaLabel": "Send request"
+    },
+    "info": {
+      "withRestaurant": "Recommendations are based on {restaurantName}'s menu.",
+      "generic": "Recommendations are based on the digital menu."
+    },
+    "errors": {
+      "generic": "I can't respond right now."
+    }
+  }
+  ,
+  "aiAssistantContent": {
+    "intro": {
+      "prefix": "I'm",
+      "suffix": "I’ll help you find the perfect dish."
+    },
+    "loading": {
+      "caption": "The chef is thinking"
+    }
+  }
+  ,
+  "aiAssistantSuggestions": {
+    "prompts": {
+      "noLactose": "I need lactose-free food",
+      "light": "Something light",
+      "sweet": "Something sweet",
+      "surprise": "Surprise me"
+    }
+  }
+  ,
   "mealTypeToggle": {
     "food": "Food",
     "drink": "Drinks"

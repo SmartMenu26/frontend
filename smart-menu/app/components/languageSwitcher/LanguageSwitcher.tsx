@@ -93,7 +93,7 @@ export default function LanguageSwitcher({ className = "" }: LanguageSwitcherPro
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="flex items-center gap-2 rounded-full border border-white/60 bg-white px-3 py-1 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B1F1E]/50"
+        className="cursor-pointer flex items-center gap-2 rounded-full border border-white/60 bg-white px-3 py-1 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B1F1E]/50"
       >
         <Image
           src={currentFlagSrc}
@@ -120,13 +120,13 @@ export default function LanguageSwitcher({ className = "" }: LanguageSwitcherPro
 
       {open && (
         <div className="absolute bottom-full right-0 mb-2 w-32 rounded-2xl border border-black/10 bg-white p-2 shadow-xl">
-          <ul role="listbox" aria-label="Select language" className="flex flex-col gap-1">
+          <ul role="listbox" aria-label="Select language" className="cursor-pointer flex flex-col gap-1">
             {remainingLocales.map((locale) => (
               <li key={locale}>
                 <button
                   type="button"
                   onClick={() => handleSwitch(locale)}
-                  className="flex w-full items-center gap-2 rounded-xl px-2 py-1 text-sm text-left text-[#1B1F1E] hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B1F1E]/30"
+                  className="cursor-pointer flex w-full items-center gap-2 rounded-xl px-2 py-1 text-sm text-left text-[#1B1F1E] hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B1F1E]/30"
                 >
                   <Image
                     src={FLAG_ICON[locale]}
