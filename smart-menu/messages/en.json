@@ -60,6 +60,73 @@
     "home": "Home",
     "contact": "Contact"
   },
+  "header": {
+    "toggleLabel": "Toggle navigation menu",
+    "fallbackName": "Restaurant",
+    "nav": {
+      "home": "Home",
+      "whyUs": "Why us",
+      "aboutUs": "About us",
+      "contact": "Contact us"
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Hospitality, reimagined",
+      "heading": "Smart Menu helps guests fall in love with your food before the first bite.",
+      "subheading": "Dazzle guests with rich storytelling around your signature dishes while the AI assistant reads their tastes, dietary needs, and mood to surface the perfect recommendation in seconds.",
+      "primaryCta": "Explore Live Demo",
+      "secondaryCta": "Talk to us"
+    },
+    "highlights": {
+      "eyebrow": "Why restaurants choose us",
+      "title": "Delight guests and empower your team.",
+      "items": {
+        "instantMenu": {
+          "title": "Instant Menu Updates",
+          "body": "Publish seasonal dishes, sold-out items, or dynamic pricing in seconds without reprinting any paper menus."
+        },
+        "aiConcierge": {
+          "title": "AI Concierge",
+          "body": "Help guests discover dishes through natural language questions and dietary filters powered by our AI assistant."
+        },
+        "insights": {
+          "title": "Personalized AI Assistant",
+          "body": "Launch a custom AI agent in your brand voice that chats with guests, answers every question, and feeds you insights you can instantly turn into new offers."
+        }
+      }
+    },
+    "blog": {
+      "eyebrow": "Growth Insights",
+      "title": "The Future of Smart Restaurant Menus",
+      "tag": "Insight",
+      "posts": {
+        "aiVsQr": {
+          "title": "Why AI-powered menus outperform static QR menus",
+          "excerpt": "Static QR menus only display dishes. Smart Menu actively guides guests with personalized recommendations, helping them decide faster and order more."
+        },
+        "upsell": {
+          "title": "Turn indecision into higher average orders",
+          "excerpt": "An AI assistant suggests dishes based on mood, dietary needs, and preferences — reducing hesitation and increasing upsells naturally."
+        }
+      }
+    },
+    "deployments": {
+      "eyebrow": "Live deployments",
+      "title": "Restaurants already on Smart Menu.",
+      "fallbackRestaurant": "Restaurant"
+    },
+    "contact": {
+      "eyebrow": "Let's talk",
+      "title": "Ready to serve your guests?",
+      "body": "Tell us about your concept, audience, and challenges. We'll tailor a Smart Menu rollout that feels like a natural extension of your brand.",
+      "items": {
+        "email": { "label": "Email" },
+        "phone": { "label": "Phone / WhatsApp" },
+        "instagram": { "label": "Visit our Instagram Profile" }
+      }
+    }
+  },
   "menuItemDetails": {
     "assistantButton": "AI Recommendation",
     "assistantPrompt": "What pairs well with {dish}?",

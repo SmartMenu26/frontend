@@ -28,6 +28,10 @@ body {
   font-family: var(--font-inter);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 .font-inter {
   font-family: var(--font-inter);
 }
@@ -38,4 +42,31 @@ body {
 
 .font-great-vibes {
   font-family: var(--font-great-vibes);
+}
+
+@keyframes landing-fade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing-fade {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: landing-fade 0.75s ease-out forwards;
+  animation-delay: 0s;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-fade {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
 }

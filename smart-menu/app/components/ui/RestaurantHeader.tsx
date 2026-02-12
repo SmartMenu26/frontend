@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import HamburgerButton from "@/app/components/ui/HamburgerButton";
 
 type Props = {
@@ -10,12 +11,14 @@ type Props = {
 };
 
 export default function RestaurantHeader({ showName = true, name }: Props) {
+  const t = useTranslations("header");
   const [menuOpen, setMenuOpen] = useState(false);
-  const displayName = name?.trim() || "Restaurant";
+  const displayName = name?.trim() || t("fallbackName");
   const navLinks = [
-    { href: "#why-us", label: "Why us" },
-    { href: "#about-us", label: "About us" },
-    { href: "#contact", label: "Contact us" },
+    { href: "/", label: t("nav.home") },
+    { href: "#why-us", label: t("nav.whyUs") },
+    { href: "#about-us", label: t("nav.aboutUs") },
+    { href: "#contact", label: t("nav.contact") },
   ];
   const headingSizeClass = useMemo(() => {
     if (displayName.length > 28) return "text-4xl md:text-5xl";
@@ -33,7 +36,7 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
           open={menuOpen}
           onToggle={() => setMenuOpen((v) => !v)}
           className="absolute top-5 right-6 z-100 text-[#1B1F1E]"
-          ariaLabel="Toggle navigation menu"
+          ariaLabel={t("toggleLabel")}
         />
 
         {showName && (

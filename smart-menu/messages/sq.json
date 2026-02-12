@@ -60,6 +60,73 @@
     "home": "Kreu",
     "contact": "Kontakt"
   },
+  "header": {
+    "toggleLabel": "Hap ose mbyll menunë e navigimit",
+    "fallbackName": "Restorant",
+    "nav": {
+      "home": "Ballina",
+      "whyUs": "Pse ne",
+      "aboutUs": "Rreth nesh",
+      "contact": "Kontakti"
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Mikpritje e ripërfytyruar",
+      "heading": "Smart Menu u ndihmon mysafirëve të dashurohen me ushqimin tuaj para kafshatës së parë.",
+      "subheading": "Impresiononi mysafirët me paraqitje vizuale të pjatave kryesore, ndërsa asistenti AI, sipas shijes dhe preferencave dietike, sugjeron zgjedhjen perfekte dhe përshpejton vendimmarrjen.",
+      "primaryCta": "Shiko demonstrimin live",
+      "secondaryCta": "Na kontakto"
+    },
+    "highlights": {
+      "eyebrow": "Pse restorantet na zgjedhin",
+      "title": "Entuziazmoni mysafirët dhe fuqizoni ekipin.",
+      "items": {
+        "instantMenu": {
+          "title": "Përditësime të menjëhershme të menusë",
+          "body": "Publikoni pjata sezonale, artikuj të shitur apo çmime dinamike për sekonda pa shtypur më meny të reja."
+        },
+        "aiConcierge": {
+          "title": "AI Concierge",
+          "body": "Ndihmoni mysafirët të zbulojnë pjata përmes pyetjeve natyrore dhe filtrave dietikë të mundësuar nga asistenti ynë AI."
+        },
+        "insights": {
+          "title": "Asistent AI i personalizuar",
+          "body": "Krijoni një agjent AI me tonin e markës suaj që flet me mysafirët, u përgjigjet pyetjeve përmenjëherë dhe ju kthen njohuri që mund t’i shndërroni në oferta të reja."
+        }
+      }
+    },
+    "blog": {
+      "eyebrow": "Ide rritjeje",
+      "title": "E ardhmja e menyrave inteligjente për restorantet",
+      "tag": "Vështrim",
+      "posts": {
+        "aiVsQr": {
+          "title": "Pse menytë me AI janë më të mira se QR-të statike",
+          "excerpt": "Menytë statike QR vetëm shfaqin pjata. Smart Menu i udhëheq mysafirët me rekomandime të personalizuara që ata të vendosin më shpejt dhe të porosisin më shumë."
+        },
+        "upsell": {
+          "title": "Kthejeni pavendosmërinë në porosi mesatare më të larta",
+          "excerpt": "Një asistent AI sugjeron pjata sipas humorit, nevojave dietike dhe preferencave — duke ulur hezitimin dhe rritur natyrshëm upsell-in."
+        }
+      }
+    },
+    "deployments": {
+      "eyebrow": "Implementime aktive",
+      "title": "Restorantet që tashmë përdorin Smart Menu.",
+      "fallbackRestaurant": "Restorant"
+    },
+    "contact": {
+      "eyebrow": "Le të flasim",
+      "title": "Gati të shërbeni mysafirët tuaj?",
+      "body": "Na tregoni për konceptin, publikun dhe sfidat tuaja. Do të krijojmë një shtrirje të Smart Menu që lidhet natyrshëm me markën tuaj.",
+      "items": {
+        "email": { "label": "Email" },
+        "phone": { "label": "Telefon / WhatsApp" },
+        "instagram": { "label": "Vizitoni profilin tonë në Instagram" }
+      }
+    }
+  },
   "menuItemDetails": {
     "assistantButton": "Rekomandim AI",
     "assistantPrompt": "Çfarë përshtatet me {dish}?",

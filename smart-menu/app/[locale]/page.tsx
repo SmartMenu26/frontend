@@ -1,61 +1,48 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Instagram, Mail, PhoneCall } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import InstallAppButton from "../_components/InstallAppButton";
+import AnchorHashCleanup from "../components/AnchorHashCleanup";
 import LanguageSwitcher from "../components/languageSwitcher/LanguageSwitcher";
 import RestaurantHeader from "../components/ui/RestaurantHeader";
+import type { Locale } from "@/i18n";
 
-const highlights = [
-  {
-    title: "Instant Menu Updates",
-    body: "Publish seasonal dishes, sold-out items, or dynamic pricing in seconds without reprinting any paper menus.",
-  },
-  {
-    title: "AI Concierge",
-    body: "Help guests discover dishes through natural language questions and dietary filters powered by our AI assistant.",
-  },
-  {
-    title: "Actionable Insights",
-    body: "Understand what guests view and favorite so you can fine-tune offers, bundles, and upsell flows.",
-  },
-];
+const HIGHLIGHT_KEYS = ["aiConcierge", "instantMenu", "insights"] as const;
 
-const blogSnippets = [
+const BLOG_POSTS = [
   {
-    title: "Why AI-powered menus outperform static QR menus",
-    excerpt:
-      "Static QR menus only display dishes. Smart Menu actively guides guests with personalized recommendations, helping them decide faster and order more.",
+    key: "aiVsQr",
     href: "/restaurant/6957e610dfe0f2ca815211f8",
   },
   {
-    title: "Turn indecision into higher average orders",
-    excerpt:
-      "An AI assistant suggests dishes based on mood, dietary needs, and preferences — reducing hesitation and increasing upsells naturally.",
+    key: "upsell",
     href: "/restaurant/6957e610dfe0f2ca815211f8",
   },
-];
+] as const;
 
-
-const contacts = [
+const CONTACT_ITEMS = [
   {
-    label: "Email",
+    key: "email",
     value: "restaurantsmart26@gmail.com",
     href: "mailto:restaurantsmart26@gmail.com",
     icon: Mail,
   },
   {
-    label: "Phone / WhatsApp",
+    key: "phone",
     value: "+389 71 863 999",
     href: "tel:+38971863999",
     icon: PhoneCall,
   },
   {
-    label: "Visit our Instagram Profile",
+    key: "instagram",
     value: "https://www.instagram.com/restaurantsmart26/",
     href: "https://www.instagram.com/restaurantsmart26/",
     icon: Instagram,
   },
-];
+] as const;
+
+type ContactItem = (typeof CONTACT_ITEMS)[number];
 
 type RestaurantRecord = {
   _id?: string;
@@ -88,63 +75,121 @@ async function loadRestaurants(): Promise<RestaurantRecord[]> {
   }
 }
 
-export default async function Home() {
+type Props = {
+  params: Promise<{ locale: Locale }>;
+};
+
+export default async function Home({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "home" });
   const restaurants = await loadRestaurants();
+  const hero = {
+    eyebrow: t("hero.eyebrow"),
+    heading: t("hero.heading"),
+    subheading: t("hero.subheading"),
+    primaryCta: t("hero.primaryCta"),
+    secondaryCta: t("hero.secondaryCta"),
+  };
+  const highlightHeading = {
+    eyebrow: t("highlights.eyebrow"),
+    title: t("highlights.title"),
+  };
+  const highlightCards = HIGHLIGHT_KEYS.map((key) => ({
+    key,
+    title: t(`highlights.items.${key}.title`),
+    body: t(`highlights.items.${key}.body`),
+  }));
+  const blogHeading = {
+    eyebrow: t("blog.eyebrow"),
+    title: t("blog.title"),
+    tag: t("blog.tag"),
+  };
+  const blogPosts = BLOG_POSTS.map((post) => ({
+    ...post,
+    title: t(`blog.posts.${post.key}.title`),
+    excerpt: t(`blog.posts.${post.key}.excerpt`),
+  }));
+  const deployments = {
+    eyebrow: t("deployments.eyebrow"),
+    title: t("deployments.title"),
+    fallbackRestaurant: t("deployments.fallbackRestaurant"),
+  };
+  const contactCopy = {
+    eyebrow: t("contact.eyebrow"),
+    title: t("contact.title"),
+    body: t("contact.body"),
+  };
+  const contactCards: Array<ContactItem & { label: string }> = CONTACT_ITEMS.map(
+    (item) => ({
+      ...item,
+      label: t(`contact.items.${item.key}.label`),
+    })
+  );
 
   return (
     <>
+      <AnchorHashCleanup />
       <div className="bg-[#F7F7F7] text-[#1B1F1E]">
       <RestaurantHeader showName={false} />
       <section className="relative overflow-hidden bg-gradient-to-b from-[#F7F7F7] to-white">
         <div className="container mx-auto flex flex-col gap-[60px] md:gap-10 px-4 pb-20 pt-24 md:flex-row md:items-center">
-          <div className="max-w-2xl">
+          <div className="landing-fade max-w-2xl" style={{ animationDelay: "120ms" }}>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#7A5A2A]">
-              Hospitality, reimagined
+              {hero.eyebrow}
             </p>
             <h1 className="mt-4 text-4xl font-semibold leading-tight text-[#1B1F1E] md:text-6xl">
-              Smart Menu helps guests fall in love with your food before the first bite.
+              {hero.heading}
             </h1>
             <p className="mt-6 text-lg text-[#4A4D52] md:text-xl">
-              Showcase signature dishes, explain stories, and guide every guest with personalized suggestions— all in a
-              beautifully branded experience that lives on their phones.
+              {hero.subheading}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
                 href="/restaurant/6957e610dfe0f2ca815211f8"
                 className="inline-flex items-center justify-center rounded-full bg-[#1B1F1E] px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-[#2C3330]"
               >
-                Explore Live Demo
+                {hero.primaryCta}
               </Link>
               <Link
                 href="#contact"
                 className="inline-flex items-center justify-center rounded-full border border-[#1B1F1E] px-6 py-3 text-sm font-semibold uppercase tracking-wide text-[#1B1F1E] transition hover:bg-[#1B1F1E] hover:text-white"
               >
-                Talk to us
+                {hero.secondaryCta}
               </Link>
             </div>
           </div>
 
-            <img
-              src="/images/mock.png"
-              alt="Smart Menu preview on a smartphone"
-              className="mx-auto w-full p-4 rounded-4xl shadow-lg scale-120"
-            />
+            <div
+              className="landing-fade mx-auto w-full md:w-1/2 p-4"
+              style={{ animationDelay: "260ms" }}
+            >
+              <video
+                className="w-full rounded-[36px] shadow-[0_30px_80px_rgba(0,0,0,0.15)]"
+                src="/smart-menu-ai-video.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster="/images/mock.png"
+              />
+            </div>
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white" />
       </section>
 
       <section id="why-us" className="container mx-auto px-4 py-16">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A5A2A]">
-          Why restaurants choose us
+          {highlightHeading.eyebrow}
         </p>
         <h2 className="mt-4 text-3xl font-semibold text-[#1B1F1E] md:text-4xl">
-          Delight guests and empower your team.
+          {highlightHeading.title}
         </h2>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {highlights.map((item) => (
+          {highlightCards.map((item, index) => (
             <article
-              key={item.title}
-              className="rounded-2xl border border-black/5 bg-white p-6 shadow-[0_15px_40px_rgba(15,24,21,0.05)]"
+              key={item.key}
+              className="landing-fade rounded-2xl border border-black/5 bg-white p-6 shadow-[0_15px_40px_rgba(15,24,21,0.05)]"
+              style={{ animationDelay: `${200 + index * 100}ms` }}
             >
               <h3 className="text-xl font-semibold text-[#2F3A37]">{item.title}</h3>
               <p className="mt-3 text-sm text-[#4A4D52]">{item.body}</p>
@@ -157,21 +202,26 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A5A2A]">Growth Insights</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A5A2A]">
+                {blogHeading.eyebrow}
+              </p>
               <h2 className="mt-3 text-3xl font-semibold text-[#1B1F1E]">
-                The Future of Smart Restaurant Menus
+                {blogHeading.title}
               </h2>
             </div>
 
           </div>
 
           <div className="mt-10 grid gap-6 md:grid-cols-2">
-            {blogSnippets.map((post) => (
+            {blogPosts.map((post, index) => (
               <article
-                key={post.title}
-                className="rounded-3xl border border-black/5 bg-gradient-to-br from-white to-[#F9F6F1] p-6"
+                key={post.key}
+                className="landing-fade rounded-3xl border border-black/5 bg-gradient-to-br from-white to-[#F9F6F1] p-6"
+                style={{ animationDelay: `${200 + index * 120}ms` }}
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.4em] text-[#7A5A2A]/80">Insight</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.4em] text-[#7A5A2A]/80">
+                  {blogHeading.tag}
+                </p>
                 <h3 className="mt-3 text-2xl font-semibold text-[#2F3A37]">{post.title}</h3>
                 <p className="mt-3 text-sm text-[#4A4D52]">{post.excerpt}</p>
               </article>
@@ -185,24 +235,30 @@ export default async function Home() {
           <div className="container mx-auto px-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A5A2A]">Live deployments</p>
-                <h2 className="mt-3 text-3xl font-semibold text-[#1B1F1E]">Restaurants already on Smart Menu.</h2>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A5A2A]">
+                  {deployments.eyebrow}
+                </p>
+                <h2 className="mt-3 text-3xl font-semibold text-[#1B1F1E]">{deployments.title}</h2>
               </div>
               <InstallAppButton />
             </div>
 
             <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {restaurants.slice(0, 3).map((restaurant) => {
+              {restaurants.slice(0, 3).map((restaurant, index) => {
                 const label =
                   typeof restaurant.name === "string"
                     ? restaurant.name
-                    : restaurant.name?.mk ?? restaurant.name?.en ?? restaurant.name?.sq ?? "Ресторан";
+                    : restaurant.name?.mk ??
+                      restaurant.name?.en ??
+                      restaurant.name?.sq ??
+                      deployments.fallbackRestaurant;
                 const image = restaurant.imageUrl;
 
                 return (
                   <article
                     key={restaurant._id ?? restaurant.slug}
-                    className="w-full md:w-fit flex gap-3 rounded-3xl border border-black/5 bg-gray p-2 shadow-[0_15px_40px_rgba(15,24,21,0.05)] transition-transform duration-300 hover:scale-[1.02]"
+                    className="landing-fade w-full md:w-fit flex gap-3 rounded-3xl border border-black/5 bg-gray p-2 shadow-[0_15px_40px_rgba(15,24,21,0.05)] transition-transform duration-300 hover:scale-[1.02]"
+                    style={{ animationDelay: `${200 + index * 120}ms` }}
                   >
                     {image ? (
                       <div className="relative w-full md:h-54 md:w-54 overflow-hidden rounded-2xl">
@@ -224,21 +280,21 @@ export default async function Home() {
 
       <section id="contact" className="bg-[#1B1F1E] py-16 text-white">
         <div className="container mx-auto grid gap-12 px-4 lg:grid-cols-2">
-          <div className="text-center lg:text-left">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70 sm:text-sm">Let's talk</p>
-            <h2 className="mt-3 text-2xl font-semibold sm:text-3xl">Ready to serve your guests?</h2>
-            <p className="mt-4 text-sm text-white/80 sm:text-base">
-              Tell us about your concept, audience, and challenges. We'll tailor a Smart Menu rollout that feels like a natural
-              extension of your brand.
+          <div className="landing-fade text-center lg:text-left" style={{ animationDelay: "200ms" }}>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70 sm:text-sm">
+              {contactCopy.eyebrow}
             </p>
+            <h2 className="mt-3 text-2xl font-semibold sm:text-3xl">{contactCopy.title}</h2>
+            <p className="mt-4 text-sm text-white/80 sm:text-base">{contactCopy.body}</p>
           </div>
           <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
-            {contacts.map((item) => {
+            {contactCards.map((item, index) => {
               const Icon = item.icon;
               return (
                 <div
-                  key={item.label}
-                  className="w-full rounded-2xl border border-white/15 bg-white/5 p-4 text-center sm:text-left transition hover:bg-white/10"
+                  key={item.key}
+                  className="landing-fade w-full rounded-2xl border border-white/15 bg-white/5 p-4 text-center sm:text-left transition hover:bg-white/10"
+                  style={{ animationDelay: `${200 + index * 100}ms` }}
                 >
                   <div className="flex flex-col items-center gap-2 sm:flex-row sm:items-center">
                     {Icon ? <Icon className="h-5 w-5 text-white" aria-hidden="true" /> : null}
