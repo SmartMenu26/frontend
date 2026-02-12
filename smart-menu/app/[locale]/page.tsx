@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Instagram, Mail, PhoneCall } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import InstallAppButton from "../_components/InstallAppButton";
 import AnchorHashCleanup from "../components/AnchorHashCleanup";
@@ -21,7 +22,14 @@ const BLOG_POSTS = [
   },
 ] as const;
 
-const CONTACT_ITEMS = [
+type ContactItem = {
+  key: "email" | "phone" | "instagram";
+  value: string;
+  href?: string;
+  icon: LucideIcon;
+};
+
+const CONTACT_ITEMS: ContactItem[] = [
   {
     key: "email",
     value: "restaurantsmart26@gmail.com",
@@ -40,9 +48,9 @@ const CONTACT_ITEMS = [
     href: "https://www.instagram.com/restaurantsmart26/",
     icon: Instagram,
   },
-] as const;
+];
 
-type ContactItem = (typeof CONTACT_ITEMS)[number];
+type ContactCard = ContactItem & { label: string };
 
 type RestaurantRecord = {
   _id?: string;
@@ -119,12 +127,10 @@ export default async function Home({ params }: Props) {
     title: t("contact.title"),
     body: t("contact.body"),
   };
-  const contactCards: Array<ContactItem & { label: string }> = CONTACT_ITEMS.map(
-    (item) => ({
-      ...item,
-      label: t(`contact.items.${item.key}.label`),
-    })
-  );
+  const contactCards: ContactCard[] = CONTACT_ITEMS.map((item) => ({
+    ...item,
+    label: t(`contact.items.${item.key}.label`),
+  }));
 
   return (
     <>
