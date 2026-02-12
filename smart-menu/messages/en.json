@@ -69,6 +69,29 @@
       "add": "Add to favorites",
       "remove": "Remove from favorites"
     },
-    "back": "Back"
+    "back": "Back",
+    "allergens": {
+      "fallback": "Allergen",
+      "gluten": {
+        "contains": "Contains gluten",
+        "free": "Gluten-free"
+      },
+      "dairy": {
+        "contains": "Contains dairy",
+        "free": "Dairy-free"
+      },
+      "egg": {
+        "free": "Egg-free"
+      },
+      "fish": {
+        "free": "Fish-free"
+      },
+      "peanut": {
+        "free": "Peanut-free"
+      },
+      "milk": {
+        "contains": "Contains milk"
+      }
+    }
   }
 }

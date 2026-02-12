@@ -43,6 +43,7 @@ export default function MenuItemDetails({
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("menuItemDetails");
+  const tAllergens = useTranslations("menuItemDetails.allergens");
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const handleBack = useCallback(() => router.back(), [router]);
 
@@ -138,7 +139,11 @@ export default function MenuItemDetails({
               <div className="mt-3 flex flex-wrap gap-3">
                 {visibleAllergens.map((a) => {
                   const iconEntry = getAllergenIconEntry(a.code);
-                  const tooltipText = resolveTooltipLabel(a.label, iconEntry);
+                  const tooltipText = resolveTooltipLabel(
+                    a.label,
+                    iconEntry,
+                    (key) => tAllergens(key)
+                  );
                   const tooltipId = `allergen-tooltip-${a.key}`;
                   const isActive = activeTooltip === a.key;
 

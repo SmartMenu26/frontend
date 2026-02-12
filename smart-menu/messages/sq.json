@@ -69,6 +69,29 @@
       "add": "Shto tek të preferuarat",
       "remove": "Hiq nga të preferuarat"
     },
-    "back": "Kthehu"
+    "back": "Kthehu",
+    "allergens": {
+      "fallback": "Alergjen",
+      "gluten": {
+        "contains": "Përmban gluten",
+        "free": "Pa gluten"
+      },
+      "dairy": {
+        "contains": "Përmban produkte bulmeti",
+        "free": "Pa produkte bulmeti"
+      },
+      "egg": {
+        "free": "Pa vezë"
+      },
+      "fish": {
+        "free": "Pa peshk"
+      },
+      "peanut": {
+        "free": "Pa kikirikë"
+      },
+      "milk": {
+        "contains": "Përmban qumësht"
+      }
+    }
   }
 }

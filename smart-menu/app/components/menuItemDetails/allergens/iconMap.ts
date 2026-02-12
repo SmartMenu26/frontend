@@ -33,22 +33,51 @@ import {
 export type AllergenIconEntry = {
   icon: LucideIcon;
   defaultTooltip?: string;
+  defaultTooltipKey?: string;
 };
 
 const ALLERGEN_ICON_MAP: Record<string, AllergenIconEntry> = {
-  gluten: { icon: Wheat, defaultTooltip: "Содржи глутен" },
-  "gluten-free": { icon: WheatOff, defaultTooltip: "Без глутен" },
+  gluten: {
+    icon: Wheat,
+    defaultTooltip: "Содржи глутен",
+    defaultTooltipKey: "gluten.contains",
+  },
+  "gluten-free": {
+    icon: WheatOff,
+    defaultTooltip: "Без глутен",
+    defaultTooltipKey: "gluten.free",
+  },
   wheat: { icon: Wheat },
-  dairy: { icon: Milk, defaultTooltip: "Содржи млечни производи" },
-  "dairy-free": { icon: MilkOff, defaultTooltip: "Без млечни производи" },
-  milk: { icon: Milk },
+  dairy: {
+    icon: Milk,
+    defaultTooltip: "Содржи млечни производи",
+    defaultTooltipKey: "dairy.contains",
+  },
+  "dairy-free": {
+    icon: MilkOff,
+    defaultTooltip: "Без млечни производи",
+    defaultTooltipKey: "dairy.free",
+  },
+  milk: {
+    icon: Milk,
+    defaultTooltip: "Содржи млеко",
+    defaultTooltipKey: "milk.contains",
+  },
   lactose: { icon: Milk },
   "lactose-free": { icon: MilkOff },
   egg: { icon: Egg },
   eggs: { icon: Egg },
-  "egg-free": { icon: EggOff, defaultTooltip: "Без јајца" },
+  "egg-free": {
+    icon: EggOff,
+    defaultTooltip: "Без јајца",
+    defaultTooltipKey: "egg.free",
+  },
   fish: { icon: Fish },
-  "fish-free": { icon: FishOff, defaultTooltip: "Без риба" },
+  "fish-free": {
+    icon: FishOff,
+    defaultTooltip: "Без риба",
+    defaultTooltipKey: "fish.free",
+  },
   seafood: { icon: Fish },
   shellfish: { icon: Shrimp },
   crustacean: { icon: Shrimp },
@@ -61,7 +90,11 @@ const ALLERGEN_ICON_MAP: Record<string, AllergenIconEntry> = {
   seed: { icon: Sprout },
   peanut: { icon: Nut },
   peanuts: { icon: Nut },
-  "peanut-free": { icon: NutOff, defaultTooltip: "Без кикирики" },
+  "peanut-free": {
+    icon: NutOff,
+    defaultTooltip: "Без кикирики",
+    defaultTooltipKey: "peanut.free",
+  },
   nuts: { icon: Nut },
   "tree-nuts": { icon: Nut },
   nut: { icon: Nut },
@@ -145,12 +178,37 @@ export const getAllergenIconEntry = (
   return undefined;
 };
 
+type TranslateFn = (key: string) => string;
+
+const translateSafely = (translate?: TranslateFn, key?: string) => {
+  if (!translate || !key) return undefined;
+  try {
+    const result = translate(key);
+    const trimmed = typeof result === "string" ? result.trim() : undefined;
+    return trimmed || undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 export const resolveTooltipLabel = (
   label?: string,
-  entry?: AllergenIconEntry
+  entry?: AllergenIconEntry,
+  translate?: TranslateFn
 ): string => {
-  if (label && label.trim() && label.trim().toLowerCase() !== "алерген") {
-    return label.trim();
+  const translated = translateSafely(translate, entry?.defaultTooltipKey);
+  if (translated) {
+    return translated;
   }
-  return entry?.defaultTooltip ?? label ?? "Алерген";
+
+  const trimmedLabel = label?.trim();
+  if (trimmedLabel && trimmedLabel.toLowerCase() !== "алерген") {
+    return trimmedLabel;
+  }
+
+  if (entry?.defaultTooltip) {
+    return entry.defaultTooltip;
+  }
+
+  return translateSafely(translate, "fallback") ?? label ?? "Алерген";
 };
