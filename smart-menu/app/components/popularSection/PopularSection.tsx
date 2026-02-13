@@ -131,7 +131,14 @@ export default function PopularSection({
                       title={it.title}
                       imageUrl={it.imageUrl}
                       priceLabel={`${it.price}ден`}
-                      onClick={() => router.push(`/restaurant/${restaurantId}/menuItem/${it.id}`)}
+                      kind={mealType}
+                      onClick={() => {
+                        const detailParams = new URLSearchParams();
+                        detailParams.set("kind", mealType);
+                        router.push(
+                          `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`
+                        );
+                      }}
                       variant="popular"
                       className="shrink-0"
                     />

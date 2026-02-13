@@ -8,7 +8,7 @@ import MealTypeToggle from "../mealTypeToggle/MealTypeToggle";
 import type { MealKind, Category } from "@/app/data/dummyMenuCategories";
 import { SkeletonCard } from "../skeletons/cardSkeleton";
 import { CategorySkeleton } from "../skeletons/categorySkeleton";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
 
@@ -29,6 +29,9 @@ type Props = {
 
 export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }: Props) {
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const searchParamsString = searchParams.toString();
     const locale = useLocale() as Locale;
 
     const [categories, setCategories] = useState<Category[]>([]);
@@ -40,8 +43,14 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
     const [loadingCategories, setLoadingCategories] = useState(true);
     const [loadingItems, setLoadingItems] = useState(false);
 
+    const selectionStorageKey = useMemo(
+        () => `menu-browser:${restaurantId}:${mealType}`,
+        [restaurantId, mealType]
+    );
+
     const categoryContainerRef = useRef<HTMLDivElement | null>(null);
     const categoryRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+    const initialSelectionAppliedRef = useRef(false);
     const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
     const selectedCategory = useMemo(
@@ -89,6 +98,12 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
     );
 
     useEffect(() => {
+        initialSelectionAppliedRef.current = false;
+        setSelectedCategoryId("");
+        setSelectedSubcategoryId("all");
+    }, [restaurantId, mealType]);
+
+    useEffect(() => {
         if (!restaurantId) return;
 
         let cancelled = false;
@@ -114,8 +129,6 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                 const mapped = mapCategories(data);
                 setRawCategories(data);
                 setCategories(mapped);
-                setSelectedCategoryId(mapped[0]?.id ?? "");
-                setSelectedSubcategoryId("all");
             } catch (err) {
                 console.error("Failed to load categories:", err);
 
@@ -141,10 +154,84 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         if (!rawCategories.length) return;
         const mapped = mapCategories(rawCategories);
         setCategories(mapped);
-        setSelectedCategoryId((prev) =>
-            prev && mapped.some((cat) => cat.id === prev) ? prev : mapped[0]?.id ?? ""
-        );
+
+        if (!initialSelectionAppliedRef.current) {
+            return;
+        }
+
+        setSelectedCategoryId((prevCategoryId) => {
+            const hasPrev = prevCategoryId && mapped.some((cat) => cat.id === prevCategoryId);
+            const fallbackCategoryId = mapped[0]?.id ?? "";
+            const nextCategoryId = hasPrev ? prevCategoryId : fallbackCategoryId;
+
+            setSelectedSubcategoryId((prevSubcategoryId) => {
+                if (!hasPrev || nextCategoryId !== prevCategoryId) {
+                    return "all";
+                }
+                if (prevSubcategoryId === "all") {
+                    return prevSubcategoryId;
+                }
+                const nextCategory = mapped.find((cat) => cat.id === nextCategoryId);
+                const subExists = nextCategory?.subcategories.some(
+                    (sub) => sub.id === prevSubcategoryId
+                );
+                return subExists ? prevSubcategoryId : "all";
+            });
+
+            return nextCategoryId;
+        });
     }, [rawCategories, mapCategories]);
+
+    useEffect(() => {
+        if (!categories.length || initialSelectionAppliedRef.current) return;
+
+        const params = new URLSearchParams(searchParamsString);
+        let candidateCategoryId = params.get("categoryId");
+        let candidateSubcategoryId = params.get("subcategoryId");
+
+        if (typeof window !== "undefined" && (!candidateCategoryId || !candidateSubcategoryId)) {
+            try {
+                const storedRaw = window.sessionStorage.getItem(selectionStorageKey);
+                if (storedRaw) {
+                    const stored = JSON.parse(storedRaw) as {
+                        categoryId?: string;
+                        subcategoryId?: string;
+                    };
+                    if (!candidateCategoryId && stored?.categoryId) {
+                        candidateCategoryId = stored.categoryId;
+                    }
+                    if (!candidateSubcategoryId && stored?.subcategoryId) {
+                        candidateSubcategoryId = stored.subcategoryId;
+                    }
+                }
+            } catch {
+                // ignore storage errors
+            }
+        }
+
+        const fallbackCategoryId =
+            candidateCategoryId && categories.some((cat) => cat.id === candidateCategoryId)
+                ? candidateCategoryId
+                : categories[0]?.id ?? "";
+
+        const nextCategoryId = fallbackCategoryId;
+        setSelectedCategoryId(nextCategoryId);
+
+        let nextSubcategoryId = "all";
+        if (
+            nextCategoryId &&
+            candidateSubcategoryId &&
+            candidateSubcategoryId !== "all"
+        ) {
+            const category = categories.find((cat) => cat.id === nextCategoryId);
+            if (category?.subcategories.some((sub) => sub.id === candidateSubcategoryId)) {
+                nextSubcategoryId = candidateSubcategoryId;
+            }
+        }
+        setSelectedSubcategoryId(nextSubcategoryId);
+
+        initialSelectionAppliedRef.current = true;
+    }, [categories, searchParamsString, selectionStorageKey]);
 
     const allChipLabel = useMemo(
         () =>
@@ -177,10 +264,14 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         ];
     }, [selectedCategory, allChipLabel]);
 
-    // Reset subcategory when category changes
-    useEffect(() => {
-        setSelectedSubcategoryId("all");
-    }, [selectedCategoryId]);
+    const handleCategorySelect = useCallback(
+        (categoryId: string) => {
+            if (categoryId === selectedCategoryId) return;
+            setSelectedCategoryId(categoryId);
+            setSelectedSubcategoryId("all");
+        },
+        [selectedCategoryId]
+    );
 
     // keep active category centered in scroll container
     useEffect(() => {
@@ -254,6 +345,44 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         };
     }, [restaurantId, selectedCategoryId, selectedSubcategoryId, mealType, resolveLocalizedLabel]);
 
+    useEffect(() => {
+        if (!initialSelectionAppliedRef.current) return;
+
+        const params = new URLSearchParams(searchParamsString);
+        if (selectedCategoryId) {
+            params.set("categoryId", selectedCategoryId);
+        } else {
+            params.delete("categoryId");
+        }
+
+        if (selectedSubcategoryId && selectedSubcategoryId !== "all") {
+            params.set("subcategoryId", selectedSubcategoryId);
+        } else {
+            params.delete("subcategoryId");
+        }
+
+        const nextSearch = params.toString();
+        if (nextSearch === searchParamsString) return;
+
+        const nextUrl = nextSearch ? `${pathname}?${nextSearch}` : pathname;
+        router.replace(nextUrl, { scroll: false });
+    }, [selectedCategoryId, selectedSubcategoryId, pathname, router, searchParamsString]);
+
+    useEffect(() => {
+        if (!initialSelectionAppliedRef.current) return;
+        if (typeof window === "undefined") return;
+
+        try {
+            const payload = JSON.stringify({
+                categoryId: selectedCategoryId,
+                subcategoryId: selectedSubcategoryId,
+            });
+            window.sessionStorage.setItem(selectionStorageKey, payload);
+        } catch {
+            // ignore storage errors
+        }
+    }, [selectedCategoryId, selectedSubcategoryId, selectionStorageKey]);
+
 
 
     return (
@@ -275,9 +404,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                                 key={cat.id}
                                 label={cat.label}
                                 active={cat.id === selectedCategoryId}
-                                onClick={() => {
-                                    setSelectedCategoryId(cat.id);
-                                }}
+                                onClick={() => handleCategorySelect(cat.id)}
                                 className="shrink-0"
                                 ref={(el) => {
                                     categoryRefs.current[cat.id] = el;
@@ -331,8 +458,14 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                                     title={it.title}
                                     imageUrl={it.imageUrl}
                                     priceLabel={`${it.price}ден`}
-                                    kind={it.kind}
-                                    onClick={() => router.push(`/restaurant/${restaurantId}/menuItem/${it.id}`)}
+                                    kind={it.kind ?? mealType}
+                                    onClick={() => {
+                                        const detailParams = new URLSearchParams();
+                                        detailParams.set("kind", mealType);
+                                        router.push(
+                                            `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`
+                                        );
+                                    }}
                                     className="shrink-0"
                                     index={index}
                                 />
