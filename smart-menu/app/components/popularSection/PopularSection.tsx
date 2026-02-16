@@ -8,6 +8,7 @@ import { PopularSkeletonCard } from "../skeletons/popularItemsSkeleton";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
+import { buildLocalizedPath } from "@/lib/routing";
 
 type MenuItem = {
   id: string;
@@ -135,9 +136,11 @@ export default function PopularSection({
                       onClick={() => {
                         const detailParams = new URLSearchParams();
                         detailParams.set("kind", mealType);
-                        router.push(
-                          `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`
+                        const detailHref = buildLocalizedPath(
+                          `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`,
+                          locale
                         );
+                        router.push(detailHref);
                       }}
                       variant="popular"
                       className="shrink-0"

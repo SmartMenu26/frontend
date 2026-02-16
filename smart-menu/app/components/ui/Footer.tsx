@@ -3,10 +3,14 @@
 import type { SVGProps } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { type Locale } from "@/i18n";
+import { buildLocalizedPath } from "@/lib/routing";
 
 export default function Footer() {
   const t = useTranslations("footer");
+  const locale = useLocale() as Locale;
+  const homeHref = buildLocalizedPath("/", locale);
 
   return (
     <footer className="mt-1 border-t border-black/5 bg-[#F7F7F7] backdrop-blur">
@@ -20,7 +24,7 @@ export default function Footer() {
             className="h-10 w-10"
           />
           <div className="flex gap-4">
-            <Link href="/" className="hover:text-[#074128]">
+            <Link href={homeHref} className="hover:text-[#074128]">
               {t("home")}
             </Link>
             <a

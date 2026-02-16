@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
@@ -13,6 +13,7 @@ import assistantThinking from "@/public/images/ai-assistant-cook-thinking.png";
 import menuItemPlaceholder from "@/public/images/menu-item-placeholder.png";
 import noCreditsImage from "@/public/images/no-credits.png";
 import { type Locale } from "@/i18n";
+import { buildLocalizedPath } from "@/lib/routing";
 
 type Suggestion = {
   id: string;
@@ -88,6 +89,10 @@ export default function AiAssistantContent({
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const [resultLocale, setResultLocale] = useState<Locale | null>(null);
+  const restaurantHomeHref = useMemo(
+    () => buildLocalizedPath(`/restaurant/${restaurantId}`, locale),
+    [locale, restaurantId]
+  );
 
   const handleResult = useCallback((payload?: AiAssistantResponse) => {
     const dataBlock = payload?.data;
@@ -123,7 +128,7 @@ export default function AiAssistantContent({
       <div className="mx-auto flex w-full max-w-md flex-col px-6">
         <header className="h-[10vh] flex items-center justify-between">
           <Link
-            href={`/restaurant/${restaurantId}`}
+            href={restaurantHomeHref}
             aria-label="Назад кон ресторанот"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1E1F24] shadow-md transition hover:bg-[#f1f1f1]"
           >
@@ -209,14 +214,17 @@ export default function AiAssistantContent({
                       ) ??
                       title;
 
+                    const href = id
+                      ? buildLocalizedPath(
+                          `/restaurant/${restaurantId}/menuItem/${id}`,
+                          locale
+                        )
+                      : restaurantHomeHref;
+
                     return (
                       <Link
                         key={id + title}
-                        href={
-                          id
-                            ? `/restaurant/${restaurantId}/menuItem/${id}`
-                            : `/restaurant/${restaurantId}`
-                        }
+                        href={href}
                         className="flex items-center gap-3 rounded-[22px] border border-[#ECEFF5] bg-white px-3 py-3 text-[#1E1F24] shadow-sm transition hover:border-[#C2CADB]"
                       >
                         <Image
@@ -288,7 +296,7 @@ export default function AiAssistantContent({
               AI асистентот моментално не е достапен
             </p>
             <Link
-              href={`/restaurant/${restaurantId}`}
+              href={restaurantHomeHref}
               aria-label="Назад кон ресторанот"
               className="inline-flex items-center justify-center text-[#1E1F24] underline"
             >

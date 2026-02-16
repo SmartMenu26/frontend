@@ -11,6 +11,8 @@ import {
 import Image from "next/image";
 import menuItemPlaceholder from "@/public/images/menu-item-placeholder.png";
 import { useLocale, useTranslations } from "next-intl";
+import { type Locale } from "@/i18n";
+import { buildLocalizedPath } from "@/lib/routing";
 
 type Allergen = {
   key: string;
@@ -41,7 +43,7 @@ export default function MenuItemDetails({
   price,
 }: Props) {
   const router = useRouter();
-  const locale = useLocale();
+  const locale = useLocale() as Locale;
   const t = useTranslations("menuItemDetails");
   const tAllergens = useTranslations("menuItemDetails.allergens");
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
@@ -215,7 +217,11 @@ export default function MenuItemDetails({
               onClick={() => {
                 if (!restaurantId) return;
                 const params = new URLSearchParams({ prompt: assistantPrompt });
-                router.push(`/restaurant/${restaurantId}/ai-assistant?${params.toString()}`);
+                const assistantHref = buildLocalizedPath(
+                  `/restaurant/${restaurantId}/ai-assistant?${params.toString()}`,
+                  locale
+                );
+                router.push(assistantHref);
               }}
             >
               {assistantButtonLabel}

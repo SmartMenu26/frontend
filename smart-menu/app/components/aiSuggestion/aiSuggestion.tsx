@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import ChipsRow, { ChipItem } from "../ui/ChipsRow";
 import { Star, ChefHat, Drumstick, Leaf, Dice5, Flame } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { type Locale } from "@/i18n";
+import { buildLocalizedPath } from "@/lib/routing";
 
 type AiSuggestionProps = {
   className?: string;
@@ -17,6 +19,7 @@ export default function AiSuggestion({
   assistantName,
 }: AiSuggestionProps) {
   const router = useRouter();
+  const locale = useLocale() as Locale;
   const t = useTranslations("aiSuggestion");
 
   const assistantLabel = assistantName?.trim()
@@ -65,13 +68,14 @@ export default function AiSuggestion({
     const base = restaurantId
       ? `/restaurant/${restaurantId}/ai-assistant`
       : "/ai-assistant";
+    const localizedBase = buildLocalizedPath(base, locale);
 
     const chip = chips.find((c) => c.id === chipId);
     const prompt = chip && chip.id !== "ask-bakal" ? chip.label : undefined;
     const target =
       prompt?.trim() && chip?.id !== "ask-bakal"
-        ? `${base}?prompt=${encodeURIComponent(prompt.trim())}`
-        : base;
+        ? `${localizedBase}?prompt=${encodeURIComponent(prompt.trim())}`
+        : localizedBase;
 
     router.push(target);
   };

@@ -11,6 +11,7 @@ import { CategorySkeleton } from "../skeletons/categorySkeleton";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
+import { buildLocalizedPath } from "@/lib/routing";
 
 type MenuItem = {
     id: string;
@@ -462,9 +463,11 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                                     onClick={() => {
                                         const detailParams = new URLSearchParams();
                                         detailParams.set("kind", mealType);
-                                        router.push(
-                                            `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`
+                                        const detailHref = buildLocalizedPath(
+                                            `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`,
+                                            locale
                                         );
+                                        router.push(detailHref);
                                     }}
                                     className="shrink-0"
                                     index={index}

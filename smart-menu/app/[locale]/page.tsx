@@ -8,6 +8,7 @@ import AnchorHashCleanup from "../components/AnchorHashCleanup";
 import LanguageSwitcher from "../components/languageSwitcher/LanguageSwitcher";
 import RestaurantHeader from "../components/ui/RestaurantHeader";
 import type { Locale } from "@/i18n";
+import { buildLocalizedPath } from "@/lib/routing";
 
 const HIGHLIGHT_KEYS = ["aiConcierge", "instantMenu", "insights"] as const;
 
@@ -114,6 +115,7 @@ export default async function Home({ params }: Props) {
   };
   const blogPosts = BLOG_POSTS.map((post) => ({
     ...post,
+    href: buildLocalizedPath(post.href, locale),
     title: t(`blog.posts.${post.key}.title`),
     excerpt: t(`blog.posts.${post.key}.excerpt`),
   }));
@@ -131,6 +133,11 @@ export default async function Home({ params }: Props) {
     ...item,
     label: t(`contact.items.${item.key}.label`),
   }));
+
+  const demoRestaurantHref = buildLocalizedPath(
+    "/restaurant/6957e610dfe0f2ca815211f8",
+    locale
+  );
 
   return (
     <>
@@ -151,7 +158,7 @@ export default async function Home({ params }: Props) {
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
-                href="/restaurant/6957e610dfe0f2ca815211f8"
+                href={demoRestaurantHref}
                 className="inline-flex items-center justify-center rounded-full bg-[#1B1F1E] px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-[#2C3330]"
               >
                 {hero.primaryCta}
