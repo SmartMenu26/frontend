@@ -88,9 +88,9 @@ export default function AiSuggestion({
           <span className="uppercase text-[#4D4747]">{t("subtitle")}</span>
         </div>
 
-        <h2 className="text-lg font-normal text-(--color-primary)">
+        {/* <h2 className="text-lg font-normal text-(--color-primary)">
           {t("title")}
-        </h2>
+        </h2> */}
 
         <ChipsRow items={chips} onChipClick={handleChipClick} />
       </div>

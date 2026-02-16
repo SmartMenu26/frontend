@@ -50,17 +50,17 @@ export default function Card({
   const sizeClasses =
     variant === "popular"
       ? "h-[120px] w-[120px]"
-      : "h-[140px] w-[140px]";
+      : "h-[200px] w-[200px]";
 
   const imageClasses =
     variant === "popular"
       ? "-top-5 h-[90px] w-[90px]"
-      : "-top-4 h-[105px] w-[105px]";
+      : "-top-4 h-[155px] w-[155px]";
 
 const titleClasses =
   variant === "popular"
     ? "mt-2 text-sm font-regular line-clamp-2"
-    : "mt-[26px] text-[14px] font-regular line-clamp-2";
+    : "mt-[48px] text-[17px] font-regular line-clamp-2";
 
   return (
     <button
@@ -75,8 +75,8 @@ const titleClasses =
       {/* CARD */}
       <div
         className={[
-          "flex items-center justify-center relative rounded-[21px]",
-          "pt-20 pb-6 px-4 overflow-visible",
+          "flex items-end justify-center relative rounded-[21px]",
+          "pt-20 pb-2 px-4 overflow-visible",
           sizeClasses,
           bg,
 
@@ -110,7 +110,7 @@ const titleClasses =
         {/* TITLE */}
         <h3
           className={[
-            "text-white leading-tight text-center",
+            "text-white leading-tight text-center min-h-[32px]",
             titleClasses,
           ].join(" ")}
         >

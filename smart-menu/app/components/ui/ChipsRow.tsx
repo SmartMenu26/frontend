@@ -53,12 +53,12 @@ const ChipsRow = forwardRef<HTMLDivElement, ChipsRowProps>(
           const isActive = item.id === activeId;
 
           const base =
-            "inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold " +
+            "inline-flex items-center gap-2 rounded-full px-4 py-0.5 text-[15px] font-regular " +
             "transition" +
             "shrink-0 snap-start";
 
           const outline =
-            "bg-white text-slate-900 border border-[#0D3B66] hover:bg-slate-50";
+            "bg-white text-slate-900 border border-[#0D3B66]/10 hover:bg-slate-50";
 
           const solid =
             item.colorClassName ?? "bg-slate-900 text-white hover:opacity-90";
@@ -88,7 +88,7 @@ const ChipsRow = forwardRef<HTMLDivElement, ChipsRowProps>(
               {item.icon && (
                 <span className="text-base leading-none">{item.icon}</span>
               )}
-              <span className="uppercase tracking-wide">{item.label}</span>
+              <span className=" tracking-wide">{item.label}</span>
             </button>
           );
         })}
