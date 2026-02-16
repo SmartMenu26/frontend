@@ -33,7 +33,9 @@
     },
     "loading": {
       "caption": "Куварот размислува"
-    }
+    },
+    "noCreditsTitle": "AI асистентот моментално не е достапен",
+    "backToMenu": "Назад кон менито"
   }
   ,
   "aiAssistantSuggestions": {

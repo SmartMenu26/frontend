@@ -93,6 +93,8 @@ export default function AiAssistantContent({
     () => buildLocalizedPath(`/restaurant/${restaurantId}`, locale),
     [locale, restaurantId]
   );
+  const noCreditsTitle = t("noCreditsTitle");
+  const backToMenuLabel = t("backToMenu");
 
   const handleResult = useCallback((payload?: AiAssistantResponse) => {
     const dataBlock = payload?.data;
@@ -129,7 +131,7 @@ export default function AiAssistantContent({
         <header className="h-[10vh] flex items-center justify-between">
           <Link
             href={restaurantHomeHref}
-            aria-label="Назад кон ресторанот"
+            aria-label={backToMenuLabel}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1E1F24] shadow-md transition hover:bg-[#f1f1f1]"
           >
             <svg
@@ -293,11 +295,11 @@ export default function AiAssistantContent({
               className="h-[50vh] max-w-full select-none object-cover"
             />
             <p className="text-lg font-medium text-[#1E1F24]">
-              AI асистентот моментално не е достапен
+              {noCreditsTitle}
             </p>
             <Link
               href={restaurantHomeHref}
-              aria-label="Назад кон ресторанот"
+              aria-label={backToMenuLabel}
               className="inline-flex items-center justify-center text-[#1E1F24] underline"
             >
               <svg
@@ -311,7 +313,7 @@ export default function AiAssistantContent({
               >
                 <polyline points="15 18 9 12 15 6" />
               </svg>
-              Назад кон менито
+              {backToMenuLabel}
             </Link>
           </div>
         )}
