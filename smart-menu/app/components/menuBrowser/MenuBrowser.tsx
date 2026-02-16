@@ -12,6 +12,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type MenuItem = {
     id: string;
@@ -52,6 +53,9 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
     const categoryContainerRef = useRef<HTMLDivElement | null>(null);
     const categoryRefs = useRef<Record<string, HTMLButtonElement | null>>({});
     const initialSelectionAppliedRef = useRef(false);
+    const cardsContainerRef = useRef<HTMLDivElement | null>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
     const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
     const selectedCategory = useMemo(
@@ -287,6 +291,35 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         });
     }, [selectedCategoryId]);
 
+    const updateCardScrollState = useCallback(() => {
+        const container = cardsContainerRef.current;
+        if (!container) return;
+        const { scrollLeft, scrollWidth, clientWidth } = container;
+        setCanScrollLeft(scrollLeft > 8);
+        setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 8);
+    }, []);
+
+    const scrollCards = useCallback((direction: "left" | "right") => {
+        const container = cardsContainerRef.current;
+        if (!container) return;
+        const delta = container.clientWidth * 0.8 * (direction === "left" ? -1 : 1);
+        container.scrollBy({ left: delta, behavior: "smooth" });
+    }, []);
+
+    useEffect(() => {
+        const container = cardsContainerRef.current;
+        if (!container) return;
+
+        updateCardScrollState();
+        const handleScroll = () => updateCardScrollState();
+        container.addEventListener("scroll", handleScroll);
+        window.addEventListener("resize", handleScroll);
+        return () => {
+            container.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("resize", handleScroll);
+        };
+    }, [updateCardScrollState, items.length, loadingItems, loadingCategories]);
+
     useEffect(() => {
         if (!selectedCategoryId) return;
 
@@ -439,40 +472,77 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                 )}
 
                 {/* CARDS */}
-                <div
-                    className="
-            overflow-x-auto overflow-y-visible
-            scroll-smooth
-            [-webkit-overflow-scrolling:touch]
-            [&::-webkit-scrollbar]:hidden mt-4
-          "
-                >
-                    {/* INNER STRIP */}
-                    <div className="flex gap-6 pb-4 pt-12 overflow-visible min-h-45">
-                        {(loadingItems || loadingCategories)
-                            ? Array.from({ length: 6 }).map((_, idx) => (
-                                <SkeletonCard key={idx} />
-                            ))
-                            : items.map((it, index) => (
-                                <Card
-                                    key={it.id}
-                                    title={it.title}
-                                    imageUrl={it.imageUrl}
-                                    priceLabel={`${it.price}ден`}
-                                    kind={it.kind ?? mealType}
-                                    onClick={() => {
-                                        const detailParams = new URLSearchParams();
-                                        detailParams.set("kind", mealType);
-                                        const detailHref = buildLocalizedPath(
-                                            `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`,
-                                            locale
-                                        );
-                                        router.push(detailHref);
-                                    }}
-                                    className="shrink-0"
-                                    index={index}
-                                />
-                            ))}
+                <div className="relative mt-4">
+                    <div
+                        ref={cardsContainerRef}
+                        className="
+                overflow-x-auto overflow-y-visible
+                scroll-smooth
+                [-webkit-overflow-scrolling:touch]
+                [&::-webkit-scrollbar]:hidden
+              "
+                    >
+                        {/* INNER STRIP */}
+                        <div className="flex gap-6 pb-4 pt-12 overflow-visible min-h-45">
+                            {(loadingItems || loadingCategories)
+                                ? Array.from({ length: 6 }).map((_, idx) => (
+                                    <SkeletonCard key={idx} />
+                                ))
+                                : items.map((it, index) => (
+                                    <Card
+                                        key={it.id}
+                                        title={it.title}
+                                        imageUrl={it.imageUrl}
+                                        priceLabel={`${it.price}ден`}
+                                        kind={it.kind ?? mealType}
+                                        onClick={() => {
+                                            const detailParams = new URLSearchParams();
+                                            detailParams.set("kind", mealType);
+                                            const detailHref = buildLocalizedPath(
+                                                `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`,
+                                                locale
+                                            );
+                                            router.push(detailHref);
+                                        }}
+                                        className="shrink-0"
+                                        index={index}
+                                    />
+                                ))}
+                        </div>
+                    </div>
+
+                    <div
+                        className={[
+                            "pointer-events-none absolute inset-y-0 left-0 hidden md:flex items-center",
+                            canScrollLeft ? "opacity-100" : "opacity-0",
+                        ].join(" ")}
+                    >
+                        <button
+                            type="button"
+                            aria-label="Scroll left"
+                            onClick={() => scrollCards("left")}
+                            className="cursor-pointer pointer-events-auto h-10 w-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center transition"
+                            disabled={!canScrollLeft}
+                        >
+                            <ChevronLeft className="h-5 w-5 text-[#2F3A37]" />
+                        </button>
+                    </div>
+
+                    <div
+                        className={[
+                            "pointer-events-none absolute inset-y-0 right-0 hidden md:flex items-center justify-end",
+                            canScrollRight ? "opacity-100" : "opacity-0",
+                        ].join(" ")}
+                    >
+                        <button
+                            type="button"
+                            aria-label="Scroll right"
+                            onClick={() => scrollCards("right")}
+                            className="cursor-pointer pointer-events-auto h-10 w-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center transition"
+                            disabled={!canScrollRight}
+                        >
+                            <ChevronRight className="h-5 w-5 text-[#2F3A37]" />
+                        </button>
                     </div>
                 </div>
             </div>
