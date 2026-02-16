@@ -28,6 +28,7 @@ import {
   Vegan,
   Wheat,
   WheatOff,
+  Wine,
 } from "lucide-react";
 
 export type AllergenIconEntry = {
@@ -47,7 +48,10 @@ const ALLERGEN_ICON_MAP: Record<string, AllergenIconEntry> = {
     defaultTooltip: "Без глутен",
     defaultTooltipKey: "gluten.free",
   },
-  wheat: { icon: Wheat },
+  wheat: {
+    icon: Wheat,
+    defaultTooltipKey: "gluten.contains",
+  },
   dairy: {
     icon: Milk,
     defaultTooltip: "Содржи млечни производи",
@@ -63,46 +67,122 @@ const ALLERGEN_ICON_MAP: Record<string, AllergenIconEntry> = {
     defaultTooltip: "Содржи млеко",
     defaultTooltipKey: "milk.contains",
   },
-  lactose: { icon: Milk },
-  "lactose-free": { icon: MilkOff },
-  egg: { icon: Egg },
-  eggs: { icon: Egg },
+  lactose: {
+    icon: Milk,
+    defaultTooltipKey: "dairy.contains",
+  },
+  "lactose-free": { icon: MilkOff, defaultTooltipKey: "dairy.free" },
+  egg: {
+    icon: Egg,
+    defaultTooltipKey: "egg.contains",
+  },
+  eggs: {
+    icon: Egg,
+    defaultTooltipKey: "egg.contains",
+  },
   "egg-free": {
     icon: EggOff,
     defaultTooltip: "Без јајца",
     defaultTooltipKey: "egg.free",
   },
-  fish: { icon: Fish },
+  fish: {
+    icon: Fish,
+    defaultTooltipKey: "fish.contains",
+  },
   "fish-free": {
     icon: FishOff,
     defaultTooltip: "Без риба",
     defaultTooltipKey: "fish.free",
   },
-  seafood: { icon: Fish },
-  shellfish: { icon: Shrimp },
-  crustacean: { icon: Shrimp },
-  shrimp: { icon: Shrimp },
-  mollusc: { icon: Shell },
-  soy: { icon: Bean },
-  legume: { icon: Bean },
-  beans: { icon: Bean },
-  sesame: { icon: Sprout },
-  seed: { icon: Sprout },
-  peanut: { icon: Nut },
-  peanuts: { icon: Nut },
+  seafood: {
+    icon: Fish,
+    defaultTooltipKey: "fish.contains",
+  },
+  shellfish: {
+    icon: Shrimp,
+    defaultTooltipKey: "shellfish.contains",
+  },
+  crustacean: {
+    icon: Shrimp,
+    defaultTooltipKey: "shellfish.contains",
+  },
+  shrimp: {
+    icon: Shrimp,
+    defaultTooltipKey: "shellfish.contains",
+  },
+  mollusc: {
+    icon: Shell,
+    defaultTooltipKey: "mollusc.contains",
+  },
+  soy: {
+    icon: Bean,
+    defaultTooltipKey: "soy.contains",
+  },
+  legume: {
+    icon: Bean,
+    defaultTooltipKey: "soy.contains",
+  },
+  beans: {
+    icon: Bean,
+    defaultTooltipKey: "soy.contains",
+  },
+  sesame: {
+    icon: Sprout,
+    defaultTooltipKey: "sesame.contains",
+  },
+  seed: {
+    icon: Sprout,
+    defaultTooltipKey: "sesame.contains",
+  },
+  peanut: {
+    icon: Nut,
+    defaultTooltipKey: "peanut.contains",
+  },
+  peanuts: {
+    icon: Nut,
+    defaultTooltipKey: "peanut.contains",
+  },
   "peanut-free": {
     icon: NutOff,
     defaultTooltip: "Без кикирики",
     defaultTooltipKey: "peanut.free",
   },
-  nuts: { icon: Nut },
-  "tree-nuts": { icon: Nut },
-  nut: { icon: Nut },
-  almond: { icon: Nut },
-  hazelnut: { icon: Nut },
-  pistachio: { icon: Nut },
-  cashew: { icon: Nut },
-  walnut: { icon: Nut },
+  nuts: {
+    icon: Nut,
+    defaultTooltipKey: "nuts.contains",
+  },
+  "tree-nuts": {
+    icon: Nut,
+    defaultTooltipKey: "nuts.contains",
+  },
+  nut: {
+    icon: Nut,
+    defaultTooltipKey: "nuts.contains",
+  },
+  almond: {
+    icon: Nut,
+    defaultTooltipKey: "nuts.contains",
+  },
+  hazelnut: {
+    icon: Nut,
+    defaultTooltipKey: "nuts.contains",
+  },
+  pistachio: {
+    icon: Nut,
+    defaultTooltipKey: "nuts.contains",
+  },
+  cashew: {
+    icon: Nut,
+    defaultTooltipKey: "nuts.contains",
+  },
+  walnut: {
+    icon: Nut,
+    defaultTooltipKey: "nuts.contains",
+  },
+  mustard: {
+    icon: Wine,
+    defaultTooltipKey: "mustard.contains",
+  },
   beef: { icon: Beef },
   pork: { icon: Drumstick },
   lamb: { icon: Drumstick },

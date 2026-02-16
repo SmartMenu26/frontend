@@ -150,16 +150,37 @@
         "free": "Dairy-free"
       },
       "egg": {
-        "free": "Egg-free"
+        "free": "Egg-free",
+        "contains": "Contains eggs"
       },
       "fish": {
-        "free": "Fish-free"
+        "free": "Fish-free",
+        "contains": "Contains fish"
       },
       "peanut": {
-        "free": "Peanut-free"
+        "free": "Peanut-free",
+        "contains": "Contains peanuts"
       },
       "milk": {
         "contains": "Contains milk"
+      },
+      "soy": {
+        "contains": "Contains soy"
+      },
+      "sesame": {
+        "contains": "Contains sesame"
+      },
+      "shellfish": {
+        "contains": "Contains shellfish"
+      },
+      "mollusc": {
+        "contains": "Contains molluscs"
+      },
+      "nuts": {
+        "contains": "Contains tree nuts"
+      },
+      "mustard": {
+        "contains": "Contains mustard"
       }
     }
   }

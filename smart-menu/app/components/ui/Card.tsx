@@ -49,17 +49,17 @@ export default function Card({
   
   const sizeClasses =
     variant === "popular"
-      ? "h-[120px] w-[120px]"
+      ? "h-[200px] w-[200px]"
       : "h-[200px] w-[200px]";
 
   const imageClasses =
     variant === "popular"
-      ? "-top-5 h-[90px] w-[90px]"
+      ? "-top-4 h-[155px] w-[155px]"
       : "-top-4 h-[155px] w-[155px]";
 
 const titleClasses =
   variant === "popular"
-    ? "mt-2 text-sm font-regular line-clamp-2"
+    ? "mt-[48px] text-[17px] font-regular line-clamp-2"
     : "mt-[48px] text-[17px] font-regular line-clamp-2";
 
   return (

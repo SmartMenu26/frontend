@@ -150,16 +150,37 @@
         "free": "Pa produkte bulmeti"
       },
       "egg": {
-        "free": "Pa vezë"
+        "free": "Pa vezë",
+        "contains": "Përmban vezë"
       },
       "fish": {
-        "free": "Pa peshk"
+        "free": "Pa peshk",
+        "contains": "Përmban peshk"
       },
       "peanut": {
-        "free": "Pa kikirikë"
+        "free": "Pa kikirikë",
+        "contains": "Përmban kikirikë"
       },
       "milk": {
         "contains": "Përmban qumësht"
+      },
+      "soy": {
+        "contains": "Përmban sojë"
+      },
+      "sesame": {
+        "contains": "Përmban susam"
+      },
+      "shellfish": {
+        "contains": "Përmban fruta deti"
+      },
+      "mollusc": {
+        "contains": "Përmban molusqe"
+      },
+      "nuts": {
+        "contains": "Përmban arra"
+      },
+      "mustard": {
+        "contains": "Përmban mustardë"
       }
     }
   }
