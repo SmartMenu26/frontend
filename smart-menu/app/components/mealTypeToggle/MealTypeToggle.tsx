@@ -14,42 +14,37 @@ type Props = {
 
 export default function MealTypeToggle({ value, onChange, className = "" }: Props) {
   const t = useTranslations("mealTypeToggle");
-  const options: Array<{ value: MealType; label: string; Icon: typeof Drumstick }> = [
-    { value: "food", label: t("food"), Icon: Drumstick },
-    { value: "drink", label: t("drink"), Icon: Wine },
-  ];
-  const controlLabel = `${t("food")} / ${t("drink")}`;
+  const base =
+    "cursor-pointer py-0.5 px-3 rounded-full flex items-center justify-center border transition " +
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20";
+
+  const active = "bg-[#074128] text-white";
+  const inactive = "bg-white";
 
   return (
-    <div className={`flex justify-end items-end px-6 pb-8 ${className}`}>
-      <div
-        role="tablist"
-        aria-label={controlLabel}
-        className="inline-flex rounded-full border border-[#074128]/40 bg-white shadow-sm overflow-hidden"
+    <div className={`flex justify-end items-end gap-1 px-2 pb-4 ${className}`}>
+      {/* Food */}
+      <button
+        type="button"
+        aria-label="Food"
+        aria-pressed={value === "food"}
+        onClick={() => onChange("food")}
+        className={[base, value === "food" ? active : inactive].join(" ")}
       >
-        {options.map(({ value: optionValue, label, Icon }) => {
-          const isActive = value === optionValue;
-          return (
-            <button
-              key={optionValue}
-              type="button"
-              role="tab"
-              aria-pressed={isActive}
-              aria-selected={isActive}
-              onClick={() => onChange(optionValue)}
-              className={[
-                "min-w-[100px] px-3 py-1 text-sm font-semibold flex items-center justify-between gap-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#074128]/40",
-                isActive
-                  ? "bg-[#074128] text-white"
-                  : "bg-transparent text-[#074128]"
-              ].join(" ")}
-            >
-              <Icon size={18} />
-              <span className="uppercase text-[12px] tracking-wide">{label}</span>
-            </button>
-          );
-        })}
-      </div>
+        {/* simple icon: meat/food */}
+        <span className="text-md flex gap-1 justify-center items-center"><Drumstick size={20}/>{t("food")}</span>
+      </button>
+
+      {/* Drink */}
+      <button
+        type="button"
+        aria-label="Drink"
+        aria-pressed={value === "drink"}
+        onClick={() => onChange("drink")}
+        className={[base, value === "drink" ? active : inactive].join(" ")}
+      >
+        <span className="text-md flex gap-1 justify-center items-center"><Wine size={20}/>{t("drink")}</span>
+      </button>
     </div>
   );
 }
