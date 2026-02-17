@@ -58,7 +58,7 @@ const ChipsRow = forwardRef<HTMLDivElement, ChipsRowProps>(
             "shrink-0 snap-start";
 
           const outline =
-            "bg-white text-slate-900 border border-[#0D3B66]/10 hover:bg-slate-50";
+            "bg-white text-slate-900 border border-[#0D3B66]/30 hover:bg-slate-50";
 
           const solid =
             item.colorClassName ?? "bg-slate-900 text-white hover:opacity-90";

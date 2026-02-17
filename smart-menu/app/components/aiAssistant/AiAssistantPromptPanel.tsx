@@ -152,7 +152,7 @@ export default function AiAssistantPromptPanel<TCandidate = unknown>({
               key={prompt.id}
               type="button"
               onClick={() => handleSuggestionClick(prompt.label)}
-              className="cursor-pointer inline-flex items-center gap-1 rounded-full border border-black/10 bg-white px-2 py-1 text-[14px] font-medium tracking-wide text-[#656C73] shadow-sm transition hover:border-black/40 hover:text-[#1E1F24]"
+              className="cursor-pointer inline-flex items-center gap-1 rounded-full border border-black/30 bg-white px-2 py-1 text-[14px] font-medium tracking-wide text-[#656C73] shadow-sm transition hover:border-black/40 hover:text-[#1E1F24]"
             >
               <Image
                 src={prompt.icon}
