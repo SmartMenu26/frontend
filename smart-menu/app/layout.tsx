@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
-  title: "Smart Menu | Дигитално AI мени за ресторани",
+  title: "Дигитално QR мени со AI асистент за ресторани | Smart Menu Македонија",
   description: "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
   manifest: "/manifest.json",
   robots: {
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     shortcut: ["/favicon.ico"],
   },
   openGraph: {
-    title: "Smart Menu | Дигитално AI мени за ресторани",
+    title: "Дигитално QR мени со AI асистент за ресторани | Smart Menu Македонија",
     description:
       "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
     url: "https://www.smartmenumk.com/",
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Smart Menu | Дигитално AI мени за ресторани",
+    title: "Дигитално QR мени со AI асистент за ресторани | Smart Menu Македонија",
     description:
       "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
     images: ["/og.jpg?v=2"],
