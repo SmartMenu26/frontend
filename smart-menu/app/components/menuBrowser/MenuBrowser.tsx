@@ -28,6 +28,12 @@ type Props = {
     onMealTypeChange: (next: MealKind) => void;
 };
 
+const pickDefaultSubcategoryId = (categoryId?: string, source?: Category[]) => {
+    if (!categoryId || !source) return "all";
+    const category = source.find((cat) => cat.id === categoryId);
+    return category?.subcategories?.[0]?.id ?? "all";
+};
+
 
 export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }: Props) {
     const router = useRouter();
@@ -168,10 +174,11 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
             const hasPrev = prevCategoryId && mapped.some((cat) => cat.id === prevCategoryId);
             const fallbackCategoryId = mapped[0]?.id ?? "";
             const nextCategoryId = hasPrev ? prevCategoryId : fallbackCategoryId;
+            const defaultSubcategoryId = pickDefaultSubcategoryId(nextCategoryId, mapped);
 
             setSelectedSubcategoryId((prevSubcategoryId) => {
                 if (!hasPrev || nextCategoryId !== prevCategoryId) {
-                    return "all";
+                    return defaultSubcategoryId;
                 }
                 if (prevSubcategoryId === "all") {
                     return prevSubcategoryId;
@@ -180,7 +187,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                 const subExists = nextCategory?.subcategories.some(
                     (sub) => sub.id === prevSubcategoryId
                 );
-                return subExists ? prevSubcategoryId : "all";
+                return subExists ? prevSubcategoryId : defaultSubcategoryId;
             });
 
             return nextCategoryId;
@@ -222,7 +229,8 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         const nextCategoryId = fallbackCategoryId;
         setSelectedCategoryId(nextCategoryId);
 
-        let nextSubcategoryId = "all";
+        const defaultSubcategoryId = pickDefaultSubcategoryId(nextCategoryId, categories);
+        let nextSubcategoryId = defaultSubcategoryId;
         if (
             nextCategoryId &&
             candidateSubcategoryId &&
@@ -269,13 +277,14 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         ];
     }, [selectedCategory, allChipLabel]);
 
+
     const handleCategorySelect = useCallback(
         (categoryId: string) => {
             if (categoryId === selectedCategoryId) return;
             setSelectedCategoryId(categoryId);
-            setSelectedSubcategoryId("all");
+            setSelectedSubcategoryId(pickDefaultSubcategoryId(categoryId, categories));
         },
-        [selectedCategoryId]
+        [selectedCategoryId, categories]
     );
 
     // keep active category centered in scroll container
