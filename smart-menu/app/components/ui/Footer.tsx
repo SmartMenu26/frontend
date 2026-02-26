@@ -25,7 +25,7 @@ export default function Footer() {
             width={FOOTER_LOGO_SIZE}
             height={FOOTER_LOGO_SIZE}
             sizes={FOOTER_LOGO_SIZES}
-            className="h-10 w-10"
+            className="h-10 w-10 rounded-full"
             loading="lazy"
           />
           <div className="flex gap-4">
