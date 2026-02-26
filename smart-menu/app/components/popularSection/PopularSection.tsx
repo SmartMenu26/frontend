@@ -102,6 +102,10 @@ export default function PopularSection({
     };
   }, [restaurantId, mealType, resolveLocalizedTitle]);
 
+  const hasNoPopularItems = !loadingPopular && popularItems.length === 0;
+
+  if (hasNoPopularItems) return null;
+
   return (
     <section className={`bg-white ${className}`}>
       <div className="container mx-auto">
@@ -110,45 +114,41 @@ export default function PopularSection({
             {mealType === "food" ? t("title.food") : t("title.drink")}
           </h2>
 
-          {(!loadingPopular && popularItems.length === 0) ? (
-            <div className="text-slate-500">{t("empty")}</div>
-          ) : (
-            <div
-              className="
-                overflow-x-auto overflow-y-visible
-                scroll-smooth
-                [-webkit-overflow-scrolling:touch]
-                [&::-webkit-scrollbar]:hidden
-              "
-            >
-              <div className="flex gap-6 pb-4 pt-8 overflow-visible">
-                {loadingPopular
-                  ? Array.from({ length: 5 }).map((_, idx) => (
-                    <PopularSkeletonCard key={idx} />
-                  ))
-                  : popularItems.map((it) => (
-                    <Card
-                      key={it.id}
-                      title={it.title}
-                      imageUrl={it.imageUrl}
-                      priceLabel={`${it.price}ден`}
-                      kind={mealType}
-                      onClick={() => {
-                        const detailParams = new URLSearchParams();
-                        detailParams.set("kind", mealType);
-                        const detailHref = buildLocalizedPath(
-                          `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`,
-                          locale
-                        );
-                        router.push(detailHref);
-                      }}
-                      variant="popular"
-                      className="shrink-0"
-                    />
-                  ))}
-              </div>
+          <div
+            className="
+              overflow-x-auto overflow-y-visible
+              scroll-smooth
+              [-webkit-overflow-scrolling:touch]
+              [&::-webkit-scrollbar]:hidden
+            "
+          >
+            <div className="flex gap-6 pb-4 pt-8 overflow-visible">
+              {loadingPopular
+                ? Array.from({ length: 5 }).map((_, idx) => (
+                  <PopularSkeletonCard key={idx} />
+                ))
+                : popularItems.map((it) => (
+                  <Card
+                    key={it.id}
+                    title={it.title}
+                    imageUrl={it.imageUrl}
+                    priceLabel={`${it.price}ден`}
+                    kind={mealType}
+                    onClick={() => {
+                      const detailParams = new URLSearchParams();
+                      detailParams.set("kind", mealType);
+                      const detailHref = buildLocalizedPath(
+                        `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`,
+                        locale
+                      );
+                      router.push(detailHref);
+                    }}
+                    variant="popular"
+                    className="shrink-0"
+                  />
+                ))}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </section>
