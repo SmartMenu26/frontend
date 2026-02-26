@@ -45,7 +45,7 @@ export const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Smart Menu",
-  description: "AI powered digital menu for restaurants",
+  description: "Паметна технологија за сериозни угостители.",
   manifest: "/manifest.json",
 };
 

@@ -1,7 +1,7 @@
 {
   "name": "Smart Menu",
   "short_name": "Smart Menu",
-  "description": "Digital restaurant menu powered by AI",
+  "description": "Паметна технологија за сериозни угостители.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
