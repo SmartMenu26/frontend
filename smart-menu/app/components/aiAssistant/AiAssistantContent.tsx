@@ -48,6 +48,11 @@ const fallbackCandidateDescription: Record<Locale, string> = {
   sq: "Provo këtë specialitet.",
   en: "Give this special a try.",
 };
+const HERO_IMAGE_SIZES = "240px";
+const NO_CREDITS_IMAGE_SIZES = "(max-width: 768px) 80vw, 400px";
+const CANDIDATE_IMAGE_SIZE = 56;
+const CANDIDATE_IMAGE_SIZES = "56px";
+const CANDIDATE_IMAGE_QUALITY = 60;
 
 function resolveLocalizedField(
   value: LocalizedField | undefined,
@@ -167,6 +172,7 @@ export default function AiAssistantContent({
                 src={heroImage}
                 alt={`AI Асистент ${assistantDisplayName}`}
                 priority
+                sizes={HERO_IMAGE_SIZES}
                 className="h-auto w-60 max-w-full select-none transition-opacity duration-300"
               />
             </div>
@@ -232,8 +238,11 @@ export default function AiAssistantContent({
                         <Image
                           src={img}
                           alt={imageAlt}
-                          width={56}
-                          height={56}
+                          width={CANDIDATE_IMAGE_SIZE}
+                          height={CANDIDATE_IMAGE_SIZE}
+                          quality={CANDIDATE_IMAGE_QUALITY}
+                          loading="lazy"
+                          sizes={CANDIDATE_IMAGE_SIZES}
                           className="h-14 w-14 rounded-2xl object-cover"
                         />
                         <div className="flex-1">
@@ -292,6 +301,7 @@ export default function AiAssistantContent({
               src={noCreditsImage}
               alt="No credits illustration"
               priority
+              sizes={NO_CREDITS_IMAGE_SIZES}
               className="h-[50vh] max-w-full select-none object-cover"
             />
             <p className="text-lg font-medium text-[#1E1F24]">

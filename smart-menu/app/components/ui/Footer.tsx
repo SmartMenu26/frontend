@@ -7,6 +7,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 
+const FOOTER_LOGO_SIZE = 40;
+const FOOTER_LOGO_SIZES = "40px";
+
 export default function Footer() {
   const t = useTranslations("footer");
   const locale = useLocale() as Locale;
@@ -19,9 +22,11 @@ export default function Footer() {
           <Image
             src="/icons/smart-logo-192x192.png"
             alt="Smart Menu logo"
-            width={32}
-            height={32}
+            width={FOOTER_LOGO_SIZE}
+            height={FOOTER_LOGO_SIZE}
+            sizes={FOOTER_LOGO_SIZES}
             className="h-10 w-10"
+            loading="lazy"
           />
           <div className="flex gap-4">
             <Link href={homeHref} className="hover:text-[#074128]">

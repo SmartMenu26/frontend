@@ -7,6 +7,11 @@ import clsx from "clsx";
 import { locales, type Locale } from "@/i18n";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+const FLAG_BUTTON_SIZE = 24;
+const FLAG_BUTTON_SIZES = "24px";
+const FLAG_OPTION_SIZE = 20;
+const FLAG_OPTION_SIZES = "20px";
+
 const FLAG_ICON: Record<Locale, string> = {
   mk: "/icons/flags/mk.svg",
   sq: "/icons/flags/al.svg",
@@ -98,9 +103,11 @@ export default function LanguageSwitcher({ className = "" }: LanguageSwitcherPro
         <Image
           src={currentFlagSrc}
           alt={`${currentLabel} flag`}
-          width={24}
-          height={24}
+          width={FLAG_BUTTON_SIZE}
+          height={FLAG_BUTTON_SIZE}
+          sizes={FLAG_BUTTON_SIZES}
           className="h-6 w-6 rounded-full object-cover"
+          priority
         />
         <span className="text-sm font-semibold text-[#1B1F1E]">{currentLabel}</span>
         <svg
@@ -131,9 +138,11 @@ export default function LanguageSwitcher({ className = "" }: LanguageSwitcherPro
                   <Image
                     src={FLAG_ICON[locale]}
                     alt={`${locale.toUpperCase()} flag`}
-                    width={20}
-                    height={20}
+                    width={FLAG_OPTION_SIZE}
+                    height={FLAG_OPTION_SIZE}
+                    sizes={FLAG_OPTION_SIZES}
                     className="h-5 w-5 rounded-full object-cover"
+                    loading="lazy"
                   />
                   <span className="font-medium uppercase">{locale}</span>
                 </button>

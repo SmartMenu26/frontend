@@ -262,6 +262,9 @@ type MenuItemHeroProps = {
   backLabel: string;
 };
 
+const HERO_IMAGE_SIZE = 400;
+const HERO_IMAGE_SIZES = "(max-width: 640px) 80vw, 400px";
+
 const MenuItemHero = memo(function MenuItemHero({
   name,
   imageUrl,
@@ -292,19 +295,22 @@ const MenuItemHero = memo(function MenuItemHero({
           alt=""
           aria-hidden="true"
           priority
+          sizes={HERO_IMAGE_SIZES}
           className={clsx(
             "absolute inset-0 h-full w-full rounded-full object-cover transition-opacity duration-300",
             imageLoaded ? "opacity-0" : "opacity-100"
           )}
         />
         <Image
-          width={400}
-          height={400}
+          width={HERO_IMAGE_SIZE}
+          height={HERO_IMAGE_SIZE}
           priority
-          quality={100}
+          quality={85}
           src={imageUrl}
           alt={imageAlt ?? name}
           loading="eager"
+          fetchPriority="high"
+          sizes={HERO_IMAGE_SIZES}
           onLoad={() => {
             setImageLoaded(true);
           }}

@@ -159,7 +159,9 @@ export default function AiAssistantPromptPanel<TCandidate = unknown>({
                 alt=""
                 width={14}
                 height={14}
+                sizes="14px"
                 className="opacity-80"
+                loading="lazy"
               />
               {prompt.label}
             </button>

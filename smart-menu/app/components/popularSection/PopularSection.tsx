@@ -127,7 +127,7 @@ export default function PopularSection({
                 ? Array.from({ length: 5 }).map((_, idx) => (
                   <PopularSkeletonCard key={idx} />
                 ))
-                : popularItems.map((it) => (
+                : popularItems.map((it, index) => (
                   <Card
                     key={it.id}
                     title={it.title}
@@ -145,6 +145,7 @@ export default function PopularSection({
                     }}
                     variant="popular"
                     className="shrink-0"
+                    index={index}
                   />
                 ))}
             </div>

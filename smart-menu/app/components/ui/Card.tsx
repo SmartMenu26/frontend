@@ -3,6 +3,10 @@
 import Image from "next/image";
 import React from "react";
 
+const CARD_IMAGE_SIZE = 155;
+const CARD_IMAGE_SIZES = "155px";
+const PRIORITY_CARD_COUNT = 2;
+
 type CardVariant = "default" | "popular";
 
 type CardProps = {
@@ -28,6 +32,7 @@ export default function Card({
 }: CardProps) {
   const normalizedKind = kind?.toLowerCase();
   const isDrink = variant !== "popular" && normalizedKind === "drink";
+  const shouldPrioritizeImage = typeof index === "number" && index < PRIORITY_CARD_COUNT;
   const bg =
     variant === "popular"
       ? "bg-[#A16B00]"
@@ -95,11 +100,13 @@ const titleClasses =
           <Image
             src={imageUrl}
             alt={title}
-            width={variant === "popular" ? 100 : 100}
-            height={variant === "popular" ? 100 : 100}
-            priority
+            width={CARD_IMAGE_SIZE}
+            height={CARD_IMAGE_SIZE}
+            priority={shouldPrioritizeImage}
+            loading={shouldPrioritizeImage ? "eager" : "lazy"}
+            fetchPriority={shouldPrioritizeImage ? "high" : "low"}
             quality={60}
-            sizes={variant === "popular" ? "100px" : "100px"}
+            sizes={CARD_IMAGE_SIZES}
             className={[
               "rounded-full absolute left-1/2 -translate-x-1/2 object-cover shadow-[0_0_12px_-4px_rgba(63,93,80,0.35)]",
               imageClasses,
