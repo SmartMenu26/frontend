@@ -1,11 +1,11 @@
 {
   "name": "Smart Menu",
   "short_name": "Smart Menu",
-  "description": "Паметна технологија за сериозни угостители.",
+  "description": "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#0B3B2E",
+  "theme_color": "#0B3B2E",
   "icons": [
     {
       "src": "/icons/smart-logo-192x192.png",

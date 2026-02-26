@@ -44,9 +44,44 @@ export const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Menu",
-  description: "Паметна технологија за сериозни угостители.",
+  metadataBase: new URL("https://www.smartmenumk.com"),
+  alternates: {
+    canonical: "/",
+  },
+  title: "Smart Menu | Дигитално AI мени за ресторани",
+  description: "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
   manifest: "/manifest.json",
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: [
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon.ico" } // legacy fallback
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    shortcut: ["/favicon.ico"],
+    other: [{ rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#0b3a2d" }],
+  },
+  openGraph: {
+    title: "Smart Menu | Дигитално AI мени за ресторани",
+    description:
+      "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
+    url: "https://www.smartmenumk.com/",
+    siteName: "Smart Menu",
+    images: [{ url: "/og.jpg?v=2", width: 1200, height: 630 }],
+    locale: "mk_MK",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Smart Menu | Дигитално AI мени за ресторани",
+    description:
+      "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
+    images: ["/og.jpg?v=2"],
+  },
 };
 
 export default function RootLayout({
@@ -55,7 +90,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="mk">
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=G-SX57E0RGSR"
         strategy="afterInteractive"
