@@ -297,14 +297,14 @@ const MenuItemHero = memo(function MenuItemHero({
         <ArrowLeft className="h-5 w-5 text-white" />
       </button>
 
-      <div className="py-2 relative grid aspect-square w-full max-w-xs place-items-center sm:max-w-sm">
-        <img
-          src={"@/public/images/menu-item-placeholder.png"}
-          alt=""
+      <div
+        className="py-2 relative grid place-items-center"
+        style={{ width: HERO_IMAGE_SIZE, height: HERO_IMAGE_SIZE }}
+      >
+        <div
           aria-hidden="true"
-          sizes={HERO_IMAGE_SIZES}
           className={clsx(
-            "absolute inset-0 h-full w-full rounded-full object-cover transition-opacity duration-300",
+            "absolute inset-0 rounded-full bg-white/10 transition-opacity duration-300",
             imageLoaded ? "opacity-0" : "opacity-100"
           )}
         />
@@ -317,12 +317,12 @@ const MenuItemHero = memo(function MenuItemHero({
           alt={imageAlt ?? name}
           loading="eager"
           sizes={HERO_IMAGE_SIZES}
-          onLoad={() => {
-            setImageLoaded(true);
-          }}
+          placeholder="blur"
+          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI0Y2RkZFNiIvPjwvc3ZnPg=="
+          onLoadingComplete={() => setImageLoaded(true)}
           onError={() => setImageLoaded(true)}
           className={clsx(
-            "relative aspect-square h-full w-full rounded-full object-cover transition-opacity duration-300",
+            "relative h-full w-full rounded-full object-cover transition-opacity duration-300",
             imageLoaded ? "opacity-100" : "opacity-0"
           )}
         />
