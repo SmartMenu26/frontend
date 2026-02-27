@@ -36,14 +36,6 @@ html {
   font-family: var(--font-inter);
 }
 
-.font-birthstone {
-  font-family: var(--font-birthstone);
-}
-
-.font-great-vibes {
-  font-family: var(--font-great-vibes);
-}
-
 @keyframes landing-fade {
   from {
     opacity: 0;
