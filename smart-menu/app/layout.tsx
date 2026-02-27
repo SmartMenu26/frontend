@@ -7,9 +7,6 @@ import { inter, greatVibes } from "./fonts";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.smartmenumk.com"),
-  alternates: {
-    canonical: "/",
-  },
   title: "Дигитално QR мени со AI асистент за ресторани | Smart Menu Македонија",
   description: "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
   manifest: "/manifest.json",
