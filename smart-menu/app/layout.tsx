@@ -66,7 +66,9 @@ export default function RootLayout({
       </Script>
       <body className={`${inter.variable} ${greatVibes.variable}`}>
         <RegisterSW />
-        {children}
+        <main>
+          {children}
+        </main>
         <SpeedInsights />
       </body>
     </html>
