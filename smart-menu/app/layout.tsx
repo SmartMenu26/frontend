@@ -3,6 +3,7 @@ import "./globals.css";
 import RegisterSW from "./_components/RegisterSW";
 import { Rubik, Birthstone, Inter, Great_Vibes } from "next/font/google";
 import Script from "next/script";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const rubik = Rubik({
   subsets: ["latin"],
@@ -105,6 +106,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${rubik.variable} ${birthstone.variable} ${great_vibes.variable}`}>
         <RegisterSW />
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
