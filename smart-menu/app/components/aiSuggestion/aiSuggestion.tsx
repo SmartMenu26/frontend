@@ -40,7 +40,7 @@ export default function AiSuggestion({
       label: t("chips.protein"),
       icon: <Drumstick size={16} />,
       variant: "solid",
-      colorClassName: "bg-[#B4654A] text-white hover:bg-[#B4654A]/90",
+      colorClassName: "bg-[#844b38] text-white hover:bg-[#B4654A]/90",
     },
     {
       id: "low-cal",
