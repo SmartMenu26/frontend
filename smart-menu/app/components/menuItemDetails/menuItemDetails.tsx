@@ -13,6 +13,7 @@ import menuItemPlaceholder from "@/public/images/menu-item-placeholder.png";
 import { useLocale, useTranslations } from "next-intl";
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
+import { trackEvent } from "@/app/lib/analytics";
 
 type Allergen = {
   key: string;
@@ -69,6 +70,13 @@ export default function MenuItemDetails({
   useEffect(() => {
     setActiveTooltip(null);
   }, [visibleAllergens]);
+
+  useEffect(() => {
+    trackEvent("page_label", {
+      label: `Menu Item - ${name}`,
+      locale,
+    });
+  }, [locale, name]);
 
   const intlLocale = useMemo(() => {
     switch (locale) {

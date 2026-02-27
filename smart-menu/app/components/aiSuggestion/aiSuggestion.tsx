@@ -6,6 +6,7 @@ import { Star, ChefHat, Drumstick, Leaf, Dice5, Flame } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
+import { trackEvent } from "@/app/lib/analytics";
 
 type AiSuggestionProps = {
   className?: string;
@@ -76,6 +77,12 @@ export default function AiSuggestion({
       prompt?.trim() && chip?.id !== "ask-bakal"
         ? `${localizedBase}?prompt=${encodeURIComponent(prompt.trim())}`
         : localizedBase;
+
+    trackEvent("ai_suggestion_chip", {
+      chip_id: chipId,
+      locale,
+      restaurantId: restaurantId ?? "public",
+    });
 
     router.push(target);
   };

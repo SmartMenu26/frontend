@@ -1,18 +1,31 @@
 import { MetadataRoute } from "next";
+import { locales } from "@/i18n";
+
+const baseUrl = "https://www.smartmenumk.com";
+const localeRoutes = ["", "/kako-raboti", "/cenovnik", "/za-nas"] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
+  const now = new Date();
+
+  const entries: MetadataRoute.Sitemap = [
     {
-      url: "https://www.smartmenumk.com",
-      lastModified: new Date(),
+      url: baseUrl,
+      lastModified: now,
       changeFrequency: "weekly",
       priority: 1,
     },
-    {
-      url: "https://www.smartmenumk.com/mk",
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
   ];
+
+  locales.forEach((locale) => {
+    localeRoutes.forEach((route) => {
+      entries.push({
+        url: `${baseUrl}/${locale}${route}`,
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: route === "" ? 0.9 : 0.7,
+      });
+    });
+  });
+
+  return entries;
 }

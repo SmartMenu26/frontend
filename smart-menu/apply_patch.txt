@@ -1,0 +1,21 @@
+*** Begin Patch
+*** Update File: messages/sq.json
+@@
+     },
+     "cta": {
+       "primary": "Rezervo demo",
+       "secondary": "Shkarko menunë demo"
+-    }
++    },
++    "comparison": {
++      "title": "Pse është më mirë se një QR klasik?",
++      "items": [
++        "Nuk është vetëm PDF në QR",
++        "Është interaktive dhe dinamike",
++        "AI shet në vend të kamerierit",
++        "Analiza që ndihmojnë vendimet"
++      ]
++    },
++    "localSeo": "Smart Menu është zgjidhje për menu digjitale në Maqedoni për restorante, kafene dhe hotele që duan sistem modern dhe inteligjent."
+   },
+*** End Patch
