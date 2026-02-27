@@ -13,6 +13,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { trackEvent } from "@/app/lib/analytics";
+import { greatVibes } from "@/app/fonts";
 
 type Allergen = {
   key: string;
@@ -122,7 +123,7 @@ export default function MenuItemDetails({
       {/* BOTTOM SHEET */}
       <div className="flex flex-col justify-between gap-3 md:container md:mx-auto min-h-[55dvh] md:max-w-125 rounded-t-[40px] bg-[#F7F7F7] px-6 pb-4 pt-8 shadow-[0_-20px_60px_rgba(0,0,0,0.25)] md:min-h-[45dvh]">
         <section className="flex flex-col gap-4">
-          <h1 className="font-great-vibes text-5xl leading-tight text-[#2F3A37]">
+          <h1 className={`${greatVibes.className} text-5xl leading-tight text-[#2F3A37]`}>
             {name}
           </h1>
 

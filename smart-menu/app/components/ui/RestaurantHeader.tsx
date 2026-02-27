@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import HamburgerButton from "@/app/components/ui/HamburgerButton";
 import { type Locale } from "@/i18n";
+import { greatVibes } from "@/app/fonts";
 
 type Props = {
   showName?: boolean;
@@ -46,7 +47,12 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
 
         {showName && (
           <h1
-            className={`pt-3 mx-6 md:mx-0 ${headingSizeClass} text-[#6B2E2E] font-great-vibes leading-tight whitespace-nowrap`}
+            className={[
+              greatVibes.className,
+              "pt-3 mx-6 md:mx-0",
+              headingSizeClass,
+              "text-[#6B2E2E] leading-tight whitespace-nowrap",
+            ].join(" ")}
           >
             {displayName}
           </h1>

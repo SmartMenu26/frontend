@@ -1,34 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import RegisterSW from "./_components/RegisterSW";
-import { Inter, Great_Vibes } from "next/font/google";
 import Script from "next/script";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-
-export const great_vibes = Great_Vibes({
-  weight: "400",
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-great-vibes",
-  display: "swap",
-});
-
-
-export const inter = Inter({
-  subsets: ["latin"],
-  weight: [
-    "100",
-    "200",
-    "300",
-    "400",
-    "500",
-    "600",
-    "700",
-    "800",
-    "900",
-  ],
-  variable: "--font-inter",
-  display: "swap",
-});
+import { inter, greatVibes } from "./fonts";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.smartmenumk.com"),
@@ -89,7 +64,7 @@ export default function RootLayout({
             gtag('config', 'G-SX57E0RGSR');
           `}
       </Script>
-      <body className={`${inter.variable} ${great_vibes.variable}`}>
+      <body className={`${inter.variable} ${greatVibes.variable}`}>
         <RegisterSW />
         {children}
         <SpeedInsights />
