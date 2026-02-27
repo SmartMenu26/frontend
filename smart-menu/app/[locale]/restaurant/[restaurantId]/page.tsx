@@ -70,13 +70,15 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
       ? resolvedSearch.subcategoryId
       : undefined;
 
-  const restaurantName = await fetchRestaurantName(restaurantId);
-  const initialMenuData = await fetchInitialMenuData({
-    restaurantId,
-    mealType: initialMealType,
-    categoryId: requestedCategoryId,
-    subcategoryId: requestedSubcategoryId,
-  });
+  const [restaurantName, initialMenuData] = await Promise.all([
+    fetchRestaurantName(restaurantId),
+    fetchInitialMenuData({
+      restaurantId,
+      mealType: initialMealType,
+      categoryId: requestedCategoryId,
+      subcategoryId: requestedSubcategoryId,
+    }),
+  ]);
 
   return (
     <>
