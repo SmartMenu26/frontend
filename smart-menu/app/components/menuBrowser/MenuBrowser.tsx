@@ -516,13 +516,16 @@ export default function MenuBrowser({
 
 
     return (
-        <div className="bg-[#F7F7F7] min-h-[50vh] max-h-125 flex flex-col justify-center items-center">
+        <section aria-labelledby="menu-browser-heading" className="bg-[#F7F7F7] min-h-[50vh] max-h-125 flex flex-col justify-center items-center">
             <div className="container mx-auto space-y-1 py-8 pl-4">
-
+                <h2 id="menu-browser-heading" className="sr-only">
+                    Мени
+                </h2>
                 <MealTypeToggle value={mealType} onChange={onMealTypeChange} className="ml-auto" />
-                <div
+                <nav
                     ref={categoryContainerRef}
                     className="pr-2 flex gap-4 overflow-x-auto [&::-webkit-scrollbar]:hidden scroll-smooth"
+                    aria-label="Категории"
                 >
                     {loadingCategories ? (
                         Array.from({ length: 5 }).map((_, idx) => (
@@ -542,7 +545,7 @@ export default function MenuBrowser({
                             />
                         ))
                     )}
-                </div>
+                </nav>
 
 
 
@@ -558,17 +561,19 @@ export default function MenuBrowser({
                     </div>
                 ) : (
                     !!selectedCategory && (
-                        <ChipsRow
-                            items={chipItems}
-                            activeId={selectedSubcategoryId}
-                            onChipClick={(id) => setSelectedSubcategoryId(id)}
-                            className="gap-1!"
-                        />
+                        <nav aria-label="Подкатегории">
+                            <ChipsRow
+                                items={chipItems}
+                                activeId={selectedSubcategoryId}
+                                onChipClick={(id) => setSelectedSubcategoryId(id)}
+                                className="gap-1!"
+                            />
+                        </nav>
                     )
                 )}
 
                 {/* CARDS */}
-                <div className="relative mt-4">
+                <div className="relative mt-4" role="region" aria-label="Ставки од менито">
                     <div
                         ref={cardsContainerRef}
                         className="
@@ -585,30 +590,32 @@ export default function MenuBrowser({
                                 "transition-all duration-200 ease-out transform-gpu",
                                 cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
                             ].join(" ")}
+                            role="list"
                         >
                             {(loadingItems || loadingCategories)
                                 ? Array.from({ length: 6 }).map((_, idx) => (
                                     <SkeletonCard key={idx} />
                                 ))
                                 : items.map((it, index) => (
-                                    <Card
-                                        key={it.id}
-                                        title={it.title}
-                                        imageUrl={it.imageUrl}
-                                        priceLabel={`${it.price}ден`}
-                                        kind={it.kind ?? mealType}
-                                        onClick={() => {
-                                            const detailParams = new URLSearchParams();
-                                            detailParams.set("kind", mealType);
-                                            const detailHref = buildLocalizedPath(
-                                                `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`,
-                                                locale
-                                            );
-                                            router.push(detailHref);
-                                        }}
-                                        className="shrink-0"
-                                        index={index}
-                                    />
+                                    <div role="listitem" key={it.id}>
+                                        <Card
+                                            title={it.title}
+                                            imageUrl={it.imageUrl}
+                                            priceLabel={`${it.price}ден`}
+                                            kind={it.kind ?? mealType}
+                                            onClick={() => {
+                                                const detailParams = new URLSearchParams();
+                                                detailParams.set("kind", mealType);
+                                                const detailHref = buildLocalizedPath(
+                                                    `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`,
+                                                    locale
+                                                );
+                                                router.push(detailHref);
+                                            }}
+                                            className="shrink-0"
+                                            index={index}
+                                        />
+                                    </div>
                                 ))}
                         </div>
                     </div>
@@ -649,6 +656,6 @@ export default function MenuBrowser({
                 </div>
             </div>
 
-        </div>
+        </section>
     );
 }

@@ -37,7 +37,7 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
   return (
     <>
       {/* HEADER */}
-      <div className="container mx-auto relative">
+      <header className="container mx-auto relative" role="banner">
         <HamburgerButton
           open={menuOpen}
           onToggle={() => setMenuOpen((v) => !v)}
@@ -57,7 +57,7 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
             {displayName}
           </h1>
         )}
-      </div>
+      </header>
 
       {/* BACKDROP */}
       <div
@@ -69,7 +69,7 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
         aria-hidden={!menuOpen}
       />
       {/* SLIDE-IN MENU (glass) */}
-      <div
+      <nav
         className={[
           "fixed top-0 left-0 h-screen w-full z-50",
           "transform transition-transform duration-300 ease-out",
@@ -80,21 +80,22 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
           "border-r border-white/30",
           "shadow-[20px_0_60px_rgba(0,0,0,0.18)]",
         ].join(" ")}
+        aria-label="Главна навигација"
       >
-        <nav className="pt-24 px-6 flex flex-col gap-4 text-lg font-semibold text-[#1B1F1E]">
+        <ul className="pt-24 px-6 flex flex-col gap-4 text-lg font-semibold text-[#1B1F1E]">
           {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className="inline-flex items-center gap-2 hover:text-[#6B2E2E] transition"
-            >
-              {link.label}
-            </Link>
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="inline-flex items-center gap-2 hover:text-[#6B2E2E] transition"
+              >
+                {link.label}
+              </Link>
+            </li>
           ))}
-        </nav>
-      </div>
-
+        </ul>
+      </nav>
     </>
   );
 }
