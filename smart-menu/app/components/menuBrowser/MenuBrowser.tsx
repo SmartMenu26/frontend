@@ -57,6 +57,7 @@ export default function MenuBrowser({
     const [items, setItems] = useState<MenuItem[]>([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
     const [loadingItems, setLoadingItems] = useState(false);
+    const [cardsVisible, setCardsVisible] = useState(false);
 
     const selectionStorageKey = useMemo(
         () => `menu-browser:${restaurantId}:${mealType}`,
@@ -446,6 +447,15 @@ export default function MenuBrowser({
     ]);
 
     useEffect(() => {
+        if (loadingItems || loadingCategories) {
+            setCardsVisible(false);
+            return;
+        }
+        let frame = requestAnimationFrame(() => setCardsVisible(true));
+        return () => cancelAnimationFrame(frame);
+    }, [loadingItems, loadingCategories, items.length]);
+
+    useEffect(() => {
         if (!initialSelectionAppliedRef.current) return;
 
         const params = new URLSearchParams(searchParamsString);
@@ -549,7 +559,13 @@ export default function MenuBrowser({
               "
                     >
                         {/* INNER STRIP */}
-                        <div className="flex gap-6 pb-4 pt-12 overflow-visible min-h-45">
+                        <div
+                            className={[
+                                "flex gap-6 pb-4 pt-12 overflow-visible min-h-45",
+                                "transition-all duration-200 ease-out transform-gpu",
+                                cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
+                            ].join(" ")}
+                        >
                             {(loadingItems || loadingCategories)
                                 ? Array.from({ length: 6 }).map((_, idx) => (
                                     <SkeletonCard key={idx} />
