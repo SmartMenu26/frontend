@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n";
 import { TrackedAnchor } from "@/app/components/ui/TrackedLink";
@@ -57,13 +56,12 @@ export default async function PricingPage({ params }: Props) {
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="mb-4 flex justify-center">
           <Link href={homeHref} aria-label="Smart Menu home" className="mb-4 inline-flex">
-            <Image
+            <img
               src="/icons/smart-logo-512x512.png"
               alt="Smart Menu"
               width={64}
               height={64}
               className="h-16 w-16 rounded-full object-cover"
-              priority
             />
           </Link>
         </div>

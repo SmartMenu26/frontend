@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
@@ -100,14 +99,13 @@ export default function LanguageSwitcher({ className = "" }: LanguageSwitcherPro
         aria-expanded={open}
         className="cursor-pointer flex items-center gap-2 rounded-full border border-white/60 bg-white px-3 py-1 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B1F1E]/50"
       >
-        <Image
+        <img
           src={currentFlagSrc}
           alt={`${currentLabel} flag`}
           width={FLAG_BUTTON_SIZE}
           height={FLAG_BUTTON_SIZE}
           sizes={FLAG_BUTTON_SIZES}
           className="h-6 w-6 rounded-full object-cover"
-          priority
         />
         <span className="text-sm font-semibold text-[#1B1F1E]">{currentLabel}</span>
         <svg
@@ -135,7 +133,7 @@ export default function LanguageSwitcher({ className = "" }: LanguageSwitcherPro
                   onClick={() => handleSwitch(locale)}
                   className="cursor-pointer flex w-full items-center gap-2 rounded-xl px-2 py-1 text-sm text-left text-[#1B1F1E] hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B1F1E]/30"
                 >
-                  <Image
+                  <img
                     src={FLAG_ICON[locale]}
                     alt={`${locale.toUpperCase()} flag`}
                     width={FLAG_OPTION_SIZE}

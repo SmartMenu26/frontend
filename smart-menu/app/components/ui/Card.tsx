@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const CARD_IMAGE_SIZE = 155;
 const CARD_IMAGE_SIZES = "155px";
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTU1IiBoZWlnaHQ9IjE1NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTU1IiBoZWlnaHQ9IjE1NSIgZmlsbD0iI0U4RTdFOSIvPjwvc3ZnPg==";
 const PRIORITY_CARD_COUNT = 2;
 
 type CardVariant = "default" | "popular";
@@ -51,6 +53,10 @@ export default function Card({
       : isDrink
       ? "border-[#6B2E2E]"
       : "border-[#355B4B]";
+  const [imageLoaded, setImageLoaded] = useState(false);
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [imageUrl]);
   
   const sizeClasses =
     variant === "popular"
@@ -73,9 +79,9 @@ const titleClasses =
       onClick={onClick}
       className={[
         "cursor-pointer text-left",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20",
-        className,
-      ].join(" ")}
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20",
+          className,
+        ].join(" ")}
     >
       {/* CARD */}
       <div
@@ -97,21 +103,36 @@ const titleClasses =
 
 
           {/* IMAGE */}
-          <Image
-            src={imageUrl}
-            alt={title}
-            width={CARD_IMAGE_SIZE}
-            height={CARD_IMAGE_SIZE}
-            priority={shouldPrioritizeImage}
-            loading={shouldPrioritizeImage ? "eager" : "lazy"}
-            fetchPriority={shouldPrioritizeImage ? "high" : "low"}
-            quality={60}
-            sizes={CARD_IMAGE_SIZES}
+          <div
             className={[
-              "rounded-full absolute left-1/2 -translate-x-1/2 object-cover shadow-[0_0_12px_-4px_rgba(63,93,80,0.35)]",
+              "absolute left-1/2 -translate-x-1/2",
               imageClasses,
             ].join(" ")}
-          />
+          >
+            <div
+              aria-hidden
+              className={[
+                "absolute inset-0 rounded-full bg-white/20",
+                "animate-pulse transition-opacity duration-300",
+                imageLoaded ? "opacity-0" : "opacity-100",
+              ].join(" ")}
+            />
+            <Image
+              src={imageUrl}
+              alt={title}
+              width={CARD_IMAGE_SIZE}
+              height={CARD_IMAGE_SIZE}
+              priority={shouldPrioritizeImage}
+              loading={shouldPrioritizeImage ? "eager" : "lazy"}
+              fetchPriority={shouldPrioritizeImage ? "high" : "low"}
+              quality={65}
+              sizes={CARD_IMAGE_SIZES}
+              placeholder="blur"
+              blurDataURL={BLUR_PLACEHOLDER}
+              onLoadingComplete={() => setImageLoaded(true)}
+              className="rounded-full h-full w-full object-cover shadow-[0_0_12px_-4px_rgba(63,93,80,0.35)]"
+            />
+          </div>
 
 
         {/* TITLE */}

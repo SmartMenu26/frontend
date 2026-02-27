@@ -235,12 +235,11 @@ export default function AiAssistantContent({
                         href={href}
                         className="flex items-center gap-3 rounded-[22px] border border-[#ECEFF5] bg-white px-3 py-3 text-[#1E1F24] shadow-sm transition hover:border-[#C2CADB]"
                       >
-                        <Image
+                        <img
                           src={img}
                           alt={imageAlt}
                           width={CANDIDATE_IMAGE_SIZE}
                           height={CANDIDATE_IMAGE_SIZE}
-                          quality={CANDIDATE_IMAGE_QUALITY}
                           loading="lazy"
                           sizes={CANDIDATE_IMAGE_SIZES}
                           className="h-14 w-14 rounded-2xl object-cover"
@@ -297,10 +296,9 @@ export default function AiAssistantContent({
           </div>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-6 py-10 text-center">
-            <Image
-              src={noCreditsImage}
+            <img
+              src={"@/public/images/no-credits.png"}
               alt="No credits illustration"
-              priority
               sizes={NO_CREDITS_IMAGE_SIZES}
               className="h-[50vh] max-w-full select-none object-cover"
             />

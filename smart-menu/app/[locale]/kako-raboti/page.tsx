@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
@@ -39,13 +38,12 @@ export default async function HowItWorksPage({ params }: Props) {
       <PageLabelTracker label={PAGE_LABEL[locale]} locale={locale} />
       <section className="container mx-auto px-4 py-16">
         <Link href={homeHref} className="inline-flex mb-4" aria-label="Smart Menu home">
-          <Image
+          <img
             src="/icons/smart-logo-512x512.png"
             alt="Smart Menu"
             width={64}
             height={64}
             className="h-16 w-16 rounded-full object-cover"
-            priority
           />
         </Link>
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A5A2A]">

@@ -9,7 +9,6 @@ import {
   resolveTooltipLabel,
 } from "./allergens/iconMap";
 import Image from "next/image";
-import menuItemPlaceholder from "@/public/images/menu-item-placeholder.png";
 import { useLocale, useTranslations } from "next-intl";
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
@@ -298,11 +297,10 @@ const MenuItemHero = memo(function MenuItemHero({
       </button>
 
       <div className="py-2 relative grid aspect-square w-full max-w-xs place-items-center sm:max-w-sm">
-        <Image
-          src={menuItemPlaceholder}
+        <img
+          src={"@/public/images/menu-item-placeholder.png"}
           alt=""
           aria-hidden="true"
-          priority
           sizes={HERO_IMAGE_SIZES}
           className={clsx(
             "absolute inset-0 h-full w-full rounded-full object-cover transition-opacity duration-300",
@@ -317,7 +315,6 @@ const MenuItemHero = memo(function MenuItemHero({
           src={imageUrl}
           alt={imageAlt ?? name}
           loading="eager"
-          fetchPriority="high"
           sizes={HERO_IMAGE_SIZES}
           onLoad={() => {
             setImageLoaded(true);

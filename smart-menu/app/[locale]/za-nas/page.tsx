@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n";
 import { TrackedAnchor } from "@/app/components/ui/TrackedLink";
@@ -33,12 +32,11 @@ export default async function AboutPage({ params }: Props) {
       <PageLabelTracker label={PAGE_LABEL[locale]} locale={locale} />
       <section className="container mx-auto px-4 py-16">
         <Link href={homeHref} className="inline-flex mb-4" aria-label="Smart Menu home">
-          <Image
+          <img
             src="/icons/smart-logo-512x512.png"
             alt="Smart Menu"
             width={64}
             height={64}
-            priority
             className="h-16 w-16 rounded-full object-cover"
           />
         </Link>
