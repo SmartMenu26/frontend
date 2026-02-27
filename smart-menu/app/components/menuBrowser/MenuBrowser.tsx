@@ -293,14 +293,14 @@ export default function MenuBrowser({
 
         const defaultSubcategoryId = pickDefaultSubcategoryId(nextCategoryId, categories);
         let nextSubcategoryId = defaultSubcategoryId;
-        if (
-            nextCategoryId &&
-            candidateSubcategoryId &&
-            candidateSubcategoryId !== "all"
-        ) {
-            const category = categories.find((cat) => cat.id === nextCategoryId);
-            if (category?.subcategories.some((sub) => sub.id === candidateSubcategoryId)) {
-                nextSubcategoryId = candidateSubcategoryId;
+        if (nextCategoryId && candidateSubcategoryId) {
+            if (candidateSubcategoryId === "all") {
+                nextSubcategoryId = "all";
+            } else {
+                const category = categories.find((cat) => cat.id === nextCategoryId);
+                if (category?.subcategories.some((sub) => sub.id === candidateSubcategoryId)) {
+                    nextSubcategoryId = candidateSubcategoryId;
+                }
             }
         }
         setSelectedSubcategoryId(nextSubcategoryId);
@@ -485,7 +485,7 @@ export default function MenuBrowser({
             params.delete("categoryId");
         }
 
-        if (selectedSubcategoryId && selectedSubcategoryId !== "all") {
+        if (selectedSubcategoryId) {
             params.set("subcategoryId", selectedSubcategoryId);
         } else {
             params.delete("subcategoryId");
@@ -561,14 +561,12 @@ export default function MenuBrowser({
                     </div>
                 ) : (
                     !!selectedCategory && (
-                        <nav aria-label="Подкатегории">
-                            <ChipsRow
-                                items={chipItems}
-                                activeId={selectedSubcategoryId}
-                                onChipClick={(id) => setSelectedSubcategoryId(id)}
-                                className="gap-1!"
-                            />
-                        </nav>
+                        <ChipsRow
+                            items={chipItems}
+                            activeId={selectedSubcategoryId}
+                            onChipClick={(id) => setSelectedSubcategoryId(id)}
+                            className="gap-1!"
+                        />
                     )
                 )}
 
