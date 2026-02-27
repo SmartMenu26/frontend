@@ -13,6 +13,7 @@ import { useLocale } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { PrefetchedMenuData } from "@/app/lib/menuPrefetch";
 
 type MenuItem = {
     id: string;
@@ -26,6 +27,7 @@ type Props = {
     restaurantId: string;
     mealType: MealKind;
     onMealTypeChange: (next: MealKind) => void;
+    initialData?: PrefetchedMenuData | null;
 };
 
 const pickDefaultSubcategoryId = (categoryId?: string, source?: Category[]) => {
@@ -35,7 +37,12 @@ const pickDefaultSubcategoryId = (categoryId?: string, source?: Category[]) => {
 };
 
 
-export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }: Props) {
+export default function MenuBrowser({
+    restaurantId,
+    mealType,
+    onMealTypeChange,
+    initialData,
+}: Props) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -108,11 +115,35 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         [resolveLocalizedLabel]
     );
 
+    const mapMenuItems = useCallback(
+        (data: any[]): MenuItem[] =>
+            data.map((m: any) => ({
+                id: m._id ?? m.id,
+                title: resolveLocalizedLabel(m?.name, m?.title ?? "Item"),
+                imageUrl: m?.image?.url ?? m?.imageUrl ?? "",
+                price: m?.price ?? 0,
+                kind: m?.kind ?? m?.baseCategory ?? m?.type,
+            })),
+        [resolveLocalizedLabel]
+    );
+
+    const prefetchedData = useMemo(() => {
+        if (!initialData) return null;
+        if (initialData.restaurantId !== restaurantId) return null;
+        if (initialData.mealType !== mealType) return null;
+        return initialData;
+    }, [initialData, restaurantId, mealType]);
+
     useEffect(() => {
         initialSelectionAppliedRef.current = false;
-        setSelectedCategoryId("");
-        setSelectedSubcategoryId("all");
-    }, [restaurantId, mealType]);
+        if (prefetchedData) {
+            setSelectedCategoryId(prefetchedData.categoryId ?? "");
+            setSelectedSubcategoryId(prefetchedData.subcategoryId ?? "all");
+        } else {
+            setSelectedCategoryId("");
+            setSelectedSubcategoryId("all");
+        }
+    }, [restaurantId, mealType, prefetchedData]);
 
     useEffect(() => {
         if (!restaurantId) return;
@@ -120,6 +151,16 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         let cancelled = false;
 
         async function loadCategories() {
+            if (prefetchedData?.rawCategories?.length) {
+                const mapped = mapCategories(prefetchedData.rawCategories);
+                if (cancelled) return;
+                setRawCategories(prefetchedData.rawCategories);
+                setCategories(mapped);
+                setCategoriesError(null);
+                setLoadingCategories(false);
+                return;
+            }
+
             setLoadingCategories(true);
 
             try {
@@ -159,7 +200,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         return () => {
             cancelled = true;
         };
-    }, [restaurantId, mealType, mapCategories]);
+    }, [restaurantId, mealType, mapCategories, prefetchedData]);
 
     useEffect(() => {
         if (!rawCategories.length) return;
@@ -329,8 +370,22 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         };
     }, [updateCardScrollState, items.length, loadingItems, loadingCategories]);
 
+    const prefetchedMatchesSelection = useMemo(() => {
+        if (!prefetchedData) return false;
+        return (
+            prefetchedData.categoryId === selectedCategoryId &&
+            (prefetchedData.subcategoryId ?? "all") === selectedSubcategoryId
+        );
+    }, [prefetchedData, selectedCategoryId, selectedSubcategoryId]);
+
     useEffect(() => {
         if (!selectedCategoryId) return;
+
+        if (prefetchedMatchesSelection && prefetchedData?.rawItems) {
+            setItems(mapMenuItems(prefetchedData.rawItems));
+            setLoadingItems(false);
+            return;
+        }
 
         let cancelled = false;
 
@@ -361,13 +416,7 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
                 const data = json?.data ?? json;
                 if (!Array.isArray(data)) throw new Error("Menu items response is not an array");
 
-                const mapped: MenuItem[] = data.map((m: any) => ({
-                    id: m._id ?? m.id,
-                    title: resolveLocalizedLabel(m?.name, m?.title ?? "Item"),
-                    imageUrl: m?.image?.url ?? m?.imageUrl ?? "",
-                    price: m?.price ?? 0,
-                    kind: m?.kind ?? m?.baseCategory ?? m?.type,
-                }));
+                const mapped = mapMenuItems(data);
 
                 setItems(mapped);
             } catch (e) {
@@ -386,7 +435,15 @@ export default function MenuBrowser({ restaurantId, mealType, onMealTypeChange }
         return () => {
             cancelled = true;
         };
-    }, [restaurantId, selectedCategoryId, selectedSubcategoryId, mealType, resolveLocalizedLabel]);
+    }, [
+        restaurantId,
+        selectedCategoryId,
+        selectedSubcategoryId,
+        mealType,
+        mapMenuItems,
+        prefetchedData,
+        prefetchedMatchesSelection,
+    ]);
 
     useEffect(() => {
         if (!initialSelectionAppliedRef.current) return;

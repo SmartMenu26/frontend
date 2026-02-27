@@ -21,7 +21,9 @@ export async function GET(
     qs ? `?${qs}` : ""
   }`;
 
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await fetch(url, {
+    next: { revalidate: 120 },
+  });
   const data = await res.json().catch(() => null);
 
   return NextResponse.json(data, { status: res.status });

@@ -4,6 +4,8 @@ import RestaurantContent from "@/app/components/restaurant/RestaurantContext";
 import Footer from "@/app/components/ui/Footer";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
 import LanguageSwitcher from "@/app/components/languageSwitcher/LanguageSwitcher";
+import type { MealKind } from "@/app/data/dummyMenuCategories";
+import { fetchInitialMenuData } from "@/app/lib/menuPrefetch";
 
 async function fetchRestaurantName(restaurantId: string) {
   const backendBase = process.env.BACKEND_URL?.trim().replace(/\/$/, "");
@@ -44,13 +46,37 @@ async function fetchRestaurantName(restaurantId: string) {
   }
 }
 
-type PageProps = { 
-  params: Promise<{ restaurantId: string }> // Update type to Promise
+type PageProps = {
+  params: Promise<{ restaurantId: string }>;
+  searchParams?: Promise<{
+    kind?: string;
+    categoryId?: string;
+    subcategoryId?: string;
+  }>;
 };
 
-export default async function RestaurantPage({ params }: PageProps) {
+export default async function RestaurantPage({ params, searchParams }: PageProps) {
   const { restaurantId } = await params;
+  const resolvedSearch = (searchParams ? await searchParams : {}) ?? {};
+
+  const initialMealType: MealKind =
+    resolvedSearch.kind === "drink" ? "drink" : "food";
+  const requestedCategoryId =
+    typeof resolvedSearch.categoryId === "string"
+      ? resolvedSearch.categoryId
+      : undefined;
+  const requestedSubcategoryId =
+    typeof resolvedSearch.subcategoryId === "string"
+      ? resolvedSearch.subcategoryId
+      : undefined;
+
   const restaurantName = await fetchRestaurantName(restaurantId);
+  const initialMenuData = await fetchInitialMenuData({
+    restaurantId,
+    mealType: initialMealType,
+    categoryId: requestedCategoryId,
+    subcategoryId: requestedSubcategoryId,
+  });
 
   return (
     <>
@@ -60,7 +86,10 @@ export default async function RestaurantPage({ params }: PageProps) {
 
         <AiSuggestion restaurantId={restaurantId} />
 
-        <RestaurantContent restaurantId={restaurantId} />
+        <RestaurantContent
+          restaurantId={restaurantId}
+          initialMenuData={initialMenuData}
+        />
 
         <Footer />
       </div>

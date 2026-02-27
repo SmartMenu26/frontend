@@ -5,8 +5,14 @@ import MenuBrowser from "@/app/components/menuBrowser/MenuBrowser";
 import PopularSection from "@/app/components/popularSection/PopularSection";
 import type { MealKind } from "@/app/data/dummyMenuCategories";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { PrefetchedMenuData } from "@/app/lib/menuPrefetch";
 
-export default function RestaurantContent({ restaurantId }: { restaurantId: string }) {
+type Props = {
+  restaurantId: string;
+  initialMenuData?: PrefetchedMenuData | null;
+};
+
+export default function RestaurantContent({ restaurantId, initialMenuData }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -41,6 +47,7 @@ export default function RestaurantContent({ restaurantId }: { restaurantId: stri
         restaurantId={restaurantId}
         mealType={mealType}
         onMealTypeChange={setMealType}
+        initialData={initialMenuData ?? undefined}
       />
       <PopularSection restaurantId={restaurantId} mealType={mealType} />
     </>
