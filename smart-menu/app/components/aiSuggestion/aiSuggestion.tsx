@@ -47,14 +47,14 @@ export default function AiSuggestion({
       label: t("chips.healthy"),
       icon: <Leaf size={16} />,
       variant: "solid",
-      colorClassName: "bg-[#70B77E] text-white hover:bg-[#70B77E]/90",
+      colorClassName: "bg-[#386c42] text-white hover:bg-[#70B77E]/90",
     },
     {
       id: "protein2",
       label: t("chips.surprise"),
       icon: <Dice5 size={16} />,
       variant: "solid",
-      colorClassName: "bg-[#7EA0B7] text-white hover:bg-[#7EA0B7]/90",
+      colorClassName: "bg-[#436d8a] text-white hover:bg-[#7EA0B7]/90",
     },
     {
       id: "protein3",
