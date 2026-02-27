@@ -41,7 +41,15 @@ export default function Footer() {
           </div>
         </div>
 
-        <InstagramIcon className="h-6 w-6 text-[#2F3A37]" strokeWidth={1.7} />
+        <a
+          href="https://www.instagram.com/smartmenu.mk/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Visit Smart Menu on Instagram"
+          className="hover:text-[#074128]"
+        >
+          <InstagramIcon className="h-6 w-6 text-[#2F3A37]" strokeWidth={1.7} />
+        </a>
       </div>
     </footer>
   );
