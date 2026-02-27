@@ -49,16 +49,6 @@ export default function MenuBrowser({
     const searchParamsString = searchParams.toString();
     const locale = useLocale() as Locale;
 
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [rawCategories, setRawCategories] = useState<any[]>([]);
-    const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
-    const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>("all");
-
-    const [items, setItems] = useState<MenuItem[]>([]);
-    const [loadingCategories, setLoadingCategories] = useState(true);
-    const [loadingItems, setLoadingItems] = useState(false);
-    const [cardsVisible, setCardsVisible] = useState(false);
-
     const selectionStorageKey = useMemo(
         () => `menu-browser:${restaurantId}:${mealType}`,
         [restaurantId, mealType]
@@ -71,11 +61,6 @@ export default function MenuBrowser({
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
     const [categoriesError, setCategoriesError] = useState<string | null>(null);
-
-    const selectedCategory = useMemo(
-        () => categories.find((c) => c.id === selectedCategoryId),
-        [categories, selectedCategoryId]
-    );
 
     const labelPriority = useMemo(() => {
         const order: string[] = [];
@@ -134,6 +119,41 @@ export default function MenuBrowser({
         if (initialData.mealType !== mealType) return null;
         return initialData;
     }, [initialData, restaurantId, mealType]);
+
+    const prefetchedCategories = useMemo(
+        () => (prefetchedData?.rawCategories?.length ? mapCategories(prefetchedData.rawCategories) : []),
+        [prefetchedData, mapCategories]
+    );
+
+    const prefetchedItems = useMemo(
+        () => (prefetchedData?.rawItems?.length ? mapMenuItems(prefetchedData.rawItems) : []),
+        [prefetchedData, mapMenuItems]
+    );
+
+    const [categories, setCategories] = useState<Category[]>(() => prefetchedCategories);
+    const [rawCategories, setRawCategories] = useState<any[]>(() => prefetchedData?.rawCategories ?? []);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string>(() => prefetchedData?.categoryId ?? "");
+    const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>(() => prefetchedData?.subcategoryId ?? "all");
+
+    const [items, setItems] = useState<MenuItem[]>(() => prefetchedItems);
+    const [loadingCategories, setLoadingCategories] = useState(() => !prefetchedData);
+    const [loadingItems, setLoadingItems] = useState(() => !prefetchedData);
+    const [cardsVisible, setCardsVisible] = useState(() => Boolean(prefetchedData));
+
+    const selectedCategory = useMemo(
+        () => categories.find((c) => c.id === selectedCategoryId),
+        [categories, selectedCategoryId]
+    );
+
+    useEffect(() => {
+        if (prefetchedData) {
+            setRawCategories(prefetchedData.rawCategories ?? []);
+            setCategories(prefetchedCategories);
+            setItems(prefetchedItems);
+            setLoadingCategories(false);
+            setLoadingItems(false);
+        }
+    }, [prefetchedData, prefetchedCategories, prefetchedItems]);
 
     useEffect(() => {
         initialSelectionAppliedRef.current = false;

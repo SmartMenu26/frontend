@@ -7,12 +7,17 @@ import LanguageSwitcher from "@/app/components/languageSwitcher/LanguageSwitcher
 import type { MealKind } from "@/app/data/dummyMenuCategories";
 import { fetchInitialMenuData } from "@/app/lib/menuPrefetch";
 
-async function fetchRestaurantName(restaurantId: string) {
+type RestaurantMeta = {
+  name: string | null;
+  heroImageUrl?: string | null;
+};
+
+async function fetchRestaurantMeta(restaurantId: string): Promise<RestaurantMeta> {
   const backendBase = process.env.BACKEND_URL?.trim().replace(/\/$/, "");
 
   if (!backendBase) {
     console.error("Failed to fetch restaurant: BACKEND_URL is missing");
-    return null;
+    return { name: null, heroImageUrl: null };
   }
 
   try {
@@ -23,26 +28,48 @@ async function fetchRestaurantName(restaurantId: string) {
 
     if (!res.ok) {
       console.error("Failed to fetch restaurant:", res.status, res.statusText);
-      return null;
+      return { name: null, heroImageUrl: null };
     }
 
     const payload = await res.json().catch(() => null);
     const data = payload?.data ?? payload;
 
-    if (!data) return null;
+    if (!data) return { name: null, heroImageUrl: null };
 
-    if (typeof data.name === "string") {
-      return data.name;
-    }
+    const resolvedName =
+      typeof data.name === "string"
+        ? data.name
+        : typeof data.name === "object"
+        ? data.name?.mk ?? data.name?.en ?? data.name?.sq ?? null
+        : null;
 
-    if (typeof data.name === "object") {
-      return data.name?.mk ?? data.name?.en ?? data.name?.sq ?? null;
-    }
+    const heroImageCandidates = [
+      data?.heroImage,
+      data?.coverImage,
+      data?.logo,
+      data?.image,
+      Array.isArray(data?.images) ? data.images[0] : null,
+      Array.isArray(data?.gallery) ? data.gallery[0] : null,
+    ];
 
-    return null;
+    const resolveImageUrl = (entry: any): string | null => {
+      if (!entry) return null;
+      if (typeof entry === "string") return entry;
+      if (typeof entry === "object") {
+        return entry.url ?? entry.src ?? null;
+      }
+      return null;
+    };
+
+    const heroImageUrl =
+      heroImageCandidates
+        .map(resolveImageUrl)
+        .find((url) => typeof url === "string" && url.length > 0) ?? null;
+
+    return { name: resolvedName, heroImageUrl };
   } catch (error) {
     console.error("Error fetching restaurant:", error);
-    return null;
+    return { name: null, heroImageUrl: null };
   }
 }
 
@@ -70,8 +97,8 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
       ? resolvedSearch.subcategoryId
       : undefined;
 
-  const [restaurantName, initialMenuData] = await Promise.all([
-    fetchRestaurantName(restaurantId),
+  const [restaurantMeta, initialMenuData] = await Promise.all([
+    fetchRestaurantMeta(restaurantId),
     fetchInitialMenuData({
       restaurantId,
       mealType: initialMealType,
@@ -84,7 +111,9 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
     <>
       <div className="pt-8 flex flex-col gap-6">
         <InstallAppButton />
-        <RestaurantHeader name={restaurantName ?? undefined} />
+        <RestaurantHeader
+          name={restaurantMeta.name ?? undefined}
+        />
 
         <AiSuggestion restaurantId={restaurantId} />
 
