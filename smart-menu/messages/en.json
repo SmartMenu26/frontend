@@ -183,5 +183,150 @@
         "contains": "Contains mustard"
       }
     }
+  },
+  "howItWorks": {
+    "hero": {
+      "eyebrow": "How it works",
+      "title": "A digital menu that works for you",
+      "description": "Smart Menu connects the QR menu, AI assistant, and revenue analytics in one automated platform."
+    },
+    "steps": {
+      "upload": {
+        "title": "1. Upload menu & branding",
+        "body": "Import PDF, Excel, or CMS and we auto-structure every dish, allergen, and visual."
+      },
+      "qr": {
+        "title": "2. Guests scan the QR",
+        "body": "Each QR is localized (MK, SQ, EN) and stays available offline thanks to the PWA cache."
+      },
+      "assistant": {
+        "title": "3. AI assistant sells",
+        "body": "Guests receive personalized pairings, upsell and cross-sell suggestions based on popularity and margin."
+      },
+      "insights": {
+        "title": "4. You get the insights",
+        "body": "A morning email with top sellers, average check, and stockouts keeps the whole team aligned."
+      }
+    },
+    "cta": {
+      "primary": "Book a demo",
+      "secondary": "Download sample QR menu"
+    },
+    "comparison": {
+      "title": "Why is it better than a classic QR menu?",
+      "items": [
+        "It’s not just a PDF inside a QR",
+        "Interactive and dynamic experience",
+        "AI that sells instead of the waiter",
+        "Analytics that guide every decision"
+      ]
+    },
+    "localSeo": "Smart Menu is the digital menu solution for Macedonia, built for restaurants, cafés, and hotels that want a modern, intelligent system."
+  },
+  "pricing": {
+    "hero": {
+      "eyebrow": "Pricing",
+      "title": "Pro plans for any hospitality concept",
+      "description": "Pay per venue and unlock unlimited languages, media, and push campaigns."
+    },
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "price": "22 €",
+        "period": "/month",
+        "description": "For small cafés and bars that want a modern QR menu.",
+        "features": [
+          "Up to 1 venue",
+          "Up to 120 menu items",
+          "AI recommendations",
+          "Multi-language support",
+          "Essential analytics"
+        ]
+      },
+      "pro": {
+        "name": "Pro (Most popular)",
+        "price": "50 €",
+        "period": "/month",
+        "description": "For restaurants focused on increasing the average check size.",
+        "features": [
+          "Up to 3 venues",
+          "Up to 400 menu items",
+          "Advanced AI recommendations",
+          "AI dish Q&A",
+          "Detailed analytics",
+          "Priority support"
+        ]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Talk to us",
+        "period": "",
+        "description": "For groups, hotels, and franchises.",
+        "features": [
+          "Unlimited venues",
+          "Custom functionality",
+          "API integration",
+          "SLA agreement",
+          "24/7 premium support"
+        ]
+      }
+    },
+    "roi": {
+      "title": "Why it pays for itself",
+      "items": [
+        "Average check grows 18% thanks to AI upsell.",
+        "Eliminate all menu printing and design costs.",
+        "60%+ of guests pick the recommended dish."
+      ]
+    },
+    "faq": [
+      {
+        "question": "Is there a setup fee?",
+        "answer": "No. Implementation is free at the moment and takes up to 3 business days."
+      },
+      {
+        "question": "Can I pause the subscription?",
+        "answer": "Yes, it’s a month-to-month agreement. Pause or cancel anytime."
+      },
+      {
+        "question": "Do you support multiple languages?",
+        "answer": "Smart Menu auto-translates menu content into Macedonian, Albanian, and English."
+      }
+    ],
+    "cta": "Request a quote",
+    "aiCredits": {
+      "title": "AI Credits",
+      "price": "16 €",
+      "period": "/1,000 interactions",
+      "description": "Pay only when guests chat with the assistant. Credits never expire—top up a new pack whenever you consume them.",
+      "cta": "Contact sales for a top-up"
+    }
+  },
+  "about": {
+    "hero": {
+      "eyebrow": "About us",
+      "title": "Digital QR menu with an AI assistant, built in Macedonia",
+      "description": "Smart Menu was created by a team passionate about simplifying hospitality through technology. Our goal is to make food discovery easier for guests and more efficient for restaurants."
+    },
+    "mission": {
+      "title": "Mission",
+      "body": "Our mission is to help local restaurants increase sales and deliver a better digital experience for their guests."
+    },
+    "stats": [
+      "5,000+ scans per month",
+      "Support for MK / SQ / EN",
+      "AI recommendations that keep improving"
+    ],
+    "founder": {
+      "title": "Founder note",
+      "body": "Smart Menu is initiated and developed by Stefan Gjorgjevski. The idea was born from the need for guests to choose meals more easily while restaurateurs manage menus through a modern, simple workflow."
+    },
+    "contact": {
+      "title": "Contact",
+      "email": "restaurantsmart26@gmail.com",
+      "phone": "+389 71 863 999",
+      "address": "Bul. Partizanski Odredi 14, Skopje",
+      "mapLabel": "Open Google Maps"
+    }
   }
 }

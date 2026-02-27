@@ -183,5 +183,150 @@
         "contains": "Përmban mustardë"
       }
     }
+  },
+  "howItWorks": {
+    "hero": {
+      "eyebrow": "Si funksionon",
+      "title": "Meni digjital që punon për ju",
+      "description": "Smart Menu bashkon QR menutë, asistentin AI dhe analizat në një platformë të vetme."
+    },
+    "steps": {
+      "upload": {
+        "title": "1. Ngarko menunë dhe branding-un",
+        "body": "Importojmë PDF, Excel ose CMS dhe i organizojmë automatikisht të gjitha artikujt, alergjenët dhe fotot."
+      },
+      "qr": {
+        "title": "2. Mysafirët skanojnë QR",
+        "body": "Çdo QR është i lokalizuar (MK, SQ, EN) dhe punon edhe offline falë cache-it PWA."
+      },
+      "assistant": {
+        "title": "3. Asistenti AI rekomandon",
+        "body": "Mysafirët marrin sugjerime personale bazuar në popullaritet, marzh dhe preferenca dietike."
+      },
+      "insights": {
+        "title": "4. Ju merrni njohuritë",
+        "body": "Dashboard me shitjet kryesore, llogarinë mesatare dhe mungesat – dërguar çdo mëngjes në email."
+      }
+    },
+    "cta": {
+      "primary": "Rezervo demo",
+      "secondary": "Shkarko menunë demo"
+    },
+    "comparison": {
+      "title": "Pse është më mirë se një QR klasik?",
+      "items": [
+        "Nuk është vetëm PDF në QR",
+        "Është interaktive dhe dinamike",
+        "AI shet në vend të kamerierit",
+        "Analiza që ndihmojnë vendimet"
+      ]
+    },
+    "localSeo": "Smart Menu është zgjidhje për menu digjitale në Maqedoni për restorante, kafene dhe hotele që duan sistem modern dhe inteligjent."
+  },
+  "pricing": {
+    "hero": {
+      "eyebrow": "Çmime",
+      "title": "Paketa profesionale për çdo biznes",
+      "description": "Pagesë sipas lokacionit me gjuhë të pakufizuara, foto dhe njoftime push."
+    },
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "price": "22 €",
+        "period": "/muaj",
+        "description": "Për kafene dhe bare të vogla që duan menu moderne me QR.",
+        "features": [
+          "Deri në 1 lokacion",
+          "Deri në 120 artikuj",
+          "Rekomandime AI",
+          "Mbështetje multi-gjuhëshe",
+          "Analiza bazike"
+        ]
+      },
+      "pro": {
+        "name": "Pro (Më i kërkuari)",
+        "price": "50 €",
+        "period": "/muaj",
+        "description": "Për restorante që duan të rrisin llogarinë mesatare.",
+        "features": [
+          "Deri në 3 lokacione",
+          "Deri në 400 artikuj",
+          "Rekomandime të avancuara AI",
+          "Pyetje AI për pjatat",
+          "Analiza të detajuara",
+          "Mbështetje prioritare"
+        ]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Na kontakto",
+        "period": "",
+        "description": "Për zinxhirë, hotele dhe franshiza.",
+        "features": [
+          "Lokacione të pakufizuara",
+          "Funksione të personalizuara",
+          "Integrim API",
+          "Marrëveshje SLA",
+          "Mbështetje 24/7"
+        ]
+      }
+    },
+    "roi": {
+      "title": "Pse ja vlen?",
+      "items": [
+        "Llogaria mesatare rritet 18% nga upsell-i i AI.",
+        "Zero kosto për printim dhe dizajn të menuseve.",
+        "60% e mysafirëve zgjedhin artikullin e rekomanduar."
+      ]
+    },
+    "faq": [
+      {
+        "question": "A ka tarifë instalimi?",
+        "answer": "Jo, setup-i është falas dhe përfundon për 3 ditë pune."
+      },
+      {
+        "question": "A mund ta pezulloj abonimin?",
+        "answer": "Po, kontrata është mujore pa detyrim – pezullo kur të duash."
+      },
+      {
+        "question": "A mbështesni shumë gjuhë?",
+        "answer": "Smart Menu përkthen automatikisht në maqedonisht, shqip dhe anglisht."
+      }
+    ],
+    "cta": "Kërko ofertë",
+    "aiCredits": {
+      "title": "Kreditë AI",
+      "price": "16 €",
+      "period": "/1,000 ndërveprime",
+      "description": "Paguani vetëm kur përdorni asistentin AI. Kreditë nuk skadojnë – sapo të mbarojnë, shtoni një paketë të re.",
+      "cta": "Kontakto për rimbushje"
+    }
+  },
+  "about": {
+    "hero": {
+      "eyebrow": "Rreth nesh",
+      "title": "Menu digjitale QR me asistent AI, zhvilluar në Maqedoni",
+      "description": "Smart Menu u krijua nga një ekip me pasion për të thjeshtuar mikpritjen përmes teknologjisë. Qëllimi ynë është ta bëjmë zgjedhjen e ushqimit më të lehtë për mysafirët dhe më efikase për restorantet."
+    },
+    "mission": {
+      "title": "Misioni",
+      "body": "Misioni ynë është t’u ndihmojmë restoranteve lokale të rrisin shitjet dhe të ofrojnë një përvojë digjitale më të mirë për mysafirët e tyre."
+    },
+    "stats": [
+      "5,000+ skanime mujore",
+      "Mbështetje MK / SQ / EN",
+      "Rekomandime AI që përmirësohen vazhdimisht"
+    ],
+    "founder": {
+      "title": "Themeluesi",
+      "body": "Smart Menu është nisur dhe zhvilluar nga Stefan Gjorgjevski. Ideja lindi nga nevoja që mysafirët të zgjedhin më lehtë ushqimin, ndërsa restorantet të kenë një mënyrë moderne dhe të thjeshtë për ta menaxhuar menunë."
+    },
+    "contact": {
+      "title": "Kontakti",
+      "email": "restaurantsmart26@gmail.com",
+      "phone": "+389 71 863 999",
+      "address": "Bul. Partizanski Odredi 14, Shkup",
+      "mapLabel": "Hape në Google Maps"
+    }
   }
 }
