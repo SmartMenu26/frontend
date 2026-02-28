@@ -41,6 +41,16 @@ const normalizeCategorySelection = (
   }
 
   const sortedSubcategories = sortByOrder(category.children ?? []);
+  const wantsAll =
+    requestedSubcategoryId === "all" || sortedSubcategories.length === 0;
+
+  if (wantsAll) {
+    return {
+      categoryId: category._id,
+      subcategoryId: "all" as const,
+    };
+  }
+
   const subcategory =
     sortedSubcategories.find((child) => child._id === requestedSubcategoryId) ??
     sortedSubcategories[0];

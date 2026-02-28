@@ -270,8 +270,8 @@ type MenuItemHeroProps = {
   backLabel: string;
 };
 
-const HERO_IMAGE_SIZE = 400;
-const HERO_IMAGE_SIZES = "(max-width: 640px) 80vw, 400px";
+const HERO_IMAGE_SIZE = 300;
+const HERO_IMAGE_SIZES = "300px";
 
 const MenuItemHero = memo(function MenuItemHero({
   name,
@@ -322,7 +322,7 @@ const MenuItemHero = memo(function MenuItemHero({
           onLoadingComplete={() => setImageLoaded(true)}
           onError={() => setImageLoaded(true)}
           className={clsx(
-            "relative h-full w-full rounded-full object-cover transition-opacity duration-300",
+            "h-full w-full rounded-full object-cover transition-opacity duration-300",
             imageLoaded ? "opacity-100" : "opacity-0"
           )}
         />

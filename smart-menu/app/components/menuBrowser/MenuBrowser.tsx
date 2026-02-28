@@ -380,6 +380,13 @@ export default function MenuBrowser({
     useEffect(() => {
         const container = cardsContainerRef.current;
         if (!container) return;
+        container.scrollLeft = 0;
+        requestAnimationFrame(() => updateCardScrollState());
+    }, [selectedCategoryId, selectedSubcategoryId, updateCardScrollState]);
+
+    useEffect(() => {
+        const container = cardsContainerRef.current;
+        if (!container) return;
 
         updateCardScrollState();
         const handleScroll = () => updateCardScrollState();
