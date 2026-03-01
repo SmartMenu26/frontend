@@ -158,12 +158,6 @@ export default async function Home({ params }: Props) {
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
-                href={demoRestaurantHref}
-                className="inline-flex items-center justify-center rounded-full bg-[#1B1F1E] px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-[#2C3330]"
-              >
-                {hero.primaryCta}
-              </Link>
-              <Link
                 href="#contact"
                 className="inline-flex items-center justify-center rounded-full border border-[#1B1F1E] px-6 py-3 text-sm font-semibold uppercase tracking-wide text-[#1B1F1E] transition hover:bg-[#1B1F1E] hover:text-white"
               >
