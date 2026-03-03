@@ -1,7 +1,27 @@
 import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
+import type { Redirect, RouteHas } from "next/dist/lib/load-custom-routes";
 
 const withNextIntl = createNextIntlPlugin("./next-intl.config.ts");
+
+const DEFAULT_SITE_URL = "https://smartmenumk.com";
+const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() ?? DEFAULT_SITE_URL;
+
+function computeSiteMeta(urlString: string) {
+  try {
+    const parsed = new URL(urlString);
+    return { origin: parsed.origin, host: parsed.host };
+  } catch {
+    const fallback = new URL(DEFAULT_SITE_URL);
+    return { origin: fallback.origin, host: fallback.host };
+  }
+}
+
+const { origin: siteOrigin, host: canonicalHost } = computeSiteMeta(rawSiteUrl);
+const isLocalhost = canonicalHost.includes("localhost");
+const alternateHost = canonicalHost.startsWith("www.")
+  ? canonicalHost.replace(/^www\./, "")
+  : `www.${canonicalHost}`;
 
 const IMAGE_DEVICE_SIZES = [360, 480, 640, 768, 1024];
 const IMAGE_FIXED_SIZES = [14, 20, 24, 32, 40, 48, 56, 64, 72, 96, 100, 128, 160, 200, 320, 400];
@@ -22,6 +42,25 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     // Keep the quality buckets small so fewer unique transformations are produced.
     qualities: [60, 75, 85],
+  },
+  async redirects() {
+    const redirects: Redirect[] = [];
+
+    if (!isLocalhost && alternateHost !== canonicalHost) {
+      const hostCondition: RouteHas = {
+        type: "host",
+        value: alternateHost,
+      };
+
+      redirects.push({
+        source: "/:path*",
+        has: [hostCondition],
+        destination: `${siteOrigin}/:path*`,
+        permanent: true,
+      });
+    }
+
+    return redirects;
   },
 };
 

@@ -1,7 +1,8 @@
 import { MetadataRoute } from "next";
 import { locales } from "@/i18n";
+import { getSiteUrl } from "@/lib/siteMeta";
 
-const baseUrl = "https://www.smartmenumk.com";
+const baseUrl = getSiteUrl();
 const localeRoutes = ["", "/kako-raboti", "/cenovnik", "/za-nas"] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

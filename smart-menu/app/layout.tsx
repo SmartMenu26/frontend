@@ -4,9 +4,14 @@ import RegisterSW from "./_components/RegisterSW";
 import Script from "next/script";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { inter, greatVibes } from "./fonts";
+import { getSiteUrl } from "@/lib/siteMeta";
+
+const siteUrl = getSiteUrl();
+const homeUrl = `${siteUrl}/`;
+const ogImageUrl = `${siteUrl}/og.jpg?v=2`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.smartmenumk.com"),
+  metadataBase: new URL(siteUrl),
   title: "Дигитално QR мени со AI асистент за ресторани | Smart Menu Македонија",
   description: "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
   manifest: "/manifest.json",
@@ -27,9 +32,9 @@ export const metadata: Metadata = {
     title: "Дигитално QR мени со AI асистент за ресторани | Smart Menu Македонија",
     description:
       "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
-    url: "https://www.smartmenumk.com/",
+    url: homeUrl,
     siteName: "Smart Menu",
-    images: [{ url: "/og.jpg?v=2", width: 1200, height: 630 }],
+    images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     locale: "mk_MK",
     type: "website",
   },
@@ -38,7 +43,7 @@ export const metadata: Metadata = {
     title: "Дигитално QR мени со AI асистент за ресторани | Smart Menu Македонија",
     description:
       "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
-    images: ["/og.jpg?v=2"],
+    images: [ogImageUrl],
   },
 };
 
