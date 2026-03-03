@@ -4,12 +4,16 @@ import type { Redirect, RouteHas } from "next/dist/lib/load-custom-routes";
 
 const withNextIntl = createNextIntlPlugin("./next-intl.config.ts");
 
-const DEFAULT_SITE_URL = "https://smartmenumk.com";
+const DEFAULT_SITE_URL = "https://www.smartmenumk.com";
 const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() ?? DEFAULT_SITE_URL;
 
 function computeSiteMeta(urlString: string) {
+  const normalized =
+    urlString.startsWith("http://") || urlString.startsWith("https://")
+      ? urlString
+      : `https://${urlString}`;
   try {
-    const parsed = new URL(urlString);
+    const parsed = new URL(normalized);
     return { origin: parsed.origin, host: parsed.host };
   } catch {
     const fallback = new URL(DEFAULT_SITE_URL);
