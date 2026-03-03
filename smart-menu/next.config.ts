@@ -1,5 +1,6 @@
 import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
+import type { Redirect, RouteHas } from "next/dist/lib/load-custom-routes";
 
 const withNextIntl = createNextIntlPlugin("./next-intl.config.ts");
 
@@ -43,17 +44,17 @@ const nextConfig: NextConfig = {
     qualities: [60, 75, 85],
   },
   async redirects() {
-    const redirects = [];
+    const redirects: Redirect[] = [];
 
     if (!isLocalhost && alternateHost !== canonicalHost) {
+      const hostCondition: RouteHas = {
+        type: "host",
+        value: alternateHost,
+      };
+
       redirects.push({
         source: "/:path*",
-        has: [
-          {
-            type: "host",
-            value: alternateHost,
-          },
-        ],
+        has: [hostCondition],
         destination: `${siteOrigin}/:path*`,
         permanent: true,
       });
