@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
+import { incrementMenuItemView } from "@/app/lib/menuItemViews";
 
 type MenuItem = {
   id: string;
@@ -135,6 +136,10 @@ export default function PopularSection({
                     priceLabel={`${it.price}ден`}
                     kind={mealType}
                     onClick={() => {
+                      void incrementMenuItemView({
+                        restaurantId,
+                        menuItemId: it.id,
+                      });
                       const detailParams = new URLSearchParams();
                       detailParams.set("kind", mealType);
                       const detailHref = buildLocalizedPath(

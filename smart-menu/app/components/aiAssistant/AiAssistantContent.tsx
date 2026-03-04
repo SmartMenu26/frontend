@@ -14,6 +14,7 @@ import menuItemPlaceholder from "@/public/images/menu-item-placeholder.png";
 import noCreditsImage from "@/public/images/no-credits.png";
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
+import { incrementMenuItemView } from "@/app/lib/menuItemViews";
 
 type Suggestion = {
   id: string;
@@ -233,6 +234,14 @@ export default function AiAssistantContent({
                       <Link
                         key={id + title}
                         href={href}
+                        onClick={() => {
+                          if (id) {
+                            void incrementMenuItemView({
+                              restaurantId,
+                              menuItemId: id,
+                            });
+                          }
+                        }}
                         className="flex items-center gap-3 rounded-[22px] border border-[#ECEFF5] bg-white px-3 py-3 text-[#1E1F24] shadow-sm transition hover:border-[#C2CADB]"
                       >
                         <img
