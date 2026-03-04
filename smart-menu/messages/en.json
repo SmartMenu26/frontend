@@ -47,6 +47,145 @@
     }
   }
   ,
+  "adminDashboard": {
+    "header": {
+      "eyebrow": "Smart Menu internal",
+      "title": "Restaurant admin",
+      "subtitle": "Use the admin dashboard to update menu items, AI credits, assistant names, and supported languages.",
+      "logout": "Log out"
+    },
+    "login": {
+      "labels": {
+        "username": "Username",
+        "password": "Password",
+        "remember": "Remember me"
+      },
+      "buttons": {
+        "submit": "Sign in",
+        "submitting": "Signing in..."
+      },
+      "messages": {
+        "success": "Login successful. Loading dashboard...",
+        "missingCredentials": "Enter both username and password to continue.",
+        "genericError": "Login failed. Please try again.",
+        "proxyNote": "Requests are proxied to <code>{endpoint}</code>. Use the credentials from Smart Menu (example: {example})."
+      }
+    },
+    "restaurantCard": {
+      "title": "Restaurant",
+      "unnamed": "Unnamed restaurant",
+      "noImage": "No image",
+      "planLabel": "Plan · {plan}",
+      "fields": {
+        "slug": "Slug",
+        "timezone": "Timezone",
+        "created": "Created",
+        "updated": "Updated"
+      },
+      "badges": {
+        "active": "Active",
+        "disabled": "Disabled",
+        "aiEnabled": "AI enabled",
+        "aiDisabled": "AI disabled"
+      }
+    },
+    "adminCard": {
+      "title": "Admin contact",
+      "fields": {
+        "username": "Username",
+        "email": "Email",
+        "status": "Status",
+        "missingEmail": "Not provided",
+        "sessionStarted": "Session started"
+      },
+      "badges": {
+        "active": "Active",
+        "suspended": "Suspended"
+      }
+    },
+    "creditsCard": {
+      "title": "AI credits",
+      "remainingSuffix": "remaining",
+      "currencyChip": "Currency · {currency}",
+      "usedLabel": "Used",
+      "remainingLabel": "Remaining",
+      "hint": "Total credits: {total}. Keep at least 100 available to avoid throttling AI conversations."
+    },
+    "assistantNames": {
+      "title": "AI assistant names",
+      "empty": "No language overrides configured. The assistant falls back to the restaurant name."
+    },
+    "assistantPhoto": {
+      "title": "Assistant illustration",
+      "alt": "Illustration of AI assistant {name}",
+      "fallbackName": "Smart Assistant"
+    },
+    "topViewed": {
+      "title": "Most viewed menu items",
+      "subtitle": "Based on in-app product views.",
+      "loading": "Loading top items...",
+      "error": "Unable to load top viewed items.",
+      "empty": "No view data yet.",
+      "unknown": "Unnamed item",
+      "viewsLabel": "Views",
+      "priceUnknown": "Price unavailable"
+    },
+    "menuItems": {
+      "title": "Menu items",
+      "subtitle": "Search, filter, and inspect the latest products.",
+      "searchLabel": "Search products",
+      "searchPlaceholder": "Search by name, tag, or category...",
+      "filters": {
+        "all": "All",
+        "food": "Food",
+        "drink": "Drinks"
+      },
+      "loading": "Loading menu items...",
+      "errors": {
+        "generic": "Unable to load menu items right now."
+      },
+      "meta": {
+        "total": "{count, plural, one {# item} other {# items}}",
+        "lastSynced": "Last updated {value}"
+      },
+      "empty": {
+        "title": "No products match your filters",
+        "description": "Try clearing the search or switching meal types.",
+        "reset": "Reset filters"
+      },
+      "groups": {
+        "food": {
+          "title": "Food"
+        },
+        "drink": {
+          "title": "Drinks"
+        },
+        "showMore": "Show all {count}",
+        "showLess": "Show less",
+        "empty": "No items in this section."
+      },
+      "card": {
+        "unknownName": "Unnamed item",
+        "priceUnavailable": "Price TBD",
+        "updated": "Updated {value}",
+        "displayed": "Displayed",
+        "hidden": "Hidden",
+        "edit": "Edit",
+        "save": "Save changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "priceLabel": "Price",
+        "invalidPrice": "Enter a valid number.",
+        "updateError": "Unable to save changes."
+      },
+      "pagination": {
+        "prev": "Previous",
+        "next": "Next",
+        "pageLabel": "Page {page} of {total}"
+      }
+    }
+  }
+  ,
   "mealTypeToggle": {
     "food": "Food",
     "drink": "Drinks"

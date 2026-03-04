@@ -14,6 +14,7 @@ import { defaultLocale, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { PrefetchedMenuData } from "@/app/lib/menuPrefetch";
+import { incrementMenuItemView } from "@/app/lib/menuItemViews";
 
 type MenuItem = {
     id: string;
@@ -609,6 +610,10 @@ export default function MenuBrowser({
                                             priceLabel={`${it.price}ден`}
                                             kind={it.kind ?? mealType}
                                             onClick={() => {
+                                                void incrementMenuItemView({
+                                                    restaurantId,
+                                                    menuItemId: it.id,
+                                                });
                                                 const detailParams = new URLSearchParams();
                                                 detailParams.set("kind", mealType);
                                                 const detailHref = buildLocalizedPath(

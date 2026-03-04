@@ -47,6 +47,145 @@
     }
   }
   ,
+  "adminDashboard": {
+    "header": {
+      "eyebrow": "Smart Menu interno",
+      "title": "Paneli i administratorit të restorantit",
+      "subtitle": "Përdorni panelin e administratorit për të përditësuar produktet e menusë, kreditë AI, emrat e asistentit dhe gjuhët e mbështetura.",
+      "logout": "Dil"
+    },
+    "login": {
+      "labels": {
+        "username": "Emri i përdoruesit",
+        "password": "Fjalëkalimi",
+        "remember": "Më mbaj mend"
+      },
+      "buttons": {
+        "submit": "Hyr",
+        "submitting": "Duke u identifikuar..."
+      },
+      "messages": {
+        "success": "Identifikimi u krye me sukses. Po ngarkojmë panelin...",
+        "missingCredentials": "Shkruani emrin e përdoruesit dhe fjalëkalimin për të vazhduar.",
+        "genericError": "Identifikimi dështoi. Provoni sërish.",
+        "proxyNote": "Kërkesat kalojnë përmes <code>{endpoint}</code>. Përdorni kredencialet e dhëna nga Smart Menu (shembull: {example})."
+      }
+    },
+    "restaurantCard": {
+      "title": "Restorant",
+      "unnamed": "Restorant pa emër",
+      "noImage": "Pa foto",
+      "planLabel": "Plani · {plan}",
+      "fields": {
+        "slug": "Slug",
+        "timezone": "Zonë kohore",
+        "created": "Krijuar",
+        "updated": "Përditësuar"
+      },
+      "badges": {
+        "active": "Aktiv",
+        "disabled": "Jo aktiv",
+        "aiEnabled": "AI i aktivizuar",
+        "aiDisabled": "AI i çaktivizuar"
+      }
+    },
+    "adminCard": {
+      "title": "Kontakti i administratorit",
+      "fields": {
+        "username": "Emri i përdoruesit",
+        "email": "Email",
+        "status": "Statusi",
+        "missingEmail": "Nuk është dhënë",
+        "sessionStarted": "Sesioni filloi"
+      },
+      "badges": {
+        "active": "Aktiv",
+        "suspended": "I pezulluar"
+      }
+    },
+    "creditsCard": {
+      "title": "AI kredite",
+      "remainingSuffix": "të mbetura",
+      "currencyChip": "Monedha · {currency}",
+      "usedLabel": "Të përdorura",
+      "remainingLabel": "Të mbetura",
+      "hint": "Kredite gjithsej: {total}. Mbani të paktën 100 për të shmangur kufizimet në bisedat me AI."
+    },
+    "assistantNames": {
+      "title": "Emrat e asistentit AI",
+      "empty": "Nuk ka përkthime të personalizuara. Asistenti përdor emrin e restorantit."
+    },
+    "assistantPhoto": {
+      "title": "Ilustrimi i asistentit",
+      "alt": "Ilustrim i asistentit AI {name}",
+      "fallbackName": "Asistenti i mençur"
+    },
+    "topViewed": {
+      "title": "Artikujt më të shikuar",
+      "subtitle": "Bazuar në shikimet brenda aplikacionit.",
+      "loading": "Po ngarkohen artikujt...",
+      "error": "Nuk mund t'i ngarkojmë artikujt më të shikuar.",
+      "empty": "Ende nuk ka të dhëna për shikime.",
+      "unknown": "Artikull pa emër",
+      "viewsLabel": "Shikime",
+      "priceUnknown": "Çmimi nuk është i disponueshëm"
+    },
+    "menuItems": {
+      "title": "Produktet e menusë",
+      "subtitle": "Kërko, filtro dhe shiko produktet aktive.",
+      "searchLabel": "Kërko produkte",
+      "searchPlaceholder": "Kërko sipas emrit, etiketës ose kategorisë...",
+      "filters": {
+        "all": "Të gjitha",
+        "food": "Ushqim",
+        "drink": "Pije"
+      },
+      "loading": "Po ngarkohen produktet...",
+      "errors": {
+        "generic": "Nuk mund t'i ngarkojmë produktet tani."
+      },
+      "meta": {
+        "total": "{count, plural, one {# produkt} other {# produkte}}",
+        "lastSynced": "Përditësimi i fundit {value}"
+      },
+      "empty": {
+        "title": "Asnjë produkt nuk përputhet",
+        "description": "Pastro kërkimin ose ndrysho filtrin.",
+        "reset": "Rivendos filtrat"
+      },
+      "groups": {
+        "food": {
+          "title": "Ushqim"
+        },
+        "drink": {
+          "title": "Pije"
+        },
+        "showMore": "Shfaq të gjitha {count}",
+        "showLess": "Shfaq më pak",
+        "empty": "Nuk ka artikuj në këtë seksion."
+      },
+      "card": {
+        "unknownName": "Artikull pa emër",
+        "priceUnavailable": "Çmimi TBD",
+        "updated": "Përditësuar {value}",
+        "displayed": "E shfaqur",
+        "hidden": "E fshehur",
+        "edit": "Ndrysho",
+        "save": "Ruaj ndryshimet",
+        "saving": "Duke ruajtur...",
+        "cancel": "Anulo",
+        "priceLabel": "Çmimi",
+        "invalidPrice": "Shkruani një numër të vlefshëm.",
+        "updateError": "Nuk mund t'i ruajmë ndryshimet."
+      },
+      "pagination": {
+        "prev": "Mëparshëm",
+        "next": "Tjetri",
+        "pageLabel": "Faqja {page} nga {total}"
+      }
+    }
+  }
+  ,
   "mealTypeToggle": {
     "food": "Ushqim",
     "drink": "Pije"
