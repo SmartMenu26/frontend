@@ -322,7 +322,7 @@ const MenuItemHero = memo(function MenuItemHero({
           sizes={HERO_IMAGE_SIZES}
           placeholder="blur"
           blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI0Y2RkZFNiIvPjwvc3ZnPg=="
-          onLoadingComplete={() => setImageLoaded(true)}
+          onLoad={() => setImageLoaded(true)}
           onError={() => setImageLoaded(true)}
           className={clsx(
             "h-full w-full rounded-full object-cover transition-opacity duration-300",

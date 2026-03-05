@@ -13,12 +13,13 @@ type RestaurantRecord = {
 
 async function fetchRestaurants(): Promise<RestaurantRecord[]> {
   const backendBase = process.env.BACKEND_URL?.trim().replace(/\/$/, "");
-  if (!backendBase) {
+  if (!backendBase || process.env.NODE_ENV !== "production") {
     return [];
   }
 
   try {
-    const res = await fetch(`${backendBase}/api/restaurants`, {
+    const endpoint = `${backendBase}/api/restaurants`;
+    const res = await fetch(endpoint, {
       next: { revalidate: 3600 },
     });
 
@@ -37,7 +38,8 @@ async function fetchRestaurants(): Promise<RestaurantRecord[]> {
       (restaurant: RestaurantRecord) =>
         typeof restaurant?.slug === "string" && restaurant.slug.length > 0
     );
-  } catch {
+  } catch (error) {
+    console.error("[sitemap] Restaurant fetch error:", error);
     return [];
   }
 }
