@@ -48,25 +48,25 @@ const nextConfig: NextConfig = {
     qualities: [60, 75, 85],
   },
   async redirects() {
-    const redirects: Redirect[] = [];
-
-    // 2) Canonical host redirect (www -> non-www OR non-www -> www)
-    if (!isLocalhost && alternateHost !== canonicalHost) {
-      const hostCondition: RouteHas = {
-        type: "host",
-        value: alternateHost,
-      };
-
-      redirects.push({
-        source: "/:path*",
-        has: [hostCondition],
-        destination: `${siteOrigin}/:path*`,
+    return [
+      {
+        source: "/(.*)",
+        has: [
+          { type: "host", value: "smartmenumk.com" },
+        ],
+        destination: "https://www.smartmenumk.com/:path*",
         permanent: true,
-      });
-    }
-
-    return redirects;
-  }
+      },
+      {
+        source: "/(.*)",
+        has: [
+          { type: "header", key: "x-forwarded-proto", value: "http" },
+        ],
+        destination: "https://www.smartmenumk.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
