@@ -10,10 +10,13 @@ const siteUrl = getSiteUrl();
 const homeUrl = `${siteUrl}/`;
 const ogImageUrl = `${siteUrl}/og.jpg?v=2`;
 
+const baseTitle = "AI QR мени со асистент | Smart Menu M";
+const baseDescription =
+  "Паметна технологија за сериозни угостители: AI асистент, QR мени и аналитика што ја зголемува продажбата и го подобрува гостинското искуство.";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Дигитално QR мени со AI асистент за ресторани | Smart Menu Македонија",
-  description: "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
+  title: baseTitle,
+  description: baseDescription,
   manifest: "/manifest.json",
   robots: {
     index: true,
@@ -29,9 +32,8 @@ export const metadata: Metadata = {
     shortcut: ["/favicon.ico"],
   },
   openGraph: {
-    title: "Дигитално QR мени со AI асистент за ресторани | Smart Menu Македонија",
-    description:
-      "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
+    title: baseTitle,
+    description: baseDescription,
     url: homeUrl,
     siteName: "Smart Menu",
     images: [{ url: ogImageUrl, width: 1200, height: 630 }],
@@ -40,9 +42,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Дигитално QR мени со AI асистент за ресторани | Smart Menu Македонија",
-    description:
-      "Паметна технологија за сериозни угостители. QR дигитално мени со AI асистент што ја зголемува продажбата и просечната сметка.",
+    title: baseTitle,
+    description: baseDescription,
     images: [ogImageUrl],
   },
 };
