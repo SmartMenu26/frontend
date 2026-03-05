@@ -129,7 +129,7 @@ const titleClasses =
               sizes={CARD_IMAGE_SIZES}
               placeholder="blur"
               blurDataURL={BLUR_PLACEHOLDER}
-              onLoadingComplete={() => setImageLoaded(true)}
+              onLoad={() => setImageLoaded(true)}
               className="rounded-full h-full w-full object-cover shadow-[0_0_12px_-4px_rgba(63,93,80,0.35)]"
             />
           </div>
