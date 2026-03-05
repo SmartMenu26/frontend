@@ -26,6 +26,7 @@ type MenuItem = {
 
 type Props = {
     restaurantId: string;
+    restaurantSlug?: string;
     mealType: MealKind;
     onMealTypeChange: (next: MealKind) => void;
     initialData?: PrefetchedMenuData | null;
@@ -40,6 +41,7 @@ const pickDefaultSubcategoryId = (categoryId?: string, source?: Category[]) => {
 
 export default function MenuBrowser({
     restaurantId,
+    restaurantSlug,
     mealType,
     onMealTypeChange,
     initialData,
@@ -616,8 +618,9 @@ export default function MenuBrowser({
                                                 });
                                                 const detailParams = new URLSearchParams();
                                                 detailParams.set("kind", mealType);
+                                                const slugOrId = restaurantSlug ?? restaurantId;
                                                 const detailHref = buildLocalizedPath(
-                                                    `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`,
+                                                    `/restaurant/${slugOrId}/menuItem/${it.id}?${detailParams.toString()}`,
                                                     locale
                                                 );
                                                 router.push(detailHref);

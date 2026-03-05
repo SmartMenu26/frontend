@@ -71,6 +71,7 @@ function resolveLocalizedField(
 
 type Props = {
   restaurantId: string;
+  restaurantSlug?: string;
   suggestionPrompts: Suggestion[];
   prompt: string;
   restaurantName?: string;
@@ -80,6 +81,7 @@ type Props = {
 
 export default function AiAssistantContent({
   restaurantId,
+  restaurantSlug,
   suggestionPrompts,
   prompt,
   restaurantName,
@@ -95,9 +97,10 @@ export default function AiAssistantContent({
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const [resultLocale, setResultLocale] = useState<Locale | null>(null);
+  const slugOrId = restaurantSlug ?? restaurantId;
   const restaurantHomeHref = useMemo(
-    () => buildLocalizedPath(`/restaurant/${restaurantId}`, locale),
-    [locale, restaurantId]
+    () => buildLocalizedPath(`/restaurant/${slugOrId}`, locale),
+    [locale, slugOrId]
   );
   const noCreditsTitle = t("noCreditsTitle");
   const backToMenuLabel = t("backToMenu");
@@ -225,7 +228,7 @@ export default function AiAssistantContent({
 
                     const href = id
                       ? buildLocalizedPath(
-                          `/restaurant/${restaurantId}/menuItem/${id}`,
+                          `/restaurant/${slugOrId}/menuItem/${id}`,
                           locale
                         )
                       : restaurantHomeHref;

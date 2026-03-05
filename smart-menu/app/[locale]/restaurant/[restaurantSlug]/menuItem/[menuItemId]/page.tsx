@@ -1,9 +1,12 @@
 import MenuItemDetails from "@/app/components/menuItemDetails/menuItemDetails";
-import { headers } from "next/headers";
+import { fetchRestaurantRecord } from "@/app/lib/restaurants";
 import { defaultLocale, locales, type Locale } from "@/i18n";
+import { headers } from "next/headers";
+import { notFound, redirect } from "next/navigation";
+import { buildLocalizedPath } from "@/lib/routing";
 
 type Props = {
-  params: Promise<{ locale: Locale; restaurantId: string; menuItemId: string }>;
+  params: Promise<{ locale: Locale; restaurantSlug: string; menuItemId: string }>;
   searchParams?: Promise<{ kind?: string }>;
 };
 
@@ -61,9 +64,35 @@ const parsePrice = (value: unknown): number | undefined => {
 };
 
 export default async function MenuItemPage({ params, searchParams }: Props) {
-  const { locale: routeLocale, restaurantId, menuItemId } = await params;
+  const { locale: routeLocale, restaurantSlug, menuItemId } = await params;
   const resolvedLocale: Locale =
     locales.find((candidate) => candidate === routeLocale) ?? defaultLocale;
+  const record = await fetchRestaurantRecord(restaurantSlug);
+
+  if (!record?.id) {
+    notFound();
+  }
+
+  const resolvedSearch = (searchParams ? await searchParams : {}) ?? {};
+
+  if (
+    record.slug &&
+    record.slug !== restaurantSlug &&
+    /^[a-f\\d]{24}$/i.test(restaurantSlug)
+  ) {
+    const base = buildLocalizedPath(
+      `/restaurant/${record.slug}/menuItem/${menuItemId}`,
+      resolvedLocale
+    );
+    const qs = new URLSearchParams();
+    if (resolvedSearch?.kind) {
+      qs.set("kind", resolvedSearch.kind);
+    }
+    const target = qs.size > 0 ? `${base}?${qs.toString()}` : base;
+    redirect(target);
+  }
+
+  const restaurantId = record.id;
   const localePriority = Array.from(
     new Set<Locale>([resolvedLocale, defaultLocale, "en" as Locale])
   );
@@ -94,7 +123,7 @@ export default async function MenuItemPage({ params, searchParams }: Props) {
     );
   };
 
-  const { kind } = (searchParams ? await searchParams : {}) ?? {};
+  const { kind } = resolvedSearch;
 
   const qs = new URLSearchParams();
   if (kind) qs.set("kind", kind);
@@ -168,6 +197,7 @@ export default async function MenuItemPage({ params, searchParams }: Props) {
           )
       : [],
     restaurantId,
+    restaurantSlug: record.slug,
   };
 
   return <MenuItemDetails {...mapped} />;

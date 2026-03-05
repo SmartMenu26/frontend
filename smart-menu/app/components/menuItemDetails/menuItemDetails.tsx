@@ -30,6 +30,7 @@ type Props = {
   imageAlt?: string;
   allergens?: Allergen[];
   restaurantId?: string;
+  restaurantSlug?: string;
   price?: number;
 };
 
@@ -41,6 +42,7 @@ export default function MenuItemDetails({
   imageAlt,
   allergens = [],
   restaurantId,
+  restaurantSlug,
   price,
 }: Props) {
   const router = useRouter();
@@ -225,8 +227,9 @@ export default function MenuItemDetails({
               onClick={() => {
                 if (!restaurantId) return;
                 const params = new URLSearchParams({ prompt: assistantPrompt });
+                const slugOrId = restaurantSlug ?? restaurantId;
                 const assistantHref = buildLocalizedPath(
-                  `/restaurant/${restaurantId}/ai-assistant?${params.toString()}`,
+                  `/restaurant/${slugOrId}/ai-assistant?${params.toString()}`,
                   locale
                 );
                 router.push(assistantHref);

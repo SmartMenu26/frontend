@@ -11,12 +11,14 @@ import { trackEvent } from "@/app/lib/analytics";
 type AiSuggestionProps = {
   className?: string;
   restaurantId?: string;
+  restaurantSlug?: string;
   assistantName?: string;
 };
 
 export default function AiSuggestion({
   className = "",
   restaurantId,
+  restaurantSlug,
   assistantName,
 }: AiSuggestionProps) {
   const router = useRouter();
@@ -66,8 +68,9 @@ export default function AiSuggestion({
   ];
 
   const handleChipClick = (chipId: string) => {
-    const base = restaurantId
-      ? `/restaurant/${restaurantId}/ai-assistant`
+    const slugOrId = restaurantSlug ?? restaurantId;
+    const base = slugOrId
+      ? `/restaurant/${slugOrId}/ai-assistant`
       : "/ai-assistant";
     const localizedBase = buildLocalizedPath(base, locale);
 
