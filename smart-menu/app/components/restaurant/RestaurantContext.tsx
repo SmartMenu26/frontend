@@ -9,10 +9,15 @@ import type { PrefetchedMenuData } from "@/app/lib/menuPrefetch";
 
 type Props = {
   restaurantId: string;
+  restaurantSlug?: string;
   initialMenuData?: PrefetchedMenuData | null;
 };
 
-export default function RestaurantContent({ restaurantId, initialMenuData }: Props) {
+export default function RestaurantContent({
+  restaurantId,
+  restaurantSlug,
+  initialMenuData,
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -45,11 +50,16 @@ export default function RestaurantContent({ restaurantId, initialMenuData }: Pro
     <>
       <MenuBrowser
         restaurantId={restaurantId}
+        restaurantSlug={restaurantSlug}
         mealType={mealType}
         onMealTypeChange={setMealType}
         initialData={initialMenuData ?? undefined}
       />
-      <PopularSection restaurantId={restaurantId} mealType={mealType} />
+      <PopularSection
+        restaurantId={restaurantId}
+        restaurantSlug={restaurantSlug}
+        mealType={mealType}
+      />
     </>
   );
 }

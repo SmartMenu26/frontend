@@ -20,12 +20,14 @@ type MenuItem = {
 
 type PopularSectionProps = {
   restaurantId: string;
+  restaurantSlug?: string;
   mealType: MealKind;
   className?: string;
 };
 
 export default function PopularSection({
   restaurantId,
+  restaurantSlug,
   mealType,
   className = "",
 }: PopularSectionProps) {
@@ -142,8 +144,9 @@ export default function PopularSection({
                       });
                       const detailParams = new URLSearchParams();
                       detailParams.set("kind", mealType);
+                      const slugOrId = restaurantSlug ?? restaurantId;
                       const detailHref = buildLocalizedPath(
-                        `/restaurant/${restaurantId}/menuItem/${it.id}?${detailParams.toString()}`,
+                        `/restaurant/${slugOrId}/menuItem/${it.id}?${detailParams.toString()}`,
                         locale
                       );
                       router.push(detailHref);
