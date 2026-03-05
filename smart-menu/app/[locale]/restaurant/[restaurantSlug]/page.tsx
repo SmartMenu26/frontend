@@ -9,6 +9,7 @@ import type { MealKind } from "@/app/data/dummyMenuCategories";
 import { fetchInitialMenuData } from "@/app/lib/menuPrefetch";
 import {
   fetchRestaurantRecord,
+  pickRestaurantDescription,
   pickRestaurantName,
   resolveLocalizedText,
 } from "@/app/lib/restaurants";
@@ -83,9 +84,10 @@ export async function generateMetadata({
   const name =
     pickRestaurantName(record, localePriority) ?? record.plainName ?? "Smart Menu";
   const city = record.city;
+  const customDescription = pickRestaurantDescription(record, localePriority);
 
   const title = formatTitle(resolvedLocale, name, city);
-  const description = formatDescription(resolvedLocale, name, city);
+  const description = customDescription ?? formatDescription(resolvedLocale, name, city);
   const canonicalPath = buildLocalizedPath(
     `/restaurant/${record.slug}`,
     resolvedLocale
