@@ -50,6 +50,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     const redirects: Redirect[] = [];
 
+    // 2) Canonical host redirect (www -> non-www OR non-www -> www)
     if (!isLocalhost && alternateHost !== canonicalHost) {
       const hostCondition: RouteHas = {
         type: "host",
@@ -65,7 +66,7 @@ const nextConfig: NextConfig = {
     }
 
     return redirects;
-  },
+  }
 };
 
 export default withNextIntl(nextConfig);
