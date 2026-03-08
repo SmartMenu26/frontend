@@ -304,10 +304,15 @@ const MenuItemHero = memo(function MenuItemHero({
         className="py-2 relative grid place-items-center"
         style={{ width: HERO_IMAGE_SIZE, height: HERO_IMAGE_SIZE }}
       >
-        <div
+        <Image
           aria-hidden="true"
+          width={HERO_IMAGE_SIZE}
+          height={HERO_IMAGE_SIZE}
+          src="/images/menu-item-placeholder.png"
+          alt=""
+          priority
           className={clsx(
-            "absolute inset-0 rounded-full bg-white/10 transition-opacity duration-300",
+            "absolute inset-0 h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px] max-w-[300px]",
             imageLoaded ? "opacity-0" : "opacity-100"
           )}
         />
@@ -325,7 +330,7 @@ const MenuItemHero = memo(function MenuItemHero({
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageLoaded(true)}
           className={clsx(
-            "h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px]",
+            "h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px] max-w-[300px]",
             imageLoaded ? "opacity-100" : "opacity-0"
           )}
         />
