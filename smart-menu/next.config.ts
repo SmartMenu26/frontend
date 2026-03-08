@@ -50,6 +50,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/mk/restaurant/:path*",
+        destination: "/restaurant/:path*",
+        permanent: true,
+      },
+      {
         source: "/(.*)",
         has: [
           { type: "host", value: "smartmenumk.com" },
