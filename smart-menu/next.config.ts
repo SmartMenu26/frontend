@@ -32,6 +32,7 @@ const IMAGE_FIXED_SIZES = [14, 20, 24, 32, 40, 48, 56, 64, 72, 96, 100, 128, 160
 const THIRTY_DAYS_IN_SECONDS = 60 * 60 * 24 * 30;
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   images: {
     remotePatterns: [
       {
