@@ -113,7 +113,7 @@ export default function MenuItemDetails({
   const backLabel = t("back");
 
   return (
-    <div className="min-h-dvh bg-[#3F5D50] flex flex-col justify-between">
+    <div className="min-h-dvh bg-[#3F5D50] flex flex-col justify-between gap-5">
       <MenuItemHero
         name={name}
         imageUrl={imageUrl}
