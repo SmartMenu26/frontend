@@ -204,6 +204,7 @@
   "header": {
     "toggleLabel": "Hap ose mbyll menunë e navigimit",
     "fallbackName": "Restorant",
+    "menuLabel": "Menu",
     "nav": {
       "home": "Ballina",
       "whyUs": "Pse ne",

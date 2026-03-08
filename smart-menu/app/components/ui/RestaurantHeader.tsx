@@ -17,6 +17,7 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
   const locale = useLocale() as Locale;
   const [menuOpen, setMenuOpen] = useState(false);
   const displayName = name?.trim() || t("fallbackName");
+  const menuLabel = t("menuLabel");
   const navLinks = useMemo(
     () => [
       { href: locale ? `/${locale}` : "/", label: t("nav.home") },
@@ -51,10 +52,13 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
               greatVibes.className,
               "pt-3 mx-6 md:mx-0",
               headingSizeClass,
-              "text-[#6B2E2E] leading-tight whitespace-nowrap",
+              "text-[#6B2E2E]",
             ].join(" ")}
           >
             {displayName}
+            <span className="block text-4xl md:text-4xl text-[#1B1F1E]/80 md:inline md:ml-3">
+              {menuLabel}
+            </span>
           </h1>
         )}
       </header>
