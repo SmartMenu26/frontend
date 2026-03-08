@@ -204,6 +204,7 @@
   "header": {
     "toggleLabel": "Toggle navigation menu",
     "fallbackName": "Restaurant",
+    "menuLabel": "Menu",
     "nav": {
       "home": "Home",
       "whyUs": "Why us",

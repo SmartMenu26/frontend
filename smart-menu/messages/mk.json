@@ -204,6 +204,7 @@
   "header": {
     "toggleLabel": "Отвори или затвори го менито",
     "fallbackName": "Ресторан",
+    "menuLabel": "Мени",
     "nav": {
       "home": "Почетна",
       "whyUs": "Зошто ние",
