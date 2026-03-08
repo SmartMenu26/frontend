@@ -325,7 +325,7 @@ const MenuItemHero = memo(function MenuItemHero({
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageLoaded(true)}
           className={clsx(
-            "h-full w-full rounded-full object-cover transition-opacity duration-300",
+            "h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px]",
             imageLoaded ? "opacity-100" : "opacity-0"
           )}
         />
