@@ -1,11 +1,34 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import type { Locale } from "@/i18n";
+import { defaultLocale, locales, type Locale } from "@/i18n";
 import { TrackedAnchor } from "@/app/components/ui/TrackedLink";
 import { buildLocalizedPath } from "@/lib/routing";
 import { PageLabelTracker } from "@/app/components/analytics/PageLabelTracker";
+import { getSiteUrl } from "@/lib/siteMeta";
 
 const STAT_INDEXES = [0, 1, 2] as const;
+const ABOUT_SEGMENT = "/za-nas";
+const siteUrl = getSiteUrl();
+const ogImageUrl = `${siteUrl}/og.jpg?v=2`;
+const OG_LOCALES: Record<Locale, string> = {
+  mk: "mk_MK",
+  sq: "sq_AL",
+  en: "en_US",
+};
+
+function resolveAboutPath(locale: Locale) {
+  return locale === defaultLocale ? ABOUT_SEGMENT : `/${locale}${ABOUT_SEGMENT}`;
+}
+
+const languageAlternates = locales.reduce<Record<string, string>>(
+  (acc, locale) => {
+    acc[locale] = resolveAboutPath(locale);
+    return acc;
+  },
+  {}
+);
+
 const PAGE_LABEL: Record<Locale, string> = {
   mk: "За нас",
   sq: "Rreth nesh",
@@ -15,6 +38,43 @@ const PAGE_LABEL: Record<Locale, string> = {
 type Props = {
   params: Promise<{ locale: Locale }>;
 };
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const resolvedLocale =
+    locales.find((candidate) => candidate === locale) ?? defaultLocale;
+  const t = await getTranslations({ locale: resolvedLocale, namespace: "about" });
+
+  const title = t("hero.title");
+  const description = t("hero.description");
+  const canonicalPath = resolveAboutPath(resolvedLocale);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalPath,
+      languages: languageAlternates,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${siteUrl}${canonicalPath}`,
+      siteName: "Smart Menu",
+      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
+      locale: OG_LOCALES[resolvedLocale] ?? OG_LOCALES.mk,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImageUrl],
+    },
+  };
+}
 
 export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
