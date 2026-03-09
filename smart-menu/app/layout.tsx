@@ -10,7 +10,7 @@ const siteUrl = getSiteUrl();
 const homeUrl = `${siteUrl}/`;
 const ogImageUrl = `${siteUrl}/og.jpg?v=2`;
 
-const baseTitle = "AI QR мени со асистент | Smart Menu M";
+const baseTitle = "AI дигитално QR мени со асистент | Smart Menu";
 const baseDescription =
   "Паметна технологија за сериозни угостители: AI асистент, QR мени и аналитика што ја зголемува продажбата и го подобрува гостинското искуство.";
 export const metadata: Metadata = {
