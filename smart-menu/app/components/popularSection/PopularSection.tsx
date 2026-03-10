@@ -125,7 +125,7 @@ export default function PopularSection({
               [&::-webkit-scrollbar]:hidden
             "
           >
-            <div className="flex gap-6 pb-4 pt-8 overflow-visible">
+            <div className="flex gap-6 pb-4 pr-5 pt-8 overflow-visible w-fit">
               {loadingPopular
                 ? Array.from({ length: 5 }).map((_, idx) => (
                   <PopularSkeletonCard key={idx} />
