@@ -163,8 +163,8 @@ export default function MenuBrowser({
 
     const [categories, setCategories] = useState<Category[]>(() => prefetchedCategories);
     const [rawCategories, setRawCategories] = useState<any[]>(() => prefetchedData?.rawCategories ?? []);
-    const [selectedCategoryId, setSelectedCategoryId] = useState<string>(() => prefetchedData?.categoryId ?? "");
-    const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>(() => prefetchedData?.subcategoryId ?? "all");
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+    const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>("all");
 
     const [items, setItems] = useState<MenuItem[]>(() => prefetchedItems);
     const [loadingCategories, setLoadingCategories] = useState(() => !prefetchedData);
@@ -252,14 +252,7 @@ export default function MenuBrowser({
 
     useEffect(() => {
         initialSelectionAppliedRef.current = false;
-        if (prefetchedData) {
-            setSelectedCategoryId(prefetchedData.categoryId ?? "");
-            setSelectedSubcategoryId(prefetchedData.subcategoryId ?? "all");
-        } else {
-            setSelectedCategoryId("");
-            setSelectedSubcategoryId("all");
-        }
-    }, [restaurantId, mealType, prefetchedData]);
+    }, [restaurantId, mealType]);
 
     useEffect(() => {
         if (!restaurantId) return;
@@ -319,84 +312,66 @@ export default function MenuBrowser({
     }, [restaurantId, mealType, mapCategories, prefetchedData]);
 
     useEffect(() => {
-        if (!rawCategories.length) return;
-        const mapped = mapCategories(rawCategories);
-        setCategories(mapped);
+  if (!categories.length) return;
 
-        if (!initialSelectionAppliedRef.current) {
-            return;
-        }
+  let storedCategoryId: string | null = null;
+  let storedSubcategoryId: string | null = null;
 
-        setSelectedCategoryId((prevCategoryId) => {
-            const hasPrev = prevCategoryId && mapped.some((cat) => cat.id === prevCategoryId);
-            const fallbackCategoryId = mapped[0]?.id ?? "";
-            const nextCategoryId = hasPrev ? prevCategoryId : fallbackCategoryId;
-            const defaultSubcategoryId = pickDefaultSubcategoryId(nextCategoryId, mapped);
+  if (typeof window !== "undefined") {
+    try {
+      const storedRaw = window.sessionStorage.getItem(selectionStorageKey);
+      if (storedRaw) {
+        const stored = JSON.parse(storedRaw) as {
+          categoryId?: string;
+          subcategoryId?: string;
+        };
+        storedCategoryId = stored.categoryId ?? null;
+        storedSubcategoryId = stored.subcategoryId ?? null;
+      }
+    } catch {}
+  }
 
-            setSelectedSubcategoryId((prevSubcategoryId) => {
-                if (!hasPrev || nextCategoryId !== prevCategoryId) {
-                    return defaultSubcategoryId;
-                }
-                if (prevSubcategoryId === "all") {
-                    return prevSubcategoryId;
-                }
-                const nextCategory = mapped.find((cat) => cat.id === nextCategoryId);
-                const subExists = nextCategory?.subcategories.some(
-                    (sub) => sub.id === prevSubcategoryId
-                );
-                return subExists ? prevSubcategoryId : defaultSubcategoryId;
-            });
+  const validStoredCategory =
+    storedCategoryId && categories.some((cat) => cat.id === storedCategoryId)
+      ? storedCategoryId
+      : null;
 
-            return nextCategoryId;
-        });
-    }, [rawCategories, mapCategories]);
+  const validPrefetchedCategory =
+    prefetchedData?.categoryId &&
+    categories.some((cat) => cat.id === prefetchedData.categoryId)
+      ? prefetchedData.categoryId
+      : null;
 
-    useEffect(() => {
-        if (!categories.length || initialSelectionAppliedRef.current) return;
+  const nextCategoryId =
+    validStoredCategory ??
+    validPrefetchedCategory ??
+    categories[0]?.id ??
+    "";
 
-        let candidateCategoryId: string | null = null;
-        let candidateSubcategoryId: string | null = null;
+  const category = categories.find((cat) => cat.id === nextCategoryId);
+  const defaultSubId = pickDefaultSubcategoryId(nextCategoryId, categories);
 
-        if (typeof window !== "undefined") {
-            try {
-                const storedRaw = window.sessionStorage.getItem(selectionStorageKey);
-                if (storedRaw) {
-                    const stored = JSON.parse(storedRaw) as {
-                        categoryId?: string;
-                        subcategoryId?: string;
-                    };
-                    candidateCategoryId = stored?.categoryId ?? null;
-                    candidateSubcategoryId = stored?.subcategoryId ?? null;
-                }
-            } catch {
-                // ignore storage errors
-            }
-        }
+  let nextSubcategoryId = defaultSubId;
 
-        const fallbackCategoryId =
-            candidateCategoryId && categories.some((cat) => cat.id === candidateCategoryId)
-                ? candidateCategoryId
-                : categories[0]?.id ?? "";
+  const candidateSubId =
+    validStoredCategory === nextCategoryId
+      ? storedSubcategoryId
+      : prefetchedData?.subcategoryId ?? null;
 
-        const nextCategoryId = fallbackCategoryId;
-        setSelectedCategoryId(nextCategoryId);
+  if (candidateSubId === "all") {
+    nextSubcategoryId = "all";
+  } else if (
+    candidateSubId &&
+    category?.subcategories.some((sub) => sub.id === candidateSubId)
+  ) {
+    nextSubcategoryId = candidateSubId;
+  }
 
-        const defaultSubcategoryId = pickDefaultSubcategoryId(nextCategoryId, categories);
-        let nextSubcategoryId = defaultSubcategoryId;
-        if (nextCategoryId && candidateSubcategoryId) {
-            if (candidateSubcategoryId === "all") {
-                nextSubcategoryId = "all";
-            } else {
-                const category = categories.find((cat) => cat.id === nextCategoryId);
-                if (category?.subcategories.some((sub) => sub.id === candidateSubcategoryId)) {
-                    nextSubcategoryId = candidateSubcategoryId;
-                }
-            }
-        }
-        setSelectedSubcategoryId(nextSubcategoryId);
+  setSelectedCategoryId(nextCategoryId);
+  setSelectedSubcategoryId(nextSubcategoryId);
+  initialSelectionAppliedRef.current = true;
+}, [categories, selectionStorageKey, prefetchedData]);
 
-        initialSelectionAppliedRef.current = true;
-    }, [categories, selectionStorageKey]);
 
     const allChipLabel = useMemo(
         () =>
@@ -820,6 +795,8 @@ export default function MenuBrowser({
                                                         });
                                                         const detailParams = new URLSearchParams();
                                                         detailParams.set("kind", mealType);
+                                                        detailParams.set("categoryId", selectedCategoryId);
+                                                        detailParams.set("subcategoryId", selectedSubcategoryId);
                                                         const slugOrId = restaurantSlug ?? restaurantId;
                                                         const detailHref = buildLocalizedPath(
                                                             `/restaurant/${slugOrId}/menuItem/${it.id}?${detailParams.toString()}`,
