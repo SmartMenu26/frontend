@@ -64,6 +64,8 @@ export default function MenuBrowser({
     const cardsContainerRef = useRef<HTMLDivElement | null>(null);
     const scrollHintShownRef = useRef(false);
     const userInteractedRef = useRef(false);
+    const programmaticScrollActiveRef = useRef(false);
+    const programmaticScrollTimeoutRef = useRef<number | null>(null);
     const touchStateRef = useRef<{ lastY: number } | null>(null);
     const requestedItemsKeyRef = useRef<string | null>(null);
     const fulfilledItemsKeyRef = useRef<string | null>(null);
@@ -191,6 +193,18 @@ export default function MenuBrowser({
     }, [items]);
 
     const shouldForcePagedLayout = loadingItems || loadingCategories || chunkedItems.length > 1;
+
+    const markProgrammaticScroll = useCallback((duration = 400) => {
+        if (typeof window === "undefined") return;
+        programmaticScrollActiveRef.current = true;
+        if (programmaticScrollTimeoutRef.current !== null) {
+            window.clearTimeout(programmaticScrollTimeoutRef.current);
+        }
+        programmaticScrollTimeoutRef.current = window.setTimeout(() => {
+            programmaticScrollActiveRef.current = false;
+            programmaticScrollTimeoutRef.current = null;
+        }, duration);
+    }, []);
 
     const handleTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
         userInteractedRef.current = true;
@@ -482,9 +496,10 @@ export default function MenuBrowser({
     useEffect(() => {
         const container = cardsContainerRef.current;
         if (!container) return;
+        markProgrammaticScroll(200);
         container.scrollTop = 0;
         requestAnimationFrame(() => updateCardScrollState());
-    }, [selectedCategoryId, selectedSubcategoryId, updateCardScrollState]);
+    }, [selectedCategoryId, selectedSubcategoryId, updateCardScrollState, markProgrammaticScroll]);
 
     useEffect(() => {
         const container = cardsContainerRef.current;
@@ -492,7 +507,9 @@ export default function MenuBrowser({
 
         updateCardScrollState();
         const handleScroll = () => {
-            userInteractedRef.current = true;
+            if (!programmaticScrollActiveRef.current) {
+                userInteractedRef.current = true;
+            }
             updateCardScrollState();
         };
         container.addEventListener("scroll", handleScroll);
@@ -614,11 +631,24 @@ export default function MenuBrowser({
     }, [loadingItems, loadingCategories, items.length]);
 
     useEffect(() => {
+        return () => {
+            if (typeof window === "undefined") return;
+            if (programmaticScrollTimeoutRef.current !== null) {
+                window.clearTimeout(programmaticScrollTimeoutRef.current);
+                programmaticScrollTimeoutRef.current = null;
+                programmaticScrollActiveRef.current = false;
+            }
+        };
+    }, []);
+
+    useEffect(() => {
         if (typeof window === "undefined") return;
         if (!cardsVisible) return;
         if (loadingItems || loadingCategories) return;
         if (scrollHintShownRef.current) return;
-        if (window.localStorage.getItem(SCROLL_HINT_STORAGE_KEY) === "true") {
+
+        const storedHintValue = window.localStorage.getItem(SCROLL_HINT_STORAGE_KEY);
+        if (storedHintValue === "true") {
             scrollHintShownRef.current = true;
             return;
         }
@@ -627,8 +657,7 @@ export default function MenuBrowser({
         if (!container) return;
         if (container.scrollHeight <= container.clientHeight + 24) return;
 
-        scrollHintShownRef.current = true;
-        window.localStorage.setItem(SCROLL_HINT_STORAGE_KEY, "true");
+        const previousHintValue = storedHintValue;
 
         const maxScroll = container.scrollHeight - container.clientHeight;
         if (maxScroll <= 0) return;
@@ -649,6 +678,10 @@ export default function MenuBrowser({
         const targetOffset = Math.min(Math.max(hintOffset, 200), maxScroll * 0.8);
         if (targetOffset <= 0) return;
 
+        scrollHintShownRef.current = true;
+        window.localStorage.setItem(SCROLL_HINT_STORAGE_KEY, "true");
+        let animationTriggered = false;
+
         const downDelay = 800;
         const pauseDuration = 350;
         const upDelay = 1600;
@@ -660,11 +693,14 @@ export default function MenuBrowser({
         enqueue(
             window.setTimeout(() => {
                 if (userInteractedRef.current) return;
+                animationTriggered = true;
+                markProgrammaticScroll(800);
                 container.scrollTo({ top: targetOffset, behavior: "smooth" });
 
                 enqueue(
                     window.setTimeout(() => {
                         if (userInteractedRef.current) return;
+                        markProgrammaticScroll(800);
                         container.scrollTo({ top: 0, behavior: "smooth" });
                     }, pauseDuration)
                 );
@@ -673,8 +709,16 @@ export default function MenuBrowser({
 
         return () => {
             clearAll();
+            if (!animationTriggered) {
+                scrollHintShownRef.current = false;
+                if (previousHintValue === null) {
+                    window.localStorage.removeItem(SCROLL_HINT_STORAGE_KEY);
+                } else {
+                    window.localStorage.setItem(SCROLL_HINT_STORAGE_KEY, previousHintValue);
+                }
+            }
         };
-    }, [cardsVisible, loadingItems, loadingCategories, chunkedItems.length]);
+    }, [cardsVisible, loadingItems, loadingCategories, chunkedItems.length, markProgrammaticScroll]);
 
     // Removed URL-sync effect to keep menu links clean
 
