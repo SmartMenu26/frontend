@@ -112,6 +112,9 @@ export default async function AiAssistantPage({ params, searchParams }: Props) {
           : restaurant?.aiAssistantName ?? record.assistantName ?? undefined
       }
       aiCreditsRemaining={aiCreditsRemaining}
+      aiAssistantImageUrl={restaurant?.aiAssistantImageUrl}
+      aiAssistantThinkingImageUrl={restaurant?.aiAssistantThinkingImageUrl}
+      aiAssistantNoCreditsImageUrl={restaurant?.aiAssistantNoCreditsImageUrl}
     />
   );
 }
