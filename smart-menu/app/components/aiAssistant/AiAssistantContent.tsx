@@ -2,16 +2,11 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
 import AiAssistantPromptPanel, {
   type AiAssistantRouterResponse,
 } from "@/app/components/aiAssistant/AiAssistantPromptPanel";
-import assistantIllustration from "@/public/images/ai-assistant-cook.png";
-import assistantThinking from "@/public/images/ai-assistant-cook-thinking.png";
-import menuItemPlaceholder from "@/public/images/menu-item-placeholder.png";
-import noCreditsImage from "@/public/images/no-credits.png";
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { incrementMenuItemView } from "@/app/lib/menuItemViews";
@@ -49,11 +44,24 @@ const fallbackCandidateDescription: Record<Locale, string> = {
   sq: "Provo këtë specialitet.",
   en: "Give this special a try.",
 };
-const HERO_IMAGE_SIZES = "240px";
 const NO_CREDITS_IMAGE_SIZES = "(max-width: 768px) 80vw, 400px";
 const CANDIDATE_IMAGE_SIZE = 56;
 const CANDIDATE_IMAGE_SIZES = "56px";
-const CANDIDATE_IMAGE_QUALITY = 60;
+const HERO_IMAGE_FALLBACK = "/images/ai-assistant-cook.png";
+const HERO_THINKING_FALLBACK = "/images/ai-assistant-cook-thinking.png";
+const NO_CREDITS_FALLBACK = "/images/no-credits.png";
+const MENU_ITEM_PLACEHOLDER = "/images/menu-item-placeholder.png";
+
+function resolveImageSource(
+  primary?: string | null,
+  fallback?: string,
+  defaultSrc = ""
+) {
+  const trimmed = typeof primary === "string" ? primary.trim() : "";
+  if (trimmed) return trimmed;
+  if (fallback) return fallback;
+  return defaultSrc;
+}
 
 function resolveLocalizedField(
   value: LocalizedField | undefined,
@@ -77,6 +85,9 @@ type Props = {
   restaurantName?: string;
   assistantName?: LocalizedField;
   aiCreditsRemaining?: number;
+  aiAssistantImageUrl?: string | null;
+  aiAssistantThinkingImageUrl?: string | null;
+  aiAssistantNoCreditsImageUrl?: string | null;
 };
 
 export default function AiAssistantContent({
@@ -87,6 +98,9 @@ export default function AiAssistantContent({
   restaurantName,
   assistantName,
   aiCreditsRemaining,
+  aiAssistantImageUrl,
+  aiAssistantThinkingImageUrl,
+  aiAssistantNoCreditsImageUrl,
 }: Props) {
   const locale = useLocale() as Locale;
   const t = useTranslations("aiAssistantContent");
@@ -126,7 +140,15 @@ export default function AiAssistantContent({
   }, []);
 
   const restaurantDisplayName = restaurantName?.trim();
-  const heroImage = status === "loading" ? assistantThinking : assistantIllustration;
+  const heroImageSrc =
+    status === "loading"
+      ? resolveImageSource(aiAssistantThinkingImageUrl, HERO_THINKING_FALLBACK)
+      : resolveImageSource(aiAssistantImageUrl, HERO_IMAGE_FALLBACK);
+  const noCreditsImageSrc = resolveImageSource(
+    aiAssistantNoCreditsImageUrl,
+    NO_CREDITS_FALLBACK,
+    NO_CREDITS_FALLBACK
+  );
   const hasCredits =
     typeof aiCreditsRemaining === "number" ? aiCreditsRemaining > 0 : true;
   const displayLocale = resultLocale ?? locale;
@@ -171,12 +193,10 @@ export default function AiAssistantContent({
             )}
 
             <div className="flex justify-center">
-              <Image
+              <img
                 key={status === "loading" ? "thinking" : "regular"}
-                src={heroImage}
+                src={heroImageSrc}
                 alt={`AI Асистент ${assistantDisplayName}`}
-                priority
-                sizes={HERO_IMAGE_SIZES}
                 className="h-auto w-60 max-w-full select-none transition-opacity duration-300"
               />
             </div>
@@ -213,7 +233,7 @@ export default function AiAssistantContent({
                     const description =
                       resolveLocalizedField(item?.description, displayLocale) ??
                       fallbackCandidateDescription[displayLocale];
-                    const img = item?.image?.url ?? menuItemPlaceholder.src;
+                    const img = item?.image?.url ?? MENU_ITEM_PLACEHOLDER;
                     const imageAlt =
                       resolveLocalizedField(item?.image?.alt, displayLocale) ??
                       resolveLocalizedField(
@@ -309,7 +329,7 @@ export default function AiAssistantContent({
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-6 py-10 text-center">
             <img
-              src="/images/no-credits.png"
+              src={aiAssistantNoCreditsImageUrl ?? "/images/no-credits.png"}
               alt="No credits illustration"
               sizes={NO_CREDITS_IMAGE_SIZES}
               className="h-[50vh] max-w-full select-none object-cover"
