@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
 import { ArrowLeft, Heart } from "lucide-react";
 import {
@@ -46,11 +46,34 @@ export default function MenuItemDetails({
   price,
 }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const locale = useLocale() as Locale;
   const t = useTranslations("menuItemDetails");
   const tAllergens = useTranslations("menuItemDetails.allergens");
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
-  const handleBack = useCallback(() => router.back(), [router]);
+  const returnKind = searchParams?.get("kind") ?? undefined;
+  const returnCategoryId = searchParams?.get("categoryId") ?? undefined;
+  const returnSubcategoryId = searchParams?.get("subcategoryId") ?? undefined;
+  const slugOrId = restaurantSlug ?? restaurantId ?? null;
+
+  const backUrl = useMemo(() => {
+    if (!slugOrId) return null;
+    const base = buildLocalizedPath(`/restaurant/${slugOrId}`, locale);
+    const params = new URLSearchParams();
+    if (returnKind) params.set("kind", returnKind);
+    if (returnCategoryId) params.set("categoryId", returnCategoryId);
+    if (returnSubcategoryId) params.set("subcategoryId", returnSubcategoryId);
+    const qs = params.toString();
+    return qs ? `${base}?${qs}` : base;
+  }, [slugOrId, locale, returnKind, returnCategoryId, returnSubcategoryId]);
+
+  const handleBack = useCallback(() => {
+    if (backUrl) {
+      router.push(backUrl);
+      return;
+    }
+    router.back();
+  }, [backUrl, router]);
 
   const favoritesKey = useMemo(
     () => (restaurantId ? `favorites:${restaurantId}` : "favorites:default"),
@@ -316,17 +339,12 @@ const MenuItemHero = memo(function MenuItemHero({
             imageLoaded ? "opacity-0" : "opacity-100"
           )}
         />
-        <Image
+        <img
           width={HERO_IMAGE_SIZE}
           height={HERO_IMAGE_SIZE}
-          priority
-          quality={85}
           src={imageUrl}
           alt={imageAlt ?? name}
-          loading="eager"
           sizes={HERO_IMAGE_SIZES}
-          placeholder="blur"
-          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI0Y2RkZFNiIvPjwvc3ZnPg=="
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageLoaded(true)}
           className={clsx(

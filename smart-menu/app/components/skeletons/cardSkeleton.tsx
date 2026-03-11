@@ -1,4 +1,23 @@
-export function SkeletonCard() {
+type SkeletonCardProps = {
+  layout?: "stacked" | "list";
+};
+
+export function SkeletonCard({ layout = "stacked" }: SkeletonCardProps) {
+  if (layout === "list") {
+    return (
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="h-[60px] w-[60px] rounded-full bg-black/10 animate-pulse" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 w-2/3 rounded bg-black/10 animate-pulse" />
+            <div className="h-3 w-3/4 rounded bg-black/10 animate-pulse" />
+          </div>
+        </div>
+        <div className="h-4 w-16 rounded bg-black/10 animate-pulse" />
+      </div>
+    );
+  }
+
   return (
     <div className="shrink-0">
       {/* card box */}
