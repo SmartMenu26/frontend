@@ -316,17 +316,12 @@ const MenuItemHero = memo(function MenuItemHero({
             imageLoaded ? "opacity-0" : "opacity-100"
           )}
         />
-        <Image
+        <img
           width={HERO_IMAGE_SIZE}
           height={HERO_IMAGE_SIZE}
-          priority
-          quality={85}
           src={imageUrl}
           alt={imageAlt ?? name}
-          loading="eager"
           sizes={HERO_IMAGE_SIZES}
-          placeholder="blur"
-          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI0Y2RkZFNiIvPjwvc3ZnPg=="
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageLoaded(true)}
           className={clsx(

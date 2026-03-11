@@ -8,13 +8,16 @@ import MealTypeToggle from "../mealTypeToggle/MealTypeToggle";
 import type { MealKind, Category } from "@/app/data/dummyMenuCategories";
 import { SkeletonCard } from "../skeletons/cardSkeleton";
 import { CategorySkeleton } from "../skeletons/categorySkeleton";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { PrefetchedMenuData } from "@/app/lib/menuPrefetch";
 import { incrementMenuItemView } from "@/app/lib/menuItemViews";
+
+const ITEMS_PER_PAGE = 4;
+const PAGE_VIEWPORT_PX = 520;
+const SCROLL_HINT_STORAGE_KEY = "menuBrowserSwipeHintShown";
 
 type MenuItem = {
     id: string;
@@ -22,6 +25,7 @@ type MenuItem = {
     imageUrl: string;
     price: number;
     kind?: string;
+    description?: string;
 };
 
 type Props = {
@@ -47,9 +51,6 @@ export default function MenuBrowser({
     initialData,
 }: Props) {
     const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-    const searchParamsString = searchParams.toString();
     const locale = useLocale() as Locale;
 
     const selectionStorageKey = useMemo(
@@ -61,8 +62,9 @@ export default function MenuBrowser({
     const categoryRefs = useRef<Record<string, HTMLButtonElement | null>>({});
     const initialSelectionAppliedRef = useRef(false);
     const cardsContainerRef = useRef<HTMLDivElement | null>(null);
-    const [canScrollLeft, setCanScrollLeft] = useState(false);
-    const [canScrollRight, setCanScrollRight] = useState(false);
+    const scrollHintShownRef = useRef(false);
+    const userInteractedRef = useRef(false);
+    const touchStateRef = useRef<{ lastY: number } | null>(null);
     const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
     const labelPriority = useMemo(() => {
@@ -85,6 +87,15 @@ export default function MenuBrowser({
         [labelPriority]
     );
 
+    const resolveLocalizedText = useCallback(
+        (value?: string | Record<string, string>, fallback = "") => {
+            if (!value) return fallback;
+            if (typeof value === "string") return value;
+            return resolveLocalizedLabel(value, fallback || "");
+        },
+        [resolveLocalizedLabel]
+    );
+
     const mapCategories = useCallback(
         (data: any[]): Category[] =>
             data
@@ -92,28 +103,45 @@ export default function MenuBrowser({
                 .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
                 .map((cat: any) => ({
                     id: cat._id,
-                    label: resolveLocalizedLabel(cat.name, "Category"),
+                    label: resolveLocalizedText(cat.name, "Category"),
                     subcategories: (cat.children ?? [])
                         .slice()
                         .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
                         .map((sub: any) => ({
                             id: sub._id,
-                            label: resolveLocalizedLabel(sub.name, "Subcategory"),
+                            label: resolveLocalizedText(sub.name, "Subcategory"),
                         })),
                 })),
-        [resolveLocalizedLabel]
+        [resolveLocalizedText]
     );
 
     const mapMenuItems = useCallback(
         (data: any[]): MenuItem[] =>
-            data.map((m: any) => ({
-                id: m._id ?? m.id,
-                title: resolveLocalizedLabel(m?.name, m?.title ?? "Item"),
-                imageUrl: m?.image?.url ?? m?.imageUrl ?? "",
-                price: m?.price ?? 0,
-                kind: m?.kind ?? m?.baseCategory ?? m?.type,
-            })),
-        [resolveLocalizedLabel]
+            data.map((m: any) => {
+                const descriptionSource =
+                    m?.description ??
+                    m?.details ??
+                    m?.detail ??
+                    m?.shortDescription ??
+                    m?.subtitle ??
+                    m?.summary;
+
+                const resolvedTitle = resolveLocalizedText(
+                    m?.name ?? m?.title,
+                    typeof m?.title === "string" ? m.title : "Item"
+                );
+                const resolvedDescription = resolveLocalizedText(descriptionSource, "");
+
+                return {
+                    id: m._id ?? m.id,
+                    title: resolvedTitle,
+                    imageUrl: m?.image?.url ?? m?.imageUrl ?? "",
+                    price: m?.price ?? 0,
+                    kind: m?.kind ?? m?.baseCategory ?? m?.type,
+                    description: resolvedDescription || undefined,
+                };
+            }),
+        [resolveLocalizedText]
     );
 
     const prefetchedData = useMemo(() => {
@@ -142,6 +170,70 @@ export default function MenuBrowser({
     const [loadingCategories, setLoadingCategories] = useState(() => !prefetchedData);
     const [loadingItems, setLoadingItems] = useState(() => !prefetchedData);
     const [cardsVisible, setCardsVisible] = useState(() => Boolean(prefetchedData));
+    const [pageIndicator, setPageIndicator] = useState<{ total: number; index: number }>(() => ({
+        total: 1,
+        index: 0,
+    }));
+
+    const chunkedItems = useMemo(() => {
+        if (!items.length) return [];
+        const chunks: MenuItem[][] = [];
+        for (let i = 0; i < items.length; i += 1) {
+            const chunkIndex = Math.floor(i / ITEMS_PER_PAGE);
+            if (!chunks[chunkIndex]) {
+                chunks[chunkIndex] = [];
+            }
+            chunks[chunkIndex].push(items[i]);
+        }
+        return chunks;
+    }, [items]);
+
+    const shouldForcePagedLayout = loadingItems || loadingCategories || chunkedItems.length > 1;
+
+    const handleTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+        userInteractedRef.current = true;
+        const touch = event.touches[0];
+        if (!touch) {
+            touchStateRef.current = null;
+            return;
+        }
+        touchStateRef.current = { lastY: touch.clientY };
+    }, []);
+
+    const handleTouchMove = useCallback(
+        (event: React.TouchEvent<HTMLDivElement>) => {
+            if (!shouldForcePagedLayout) return;
+            const container = cardsContainerRef.current;
+            const touchState = touchStateRef.current;
+            const touch = event.touches[0];
+            if (!container || !touchState || !touch) return;
+
+            userInteractedRef.current = true;
+
+            const currentY = touch.clientY;
+            const deltaY = currentY - touchState.lastY;
+            touchState.lastY = currentY;
+
+            if (Math.abs(deltaY) < 0.5) return;
+
+            const atTop = container.scrollTop <= 0;
+            const atBottom =
+                container.scrollTop + container.clientHeight >= container.scrollHeight - 1;
+
+            if (typeof window === "undefined") return;
+
+            if (atTop && deltaY > 0) {
+                window.scrollBy({ top: -deltaY, left: 0, behavior: "auto" });
+            } else if (atBottom && deltaY < 0) {
+                window.scrollBy({ top: -deltaY, left: 0, behavior: "auto" });
+            }
+        },
+        [shouldForcePagedLayout]
+    );
+
+    const resetTouchState = useCallback(() => {
+        touchStateRef.current = null;
+    }, []);
 
     const selectedCategory = useMemo(
         () => categories.find((c) => c.id === selectedCategoryId),
@@ -262,11 +354,10 @@ export default function MenuBrowser({
     useEffect(() => {
         if (!categories.length || initialSelectionAppliedRef.current) return;
 
-        const params = new URLSearchParams(searchParamsString);
-        let candidateCategoryId = params.get("categoryId");
-        let candidateSubcategoryId = params.get("subcategoryId");
+        let candidateCategoryId: string | null = null;
+        let candidateSubcategoryId: string | null = null;
 
-        if (typeof window !== "undefined" && (!candidateCategoryId || !candidateSubcategoryId)) {
+        if (typeof window !== "undefined") {
             try {
                 const storedRaw = window.sessionStorage.getItem(selectionStorageKey);
                 if (storedRaw) {
@@ -274,12 +365,8 @@ export default function MenuBrowser({
                         categoryId?: string;
                         subcategoryId?: string;
                     };
-                    if (!candidateCategoryId && stored?.categoryId) {
-                        candidateCategoryId = stored.categoryId;
-                    }
-                    if (!candidateSubcategoryId && stored?.subcategoryId) {
-                        candidateSubcategoryId = stored.subcategoryId;
-                    }
+                    candidateCategoryId = stored?.categoryId ?? null;
+                    candidateSubcategoryId = stored?.subcategoryId ?? null;
                 }
             } catch {
                 // ignore storage errors
@@ -309,7 +396,7 @@ export default function MenuBrowser({
         setSelectedSubcategoryId(nextSubcategoryId);
 
         initialSelectionAppliedRef.current = true;
-    }, [categories, searchParamsString, selectionStorageKey]);
+    }, [categories, selectionStorageKey]);
 
     const allChipLabel = useMemo(
         () =>
@@ -367,23 +454,58 @@ export default function MenuBrowser({
 
     const updateCardScrollState = useCallback(() => {
         const container = cardsContainerRef.current;
-        if (!container) return;
-        const { scrollLeft, scrollWidth, clientWidth } = container;
-        setCanScrollLeft(scrollLeft > 8);
-        setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 8);
-    }, []);
+        if (!container) {
+            setPageIndicator({ total: 1, index: 0 });
+            return;
+        }
 
-    const scrollCards = useCallback((direction: "left" | "right") => {
-        const container = cardsContainerRef.current;
-        if (!container) return;
-        const delta = container.clientWidth * 0.8 * (direction === "left" ? -1 : 1);
-        container.scrollBy({ left: delta, behavior: "smooth" });
-    }, []);
+        const { scrollTop, clientHeight, scrollHeight } = container;
+        const totalPages =
+            chunkedItems.length > 0
+                ? chunkedItems.length
+                : Math.max(1, Math.ceil(scrollHeight / (clientHeight || PAGE_VIEWPORT_PX)));
+        const activePage =
+            totalPages <= 1
+                ? 0
+                : Math.min(
+                      totalPages - 1,
+                      Math.floor((scrollTop + clientHeight / 2) / (clientHeight || 1))
+                  );
+
+        setPageIndicator((prev) =>
+            prev.total === totalPages && prev.index === activePage
+                ? prev
+                : { total: totalPages, index: activePage }
+        );
+    }, [chunkedItems.length]);
+
+    const scrollToPage = useCallback(
+        (targetIndex: number) => {
+            const container = cardsContainerRef.current;
+            if (!container) return;
+
+            const totalPages =
+                chunkedItems.length > 0
+                    ? chunkedItems.length
+                    : Math.max(
+                          1,
+                          Math.ceil(container.scrollHeight / (container.clientHeight || PAGE_VIEWPORT_PX))
+                      );
+            const clampedIndex = Math.max(0, Math.min(targetIndex, totalPages - 1));
+            const viewport = container.clientHeight || PAGE_VIEWPORT_PX;
+
+            container.scrollTo({
+                top: clampedIndex * viewport,
+                behavior: "smooth",
+            });
+        },
+        [chunkedItems.length]
+    );
 
     useEffect(() => {
         const container = cardsContainerRef.current;
         if (!container) return;
-        container.scrollLeft = 0;
+        container.scrollTop = 0;
         requestAnimationFrame(() => updateCardScrollState());
     }, [selectedCategoryId, selectedSubcategoryId, updateCardScrollState]);
 
@@ -392,7 +514,10 @@ export default function MenuBrowser({
         if (!container) return;
 
         updateCardScrollState();
-        const handleScroll = () => updateCardScrollState();
+        const handleScroll = () => {
+            userInteractedRef.current = true;
+            updateCardScrollState();
+        };
         container.addEventListener("scroll", handleScroll);
         window.addEventListener("resize", handleScroll);
         return () => {
@@ -486,27 +611,69 @@ export default function MenuBrowser({
     }, [loadingItems, loadingCategories, items.length]);
 
     useEffect(() => {
-        if (!initialSelectionAppliedRef.current) return;
-
-        const params = new URLSearchParams(searchParamsString);
-        if (selectedCategoryId) {
-            params.set("categoryId", selectedCategoryId);
-        } else {
-            params.delete("categoryId");
+        if (typeof window === "undefined") return;
+        if (!cardsVisible) return;
+        if (loadingItems || loadingCategories) return;
+        if (scrollHintShownRef.current) return;
+        if (window.localStorage.getItem(SCROLL_HINT_STORAGE_KEY) === "true") {
+            scrollHintShownRef.current = true;
+            return;
         }
 
-        if (selectedSubcategoryId) {
-            params.set("subcategoryId", selectedSubcategoryId);
-        } else {
-            params.delete("subcategoryId");
+        const container = cardsContainerRef.current;
+        if (!container) return;
+        if (container.scrollHeight <= container.clientHeight + 24) return;
+
+        scrollHintShownRef.current = true;
+        window.localStorage.setItem(SCROLL_HINT_STORAGE_KEY, "true");
+
+        const maxScroll = container.scrollHeight - container.clientHeight;
+        if (maxScroll <= 0) return;
+        const cards = Array.from(
+            container.querySelectorAll<HTMLElement>("[data-menu-card]")
+        );
+        let hintOffset =
+            (container.clientHeight || PAGE_VIEWPORT_PX) / Math.max(ITEMS_PER_PAGE, 1);
+        if (cards.length > 1) {
+            const firstRect = cards[0].getBoundingClientRect();
+            const secondRect = cards[1].getBoundingClientRect();
+            const diff = secondRect.top - firstRect.top;
+            if (diff > 20) {
+                hintOffset = diff;
+            }
         }
 
-        const nextSearch = params.toString();
-        if (nextSearch === searchParamsString) return;
+        const targetOffset = Math.min(Math.max(hintOffset, 200), maxScroll * 0.8);
+        if (targetOffset <= 0) return;
 
-        const nextUrl = nextSearch ? `${pathname}?${nextSearch}` : pathname;
-        router.replace(nextUrl, { scroll: false });
-    }, [selectedCategoryId, selectedSubcategoryId, pathname, router, searchParamsString]);
+        const downDelay = 800;
+        const pauseDuration = 350;
+        const upDelay = 1600;
+
+        const timeouts: number[] = [];
+        const enqueue = (id: number) => timeouts.push(id);
+        const clearAll = () => timeouts.forEach((t) => window.clearTimeout(t));
+
+        enqueue(
+            window.setTimeout(() => {
+                if (userInteractedRef.current) return;
+                container.scrollTo({ top: targetOffset, behavior: "smooth" });
+
+                enqueue(
+                    window.setTimeout(() => {
+                        if (userInteractedRef.current) return;
+                        container.scrollTo({ top: 0, behavior: "smooth" });
+                    }, pauseDuration)
+                );
+            }, downDelay)
+        );
+
+        return () => {
+            clearAll();
+        };
+    }, [cardsVisible, loadingItems, loadingCategories, chunkedItems.length]);
+
+    // Removed URL-sync effect to keep menu links clean
 
     useEffect(() => {
         if (!initialSelectionAppliedRef.current) return;
@@ -526,8 +693,8 @@ export default function MenuBrowser({
 
 
     return (
-        <section aria-labelledby="menu-browser-heading" className="bg-[#F7F7F7] min-h-[50vh] max-h-125 flex flex-col justify-center items-center">
-            <div className="container mx-auto space-y-1 py-8 pl-4">
+        <section aria-labelledby="menu-browser-heading" className="bg-[#F7F7F7] min-h-[30vh] h-fit max-h-125 flex flex-col justify-start items-center">
+            <div className="container mx-auto space-y-1 py-5 pl-4">
                 <h2 id="menu-browser-heading" className="sr-only">
                     Мени
                 </h2>
@@ -584,88 +751,124 @@ export default function MenuBrowser({
                 <div className="relative mt-4" role="region" aria-label="Ставки од менито">
                     <div
                         ref={cardsContainerRef}
-                        className="
-                overflow-x-auto overflow-y-visible
-                scroll-smooth
-                [-webkit-overflow-scrolling:touch]
-                [&::-webkit-scrollbar]:hidden
-              "
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={resetTouchState}
+                        onTouchCancel={resetTouchState}
+                        className={[
+                            shouldForcePagedLayout ? "min-h-[330px] max-h-[330px]" : "",
+                            shouldForcePagedLayout
+                                ? "overflow-y-auto snap-y snap-mandatory scroll-smooth"
+                                : "overflow-y-visible",
+                            "overflow-x-hidden",
+                            "[-webkit-overflow-scrolling:touch]",
+                            "[&::-webkit-scrollbar]:hidden",
+                        ]
+                            .filter(Boolean)
+                            .join(" ")}
                     >
                         {/* INNER STRIP */}
                         <div
                             className={[
-                                "flex gap-6 pb-4 pt-12 overflow-visible min-h-45",
+                                "flex flex-col gap-6 pr-7",
                                 "transition-all duration-200 ease-out transform-gpu",
                                 cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
                             ].join(" ")}
                             role="list"
                         >
-                            {(loadingItems || loadingCategories)
-                                ? Array.from({ length: 6 }).map((_, idx) => (
-                                    <SkeletonCard key={idx} />
-                                ))
-                                : items.map((it, index) => (
-                                    <div role="listitem" key={it.id}>
-                                        <Card
-                                            title={it.title}
-                                            imageUrl={it.imageUrl}
-                                            priceLabel={`${it.price}ден`}
-                                            kind={it.kind ?? mealType}
-                                            onClick={() => {
-                                                void incrementMenuItemView({
-                                                    restaurantId,
-                                                    menuItemId: it.id,
-                                                });
-                                                const detailParams = new URLSearchParams();
-                                                detailParams.set("kind", mealType);
-                                                const slugOrId = restaurantSlug ?? restaurantId;
-                                                const detailHref = buildLocalizedPath(
-                                                    `/restaurant/${slugOrId}/menuItem/${it.id}?${detailParams.toString()}`,
-                                                    locale
-                                                );
-                                                router.push(detailHref);
-                                            }}
-                                            className="shrink-0"
-                                            index={index}
-                                        />
+                            {(loadingItems || loadingCategories) ? (
+                                <div
+                                    className={[
+                                        "snap-start snap-always flex flex-col divide-y divide-[#e1e5e1b3]",
+                                        shouldForcePagedLayout ? "min-h-[330px]" : "",
+                                    ]
+                                        .filter(Boolean)
+                                        .join(" ")}
+                                    role="listitem"
+                                >
+                                    {Array.from({ length: ITEMS_PER_PAGE }).map((_, idx) => (
+                                        <div key={`skeleton-${idx}`} className="py-3">
+                                            <SkeletonCard layout="list" />
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : chunkedItems.length ? (
+                                chunkedItems.map((group, pageIdx) => (
+                                    <div
+                                        role="listitem"
+                                        key={`menu-page-${pageIdx}`}
+                                        className={[
+                                            "snap-start snap-always flex flex-col divide-y divide-[#e1e5e1b3]",
+                                            shouldForcePagedLayout ? "min-h-[330px]" : "",
+                                        ]
+                                            .filter(Boolean)
+                                            .join(" ")}
+                                    >
+                                        {group.map((it, index) => (
+                                            <div key={it.id} className="w-full py-3" data-menu-card>
+                                                <Card
+                                                    title={it.title}
+                                                    imageUrl={it.imageUrl}
+                                                    priceLabel={`${it.price}ден`}
+                                                    kind={it.kind ?? mealType}
+                                                    description={it.description}
+                                                    layout="list"
+                                                    onClick={() => {
+                                                        void incrementMenuItemView({
+                                                            restaurantId,
+                                                            menuItemId: it.id,
+                                                        });
+                                                        const detailParams = new URLSearchParams();
+                                                        detailParams.set("kind", mealType);
+                                                        const slugOrId = restaurantSlug ?? restaurantId;
+                                                        const detailHref = buildLocalizedPath(
+                                                            `/restaurant/${slugOrId}/menuItem/${it.id}?${detailParams.toString()}`,
+                                                            locale
+                                                        );
+                                                        router.push(detailHref);
+                                                    }}
+                                                    className="w-full"
+                                                    index={pageIdx * ITEMS_PER_PAGE + index}
+                                                />
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                ))
+                            ) : (
+                                <div
+                                    className={[
+                                        "snap-start snap-always flex items-center justify-center text-sm text-[#64706A]",
+                                        shouldForcePagedLayout ? "min-h-[330px]" : "",
+                                    ]
+                                        .filter(Boolean)
+                                        .join(" ")}
+                                >
+                                    Нема артикли за оваа категорија.
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    <div
-                        className={[
-                            "pointer-events-none absolute inset-y-0 left-0 hidden md:flex items-center",
-                            canScrollLeft ? "opacity-100" : "opacity-0",
-                        ].join(" ")}
-                    >
-                        <button
-                            type="button"
-                            aria-label="Scroll left"
-                            onClick={() => scrollCards("left")}
-                            className="cursor-pointer pointer-events-auto h-10 w-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center transition"
-                            disabled={!canScrollLeft}
-                        >
-                            <ChevronLeft className="h-5 w-5 text-[#2F3A37]" />
-                        </button>
-                    </div>
-
-                    <div
-                        className={[
-                            "pointer-events-none absolute inset-y-0 right-0 hidden md:flex items-center justify-end",
-                            canScrollRight ? "opacity-100" : "opacity-0",
-                        ].join(" ")}
-                    >
-                        <button
-                            type="button"
-                            aria-label="Scroll right"
-                            onClick={() => scrollCards("right")}
-                            className="cursor-pointer pointer-events-auto h-10 w-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center transition"
-                            disabled={!canScrollRight}
-                        >
-                            <ChevronRight className="h-5 w-5 text-[#2F3A37]" />
-                        </button>
-                    </div>
+                    {!loadingItems && !loadingCategories && pageIndicator.total > 1 && (
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex flex-col items-center justify-center gap-2 pr-1">
+                            {Array.from({ length: pageIndicator.total }).map((_, idx) => (
+                                <button
+                                    type="button"
+                                    key={`scroll-dot-${idx}`}
+                                    className={[
+                                        "pointer-events-auto h-2.5 w-2.5 rounded-full border-2 border-[#355B4B] transition cursor-pointer",
+                                        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#355B4B]",
+                                        idx === pageIndicator.index
+                                            ? "bg-[#355B4B] border-[#355B4B] scale-110"
+                                            : "bg-transparent",
+                                    ].join(" ")}
+                                    aria-label={`Прикажи група ${idx + 1}`}
+                                    onClick={() => scrollToPage(idx)}
+                                    disabled={idx === pageIndicator.index}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
