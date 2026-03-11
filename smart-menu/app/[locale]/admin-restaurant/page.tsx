@@ -906,10 +906,10 @@ function MenuItemsPanel({ session }: MenuItemsPanelProps) {
     setPage({ food: 1, drink: 1 });
   }, [search, filter]);
 
-  const normalizedItems = useMemo(
-    () => items.filter((entry) => entry.shouldBeDisplayed !== false),
-    [items]
-  );
+  const normalizedItems = useMemo(() => {
+    // Keep hidden items in the list so pagination doesn't jump when toggling visibility.
+    return items.slice();
+  }, [items]);
 
   const filteredItems = useMemo(() => {
     const query = search.trim().toLowerCase();
