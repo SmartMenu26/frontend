@@ -309,11 +309,12 @@ export default function AiAssistantContent({
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-6 py-10 text-center">
             <img
-              src={"@/public/images/no-credits.png"}
+              src="/images/no-credits.png"
               alt="No credits illustration"
               sizes={NO_CREDITS_IMAGE_SIZES}
               className="h-[50vh] max-w-full select-none object-cover"
             />
+
             <p className="text-lg font-medium text-[#1E1F24]">
               {noCreditsTitle}
             </p>
