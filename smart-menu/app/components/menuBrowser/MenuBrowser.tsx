@@ -65,6 +65,8 @@ export default function MenuBrowser({
     const scrollHintShownRef = useRef(false);
     const userInteractedRef = useRef(false);
     const touchStateRef = useRef<{ lastY: number } | null>(null);
+    const requestedItemsKeyRef = useRef<string | null>(null);
+    const fulfilledItemsKeyRef = useRef<string | null>(null);
     const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
     const labelPriority = useMemo(() => {
@@ -512,13 +514,30 @@ export default function MenuBrowser({
     useEffect(() => {
         if (!selectedCategoryId) return;
 
+        const itemsQueryKey = [
+            restaurantId,
+            mealType,
+            selectedCategoryId,
+            selectedSubcategoryId,
+        ].join(":");
+
         if (prefetchedMatchesSelection && prefetchedData?.rawItems) {
             setItems(mapMenuItems(prefetchedData.rawItems));
             setLoadingItems(false);
+            fulfilledItemsKeyRef.current = itemsQueryKey;
+            requestedItemsKeyRef.current = null;
+            return;
+        }
+
+        if (
+            requestedItemsKeyRef.current === itemsQueryKey ||
+            fulfilledItemsKeyRef.current === itemsQueryKey
+        ) {
             return;
         }
 
         let cancelled = false;
+        requestedItemsKeyRef.current = itemsQueryKey;
 
         async function loadItems() {
             setLoadingItems(true);
@@ -549,14 +568,23 @@ export default function MenuBrowser({
 
                 const mapped = mapMenuItems(data);
 
-                setItems(mapped);
+                if (!cancelled) {
+                    setItems(mapped);
+                    fulfilledItemsKeyRef.current = itemsQueryKey;
+                }
             } catch (e) {
                 console.error("Failed to load items:", e);
                 if (!cancelled) {
                     setItems([]);
+                    fulfilledItemsKeyRef.current = null;
                 }
             } finally {
-                if (!cancelled) setLoadingItems(false);
+                if (!cancelled) {
+                    setLoadingItems(false);
+                    requestedItemsKeyRef.current = null;
+                } else if (requestedItemsKeyRef.current === itemsQueryKey) {
+                    requestedItemsKeyRef.current = null;
+                }
             }
 
         }
