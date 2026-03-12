@@ -321,6 +321,9 @@
       },
       "mustard": {
         "contains": "Përmban mustardë"
+      },
+      "sulfites": {
+        "contains": "Përmban sulfite"
       }
     }
   },

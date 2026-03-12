@@ -321,6 +321,9 @@
       },
       "mustard": {
         "contains": "Содржи сенф"
+      },
+      "sulfites": {
+        "contains": "Содржи сулфити"
       }
     }
   },
