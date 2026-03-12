@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import InstallAppButton from "@/app/_components/InstallAppButton";
 import AiSuggestion from "@/app/components/aiSuggestion/aiSuggestion";
 import RestaurantContent from "@/app/components/restaurant/RestaurantContext";
+import RestaurantContactCard, {
+  type RestaurantContactLabels,
+} from "@/app/components/restaurant/RestaurantContactCard";
 import Footer from "@/app/components/ui/Footer";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
 import LanguageSwitcher from "@/app/components/languageSwitcher/LanguageSwitcher";
@@ -15,6 +19,7 @@ import {
 } from "@/app/lib/restaurants";
 import { defaultLocale, locales, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
+import { getSiteUrl } from "@/lib/siteMeta";
 import { notFound, redirect } from "next/navigation";
 
 export const revalidate = 3600;
@@ -118,9 +123,36 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   const resolvedLocale: Locale =
     locales.find((candidate) => candidate === routeLocale) ?? defaultLocale;
   const record = await fetchRestaurantRecord(restaurantSlug);
+  const siteUrl = getSiteUrl();
 
   if (!record?.id) {
     notFound();
+  }
+
+  const canonicalPath = buildLocalizedPath(`/restaurant/${record.slug}`, resolvedLocale);
+  const absoluteMenuUrl = `${siteUrl}${canonicalPath}`;
+
+  const hasContactDetails = Boolean(
+    record.facebookUrl ||
+      record.instagramUrl ||
+      record.location ||
+      record.mobilePhone
+  );
+
+  let contactLabels: RestaurantContactLabels | null = null;
+  if (hasContactDetails) {
+    const contactTranslations = await getTranslations({
+      locale: resolvedLocale,
+      namespace: "restaurantContact",
+    });
+    contactLabels = {
+      title: contactTranslations("title"),
+      location: contactTranslations("location"),
+      phone: contactTranslations("phone"),
+      call: contactTranslations("call"),
+      facebook: contactTranslations("facebook"),
+      instagram: contactTranslations("instagram"),
+    };
   }
 
   const resolvedSearch = (searchParams ? await searchParams : {}) ?? {};
@@ -168,6 +200,40 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
       : record.assistantName,
     localePriority
   );
+  const contactDisplayName = record.fullRestaurantName ?? restaurantName;
+  const schemaPayload: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    name:
+      contactDisplayName ??
+      restaurantName ??
+      record.plainName ??
+      record.localizedName?.mk ??
+      record.slug,
+    url: absoluteMenuUrl,
+    hasMenu: absoluteMenuUrl,
+  };
+
+  if (record.heroImageUrl || record.imageUrl) {
+    schemaPayload.image = record.heroImageUrl ?? record.imageUrl;
+  }
+  if (record.mobilePhone) {
+    schemaPayload.telephone = record.mobilePhone;
+  }
+  const sameAs = [record.facebookUrl, record.instagramUrl].filter(
+    (url): url is string => Boolean(url?.trim())
+  );
+  if (sameAs.length > 0) {
+    schemaPayload.sameAs = sameAs;
+  }
+  if (record.location || record.city) {
+    const address: Record<string, string> = { "@type": "PostalAddress", addressCountry: "MK" };
+    if (record.location) address.streetAddress = record.location;
+    if (record.city) address.addressLocality = record.city;
+    schemaPayload.address = address;
+  }
+
+  const structuredData = JSON.stringify(schemaPayload);
 
   return (
     <>
@@ -187,8 +253,23 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
           initialMenuData={initialMenuData}
         />
 
+        {contactLabels ? (
+          <RestaurantContactCard
+            labels={contactLabels}
+            restaurantName={contactDisplayName ?? undefined}
+            location={record.location}
+            phone={record.mobilePhone}
+            facebookUrl={record.facebookUrl}
+            instagramUrl={record.instagramUrl}
+          />
+        ) : null}
+
         <Footer />
       </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: structuredData }}
+      />
       <div className="fixed bottom-4 right-4 z-50">
         <LanguageSwitcher />
       </div>

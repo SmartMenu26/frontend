@@ -327,6 +327,14 @@
       }
     }
   },
+  "restaurantContact": {
+    "title": "Контакт и локација",
+    "location": "Локација",
+    "phone": "Телефон",
+    "call": "Јави се",
+    "facebook": "Facebook",
+    "instagram": "Instagram"
+  },
   "howItWorks": {
     "hero": {
       "eyebrow": "Како функционира",

@@ -327,6 +327,14 @@
       }
     }
   },
+  "restaurantContact": {
+    "title": "Contact & location",
+    "location": "Location",
+    "phone": "Phone",
+    "call": "Call",
+    "facebook": "Facebook",
+    "instagram": "Instagram"
+  },
   "howItWorks": {
     "hero": {
       "eyebrow": "How it works",
