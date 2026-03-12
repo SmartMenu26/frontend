@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Script from "next/script";
+import { Suspense } from "react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { inter, greatVibes } from "./fonts";
 import { getSiteUrl } from "@/lib/siteMeta";
@@ -69,7 +70,9 @@ export default function RootLayout({
           `}
       </Script>
       <body className={`${inter.variable} ${greatVibes.variable}`}>
-        <PwaInstallPathTracker />
+        <Suspense fallback={null}>
+          <PwaInstallPathTracker />
+        </Suspense>
         <RegisterSW />
         <main>
           {children}
