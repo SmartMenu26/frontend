@@ -327,6 +327,14 @@
       }
     }
   },
+  "restaurantContact": {
+    "title": "Kontakt & Lokacion",
+    "location": "Lokacion",
+    "phone": "Telefon",
+    "call": "Telefono",
+    "facebook": "Facebook",
+    "instagram": "Instagram"
+  },
   "howItWorks": {
     "hero": {
       "eyebrow": "Si funksionon",

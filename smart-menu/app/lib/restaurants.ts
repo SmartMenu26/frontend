@@ -12,6 +12,11 @@ export type RestaurantRecord = {
   heroImageUrl?: string | null;
   imageUrl?: string | null;
   description?: string | LocalizedRecord;
+  fullRestaurantName?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  location?: string;
+  mobilePhone?: string;
 };
 
 const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i;
@@ -189,6 +194,8 @@ const mapRestaurantPayload = (
   }
 
   const heroImageUrl = pickFirstImage(payload);
+  const normalizeString = (value: unknown) =>
+    typeof value === "string" && value.trim() ? value.trim() : undefined;
 
   return {
     id: possibleId,
@@ -209,6 +216,11 @@ const mapRestaurantPayload = (
       typeof payload.imageUrl === "string" && payload.imageUrl.trim()
         ? payload.imageUrl.trim()
         : undefined,
+    fullRestaurantName: normalizeString(payload.fullRestaurantName),
+    facebookUrl: normalizeString(payload.facebookUrl),
+    instagramUrl: normalizeString(payload.instagramUrl),
+    location: normalizeString(payload.location),
+    mobilePhone: normalizeString(payload.mobilePhone),
   };
 };
 
