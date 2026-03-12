@@ -18,6 +18,7 @@ import { incrementMenuItemView } from "@/app/lib/menuItemViews";
 const ITEMS_PER_PAGE = 4;
 const PAGE_VIEWPORT_PX = 520;
 const SCROLL_HINT_STORAGE_KEY = "menuBrowserSwipeHintShown";
+const TAP_HINT_STORAGE_KEY = "menuBrowserTapHintShown";
 
 type MenuItem = {
     id: string;
@@ -63,6 +64,11 @@ export default function MenuBrowser({
     const initialSelectionAppliedRef = useRef(false);
     const cardsContainerRef = useRef<HTMLDivElement | null>(null);
     const scrollHintShownRef = useRef(false);
+    const tapHintShownRef = useRef(false);
+    const tapHintAnimationRef = useRef<Animation | null>(null);
+    const tapHintCursorAnimationRef = useRef<Animation | null>(null);
+    const tapHintCursorElRef = useRef<HTMLDivElement | null>(null);
+    const tapHintRestorePositionRef = useRef<(() => void) | null>(null);
     const userInteractedRef = useRef(false);
     const programmaticScrollActiveRef = useRef(false);
     const programmaticScrollTimeoutRef = useRef<number | null>(null);
@@ -638,8 +644,175 @@ export default function MenuBrowser({
                 programmaticScrollTimeoutRef.current = null;
                 programmaticScrollActiveRef.current = false;
             }
+            if (tapHintAnimationRef.current) {
+                tapHintAnimationRef.current.cancel();
+                tapHintAnimationRef.current = null;
+            }
+            if (tapHintCursorAnimationRef.current) {
+                tapHintCursorAnimationRef.current.cancel();
+                tapHintCursorAnimationRef.current = null;
+            }
+            if (tapHintCursorElRef.current) {
+                tapHintCursorElRef.current.remove();
+                tapHintCursorElRef.current = null;
+            }
+            if (tapHintRestorePositionRef.current) {
+                tapHintRestorePositionRef.current();
+                tapHintRestorePositionRef.current = null;
+            }
         };
     }, []);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        if (!cardsVisible) return;
+        if (loadingItems || loadingCategories) return;
+        if (chunkedItems.length !== 1) return;
+
+        if (tapHintShownRef.current) return;
+        const storedValue = window.localStorage.getItem(TAP_HINT_STORAGE_KEY);
+        if (storedValue === "true") {
+            tapHintShownRef.current = true;
+            return;
+        }
+
+        const container = cardsContainerRef.current;
+        if (!container) return;
+
+        const targetButton =
+            container.querySelector<HTMLButtonElement>("[data-menu-card] button");
+        if (!targetButton) return;
+
+        tapHintShownRef.current = true;
+        window.localStorage.setItem(TAP_HINT_STORAGE_KEY, "true");
+
+        tapHintAnimationRef.current?.cancel();
+        tapHintCursorAnimationRef.current?.cancel();
+        if (tapHintCursorElRef.current) {
+            tapHintCursorElRef.current.remove();
+            tapHintCursorElRef.current = null;
+        }
+        if (tapHintRestorePositionRef.current) {
+            tapHintRestorePositionRef.current();
+            tapHintRestorePositionRef.current = null;
+        }
+
+        const animation = targetButton.animate(
+            [
+                { transform: "scale(1)", offset: 0 },
+                { transform: "scale(0.94)", offset: 0.25 },
+                { transform: "scale(0.94)", offset: 0.45 },
+                { transform: "scale(1.04)", offset: 0.7 },
+                { transform: "scale(1)", offset: 1 },
+            ],
+            {
+                duration: 1100,
+                easing: "ease-in-out",
+            }
+        );
+        tapHintAnimationRef.current = animation;
+
+        const requiresPositionReset =
+            !targetButton.style.position || targetButton.style.position === "static";
+        if (requiresPositionReset) {
+            targetButton.style.position = "relative";
+            tapHintRestorePositionRef.current = () => {
+                targetButton.style.position = "";
+            };
+        } else {
+            tapHintRestorePositionRef.current = null;
+        }
+
+        const cursorEl = document.createElement("div");
+        cursorEl.setAttribute("aria-hidden", "true");
+        Object.assign(cursorEl.style, {
+            position: "absolute",
+            right: "12px",
+            bottom: "10px",
+            width: "38px",
+            height: "38px",
+            borderRadius: "999px",
+            background: "rgba(11, 18, 10, 0.85)",
+            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.35)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+            zIndex: "5",
+            transformOrigin: "center",
+            padding: "6px",
+        });
+        const svgNs = "http://www.w3.org/2000/svg";
+        const cursorSvg = document.createElementNS(svgNs, "svg");
+        cursorSvg.setAttribute("viewBox", "0 0 24 24");
+        cursorSvg.setAttribute("width", "20");
+        cursorSvg.setAttribute("height", "20");
+        const cursorPath = document.createElementNS(svgNs, "path");
+        cursorPath.setAttribute(
+            "d",
+            "M5 3.5V21l4.5-4 3.2 5.4 1.9-1.1-3.2-5.4H16L5 3.5z"
+        );
+        cursorPath.setAttribute("fill", "#fff");
+        cursorPath.setAttribute("stroke", "#1b1f1e");
+        cursorPath.setAttribute("stroke-width", "1.2");
+        cursorPath.setAttribute("stroke-linejoin", "round");
+        cursorSvg.appendChild(cursorPath);
+        cursorEl.appendChild(cursorSvg);
+        targetButton.appendChild(cursorEl);
+        tapHintCursorElRef.current = cursorEl;
+
+        const cursorAnimation = cursorEl.animate(
+            [
+                { transform: "translate(12px, 12px) scale(1)", opacity: 0 },
+                { transform: "translate(0, 0) scale(1)", opacity: 1, offset: 0.2 },
+                { transform: "translate(0, 0) scale(0.9)", opacity: 1, offset: 0.45 },
+                { transform: "translate(0, 0) scale(1.05)", opacity: 1, offset: 0.7 },
+                { transform: "translate(0, 0) scale(1)", opacity: 0, offset: 1 },
+            ],
+            {
+                duration: 1100,
+                easing: "ease-in-out",
+            }
+        );
+        tapHintCursorAnimationRef.current = cursorAnimation;
+
+        const handleFinish = () => {
+            if (tapHintAnimationRef.current === animation) {
+                tapHintAnimationRef.current = null;
+            }
+        };
+
+        let cursorCleaned = false;
+        const cleanupCursor = () => {
+            if (cursorCleaned) return;
+            cursorCleaned = true;
+            cursorEl.remove();
+            if (tapHintCursorElRef.current === cursorEl) {
+                tapHintCursorElRef.current = null;
+            }
+            if (tapHintCursorAnimationRef.current === cursorAnimation) {
+                tapHintCursorAnimationRef.current = null;
+            }
+            if (tapHintRestorePositionRef.current) {
+                tapHintRestorePositionRef.current();
+                tapHintRestorePositionRef.current = null;
+            }
+        };
+
+        cursorAnimation.addEventListener("finish", cleanupCursor, { once: true });
+        animation.addEventListener("finish", handleFinish, { once: true });
+
+        return () => {
+            animation.removeEventListener("finish", handleFinish);
+            animation.cancel();
+            if (tapHintAnimationRef.current === animation) {
+                tapHintAnimationRef.current = null;
+            }
+            cursorAnimation.removeEventListener("finish", cleanupCursor);
+            cursorAnimation.cancel();
+            cleanupCursor();
+        };
+    }, [cardsVisible, loadingItems, loadingCategories, chunkedItems.length]);
 
     useEffect(() => {
         if (typeof window === "undefined") return;
