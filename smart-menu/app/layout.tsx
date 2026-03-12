@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import RegisterSW from "./_components/RegisterSW";
 import Script from "next/script";
+import { Suspense } from "react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { inter, greatVibes } from "./fonts";
 import { getSiteUrl } from "@/lib/siteMeta";
+import RegisterSW from "./_components/RegisterSW";
+import PwaInstallPathTracker from "./_components/PwaInstallPathTracker";
 
 const siteUrl = getSiteUrl();
 const homeUrl = `${siteUrl}/`;
@@ -68,6 +70,9 @@ export default function RootLayout({
           `}
       </Script>
       <body className={`${inter.variable} ${greatVibes.variable}`}>
+        <Suspense fallback={null}>
+          <PwaInstallPathTracker />
+        </Suspense>
         <RegisterSW />
         <main>
           {children}

@@ -24,7 +24,7 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  event.waitUntil(clients.openWindow("/"));
+  event.waitUntil(clients.openWindow("/?pwa=1"));
 });
 
 // Minimal fetch handler so Chrome sees this SW as controlling network requests
