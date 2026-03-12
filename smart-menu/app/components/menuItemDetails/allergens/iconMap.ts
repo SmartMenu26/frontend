@@ -11,6 +11,7 @@ import {
   Fish,
   FishOff,
   Flame,
+  Grape,
   HeartPulse,
   Leaf,
   Milk,
@@ -182,6 +183,26 @@ const ALLERGEN_ICON_MAP: Record<string, AllergenIconEntry> = {
   mustard: {
     icon: Wine,
     defaultTooltipKey: "mustard.contains",
+  },
+  sulfite: {
+    icon: Grape,
+    defaultTooltip: "Содржи сулфити",
+    defaultTooltipKey: "sulfites.contains",
+  },
+  sulfites: {
+    icon: Grape,
+    defaultTooltip: "Содржи сулфити",
+    defaultTooltipKey: "sulfites.contains",
+  },
+  sulphite: {
+    icon: Grape,
+    defaultTooltip: "Содржи сулфити",
+    defaultTooltipKey: "sulfites.contains",
+  },
+  sulphites: {
+    icon: Grape,
+    defaultTooltip: "Содржи сулфити",
+    defaultTooltipKey: "sulfites.contains",
   },
   beef: { icon: Beef },
   pork: { icon: Drumstick },
