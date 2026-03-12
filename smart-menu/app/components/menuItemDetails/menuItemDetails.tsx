@@ -327,13 +327,12 @@ const MenuItemHero = memo(function MenuItemHero({
         className="py-2 relative grid place-items-center"
         style={{ width: HERO_IMAGE_SIZE, height: HERO_IMAGE_SIZE }}
       >
-        <Image
+        <img
           aria-hidden="true"
           width={HERO_IMAGE_SIZE}
           height={HERO_IMAGE_SIZE}
           src="/images/menu-item-placeholder.png"
           alt=""
-          priority
           className={clsx(
             "absolute inset-0 h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px] max-w-[300px]",
             imageLoaded ? "opacity-0" : "opacity-100"
