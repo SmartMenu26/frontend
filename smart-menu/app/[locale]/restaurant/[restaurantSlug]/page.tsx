@@ -24,10 +24,10 @@ import { notFound, redirect } from "next/navigation";
 
 export const revalidate = 3600;
 
-const TITLE_COPY: Record<Locale, (name: string, city?: string) => string> = {
-  mk: (name, city) => `Мени | ${name}${city ? ` – ${city}` : ""} | Smart Menu`,
-  sq: (name, city) => `Menu | ${name}${city ? ` – ${city}` : ""} | Smart Menu`,
-  en: (name, city) => `Menu | ${name}${city ? ` – ${city}` : ""} | Smart Menu`,
+const TITLE_COPY: Record<Locale, (name: string) => string> = {
+  mk: (name) => `Мени | ${name} | Smart Menu`,
+  sq: (name) => `Menu | ${name} | Smart Menu`,
+  en: (name) => `Menu | ${name} | Smart Menu`,
 };
 
 const DESCRIPTION_COPY: Record<Locale, (name: string, city?: string) => string> = {
@@ -60,8 +60,8 @@ const OBJECT_ID_REGEX = /^[a-f\\d]{24}$/i;
 const getLocalePriority = (locale: Locale): Locale[] =>
   Array.from(new Set<Locale>([locale, defaultLocale, "en" as Locale, "sq" as Locale]));
 
-const formatTitle = (locale: Locale, name: string, city?: string) =>
-  (TITLE_COPY[locale] ?? TITLE_COPY.mk)(name, city);
+const formatTitle = (locale: Locale, name: string) =>
+  (TITLE_COPY[locale] ?? TITLE_COPY.mk)(name);
 
 const formatDescription = (locale: Locale, name: string, city?: string) =>
   (DESCRIPTION_COPY[locale] ?? DESCRIPTION_COPY.mk)(name, city);
@@ -91,7 +91,7 @@ export async function generateMetadata({
   const city = record.city;
   const customDescription = pickRestaurantDescription(record, localePriority);
 
-  const title = formatTitle(resolvedLocale, name, city);
+  const title = formatTitle(resolvedLocale, name);
   const description = customDescription ?? formatDescription(resolvedLocale, name, city);
   const canonicalPath = buildLocalizedPath(
     `/restaurant/${record.slug}`,
