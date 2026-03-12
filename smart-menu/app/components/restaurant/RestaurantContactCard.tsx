@@ -101,7 +101,7 @@ export default function RestaurantContactCard({
   return (
     <section
       id="restaurant-contact"
-      className="rounded-[32px] border border-[#0F1F1A]/10 bg-white px-6 py-7 text-[#1B1F1E] shadow-sm"
+      className="rounded-[32px] border border-[#0F1F1A]/10 bg-white px-6 py-7 text-[#1B1F1E] shadow-sm md:container md:mx-auto"
     >
       {restaurantName ? (
         <p className={`${greatVibes.className} text-4xl text-[#1B1F1E]`}>
