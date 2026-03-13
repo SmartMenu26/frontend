@@ -32,7 +32,7 @@ export default function Footer() {
               {t("home")}
             </Link>
             <a
-              href="mailto:contact@smartmenu.app"
+              href="mailto:restaurantsmart26@gmail.com"
               className="hover:text-[#074128]"
             >
               {t("contact")}

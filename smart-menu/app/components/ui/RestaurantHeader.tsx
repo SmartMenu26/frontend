@@ -18,15 +18,27 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const displayName = name?.trim() || t("fallbackName");
   const menuLabel = t("menuLabel");
-  const navLinks = useMemo(
-    () => [
-      { href: locale ? `/${locale}` : "/", label: t("nav.home") },
-      { href: "#why-us", label: t("nav.whyUs") },
-      { href: "#about-us", label: t("nav.aboutUs") },
-      { href: "#contact", label: t("nav.contact") },
-    ],
-    [locale, t]
-  );
+  const navLinks = useMemo(() => {
+    const homeHref = locale ? `/${locale}` : "/";
+    return [
+      {
+        href: homeHref,
+        label: t("nav.home"),
+      },
+      {
+        href: `${homeHref}#why-us`,
+        label: t("nav.whyUs"),
+      },
+      {
+        href: `${homeHref}#about-us`,
+        label: t("nav.aboutUs"),
+      },
+      {
+        href: `${homeHref}#contact`,
+        label: t("nav.contact"),
+      },
+    ];
+  }, [locale, t]);
   const headingSizeClass = useMemo(() => {
     if (displayName.length > 28) return "text-4xl md:text-5xl";
     if (displayName.length > 22) return "text-5xl md:text-6xl";
