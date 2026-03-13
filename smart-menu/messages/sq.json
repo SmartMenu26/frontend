@@ -35,7 +35,8 @@
       "caption": "Kuzhinieri po mendon"
     },
     "noCreditsTitle": "Asistenti AI aktualisht nuk është i disponueshëm",
-    "backToMenu": "Kthehu te menuja"
+    "backToMenu": "Kthehu te menuja",
+    "noRecommendations": "Nuk ka rekomandime për këtë kërkesë. Provo të kërkosh për një ushqim ose pije specifike."
   }
   ,
   "aiAssistantSuggestions": {
