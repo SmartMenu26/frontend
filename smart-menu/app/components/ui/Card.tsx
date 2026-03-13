@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
 
 const CARD_IMAGE_SIZE = 155;
 const CARD_IMAGE_SIZES = "155px";
@@ -74,7 +75,7 @@ export default function Card({
       type="button"
       onClick={onClick}
       className={[
-        "cursor-pointer text-left",
+        "cursor-pointer text-left group",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#355B4B]/50",
         isListLayout
           ? [
@@ -129,11 +130,18 @@ export default function Card({
               )} */}
             </div>
           </div>
-          {priceLabel && (
-            <div className="ml-2 text-base font-semibold text-[#355B4B] whitespace-nowrap">
-              {priceLabel}
-            </div>
-          )}
+          <div className="ml-2 flex items-center gap-2 text-[#355B4B]">
+            {priceLabel && (
+              <span className="text-base font-semibold whitespace-nowrap">
+                {priceLabel}
+              </span>
+            )}
+            <ArrowUpRight
+              size={18}
+              aria-hidden
+              className="text-[#32463F] transition-transform duration-200 group-hover:translate-x-0.5"
+            />
+          </div>
         </div>
       ) : (
         <>

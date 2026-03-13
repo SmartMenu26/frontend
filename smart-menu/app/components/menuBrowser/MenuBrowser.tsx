@@ -683,134 +683,150 @@ export default function MenuBrowser({
             container.querySelector<HTMLButtonElement>("[data-menu-card] button");
         if (!targetButton) return;
 
-        tapHintShownRef.current = true;
-        window.localStorage.setItem(TAP_HINT_STORAGE_KEY, "true");
+        let teardown: (() => void) | null = null;
 
-        tapHintAnimationRef.current?.cancel();
-        tapHintCursorAnimationRef.current?.cancel();
-        if (tapHintCursorElRef.current) {
-            tapHintCursorElRef.current.remove();
-            tapHintCursorElRef.current = null;
-        }
-        if (tapHintRestorePositionRef.current) {
-            tapHintRestorePositionRef.current();
-            tapHintRestorePositionRef.current = null;
-        }
+        const startHint = () => {
+            tapHintShownRef.current = true;
+            window.localStorage.setItem(TAP_HINT_STORAGE_KEY, "true");
 
-        const animation = targetButton.animate(
-            [
-                { transform: "scale(1)", offset: 0 },
-                { transform: "scale(0.94)", offset: 0.25 },
-                { transform: "scale(0.94)", offset: 0.45 },
-                { transform: "scale(1.04)", offset: 0.7 },
-                { transform: "scale(1)", offset: 1 },
-            ],
-            {
-                duration: 1100,
-                easing: "ease-in-out",
-            }
-        );
-        tapHintAnimationRef.current = animation;
-
-        const requiresPositionReset =
-            !targetButton.style.position || targetButton.style.position === "static";
-        if (requiresPositionReset) {
-            targetButton.style.position = "relative";
-            tapHintRestorePositionRef.current = () => {
-                targetButton.style.position = "";
-            };
-        } else {
-            tapHintRestorePositionRef.current = null;
-        }
-
-        const cursorEl = document.createElement("div");
-        cursorEl.setAttribute("aria-hidden", "true");
-        Object.assign(cursorEl.style, {
-            position: "absolute",
-            right: "12px",
-            bottom: "10px",
-            width: "38px",
-            height: "38px",
-            borderRadius: "999px",
-            background: "rgba(11, 18, 10, 0.85)",
-            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.35)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            pointerEvents: "none",
-            zIndex: "5",
-            transformOrigin: "center",
-            padding: "6px",
-        });
-        const svgNs = "http://www.w3.org/2000/svg";
-        const cursorSvg = document.createElementNS(svgNs, "svg");
-        cursorSvg.setAttribute("viewBox", "0 0 24 24");
-        cursorSvg.setAttribute("width", "20");
-        cursorSvg.setAttribute("height", "20");
-        const cursorPath = document.createElementNS(svgNs, "path");
-        cursorPath.setAttribute(
-            "d",
-            "M5 3.5V21l4.5-4 3.2 5.4 1.9-1.1-3.2-5.4H16L5 3.5z"
-        );
-        cursorPath.setAttribute("fill", "#fff");
-        cursorPath.setAttribute("stroke", "#1b1f1e");
-        cursorPath.setAttribute("stroke-width", "1.2");
-        cursorPath.setAttribute("stroke-linejoin", "round");
-        cursorSvg.appendChild(cursorPath);
-        cursorEl.appendChild(cursorSvg);
-        targetButton.appendChild(cursorEl);
-        tapHintCursorElRef.current = cursorEl;
-
-        const cursorAnimation = cursorEl.animate(
-            [
-                { transform: "translate(12px, 12px) scale(1)", opacity: 0 },
-                { transform: "translate(0, 0) scale(1)", opacity: 1, offset: 0.2 },
-                { transform: "translate(0, 0) scale(0.9)", opacity: 1, offset: 0.45 },
-                { transform: "translate(0, 0) scale(1.05)", opacity: 1, offset: 0.7 },
-                { transform: "translate(0, 0) scale(1)", opacity: 0, offset: 1 },
-            ],
-            {
-                duration: 1100,
-                easing: "ease-in-out",
-            }
-        );
-        tapHintCursorAnimationRef.current = cursorAnimation;
-
-        const handleFinish = () => {
-            if (tapHintAnimationRef.current === animation) {
-                tapHintAnimationRef.current = null;
-            }
-        };
-
-        let cursorCleaned = false;
-        const cleanupCursor = () => {
-            if (cursorCleaned) return;
-            cursorCleaned = true;
-            cursorEl.remove();
-            if (tapHintCursorElRef.current === cursorEl) {
+            tapHintAnimationRef.current?.cancel();
+            tapHintCursorAnimationRef.current?.cancel();
+            if (tapHintCursorElRef.current) {
+                tapHintCursorElRef.current.remove();
                 tapHintCursorElRef.current = null;
-            }
-            if (tapHintCursorAnimationRef.current === cursorAnimation) {
-                tapHintCursorAnimationRef.current = null;
             }
             if (tapHintRestorePositionRef.current) {
                 tapHintRestorePositionRef.current();
                 tapHintRestorePositionRef.current = null;
             }
+
+            const animation = targetButton.animate(
+                [
+                    { transform: "scale(1)", offset: 0 },
+                    { transform: "scale(0.94)", offset: 0.25 },
+                    { transform: "scale(0.94)", offset: 0.45 },
+                    { transform: "scale(1.04)", offset: 0.7 },
+                    { transform: "scale(1)", offset: 1 },
+                ],
+                {
+                    duration: 1100,
+                    easing: "ease-in-out",
+                }
+            );
+            tapHintAnimationRef.current = animation;
+
+            const requiresPositionReset =
+                !targetButton.style.position || targetButton.style.position === "static";
+            if (requiresPositionReset) {
+                targetButton.style.position = "relative";
+                tapHintRestorePositionRef.current = () => {
+                    targetButton.style.position = "";
+                };
+            } else {
+                tapHintRestorePositionRef.current = null;
+            }
+
+            const cursorEl = document.createElement("div");
+            cursorEl.setAttribute("aria-hidden", "true");
+            Object.assign(cursorEl.style, {
+                position: "absolute",
+                right: "12px",
+                bottom: "10px",
+                width: "38px",
+                height: "38px",
+                borderRadius: "999px",
+                background: "rgba(11, 18, 10, 0.85)",
+                boxShadow: "0 8px 20px rgba(0, 0, 0, 0.35)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+                zIndex: "5",
+                transformOrigin: "center",
+                padding: "6px",
+            });
+            const svgNs = "http://www.w3.org/2000/svg";
+            const cursorSvg = document.createElementNS(svgNs, "svg");
+            cursorSvg.setAttribute("viewBox", "0 0 24 24");
+            cursorSvg.setAttribute("width", "20");
+            cursorSvg.setAttribute("height", "20");
+            const cursorPath = document.createElementNS(svgNs, "path");
+            cursorPath.setAttribute(
+                "d",
+                "M5 3.5V21l4.5-4 3.2 5.4 1.9-1.1-3.2-5.4H16L5 3.5z"
+            );
+            cursorPath.setAttribute("fill", "#fff");
+            cursorPath.setAttribute("stroke", "#1b1f1e");
+            cursorPath.setAttribute("stroke-width", "1.2");
+            cursorPath.setAttribute("stroke-linejoin", "round");
+            cursorSvg.appendChild(cursorPath);
+            cursorEl.appendChild(cursorSvg);
+            targetButton.appendChild(cursorEl);
+            tapHintCursorElRef.current = cursorEl;
+
+            const cursorAnimation = cursorEl.animate(
+                [
+                    { transform: "translate(12px, 12px) scale(1)", opacity: 0 },
+                    { transform: "translate(0, 0) scale(1)", opacity: 1, offset: 0.2 },
+                    { transform: "translate(0, 0) scale(0.9)", opacity: 1, offset: 0.45 },
+                    { transform: "translate(0, 0) scale(1.05)", opacity: 1, offset: 0.7 },
+                    { transform: "translate(0, 0) scale(1)", opacity: 0, offset: 1 },
+                ],
+                {
+                    duration: 1100,
+                    easing: "ease-in-out",
+                }
+            );
+            tapHintCursorAnimationRef.current = cursorAnimation;
+
+            const handleFinish = () => {
+                if (tapHintAnimationRef.current === animation) {
+                    tapHintAnimationRef.current = null;
+                }
+            };
+
+            let cursorCleaned = false;
+            const cleanupCursor = () => {
+                if (cursorCleaned) return;
+                cursorCleaned = true;
+                cursorEl.remove();
+                if (tapHintCursorElRef.current === cursorEl) {
+                    tapHintCursorElRef.current = null;
+                }
+                if (tapHintCursorAnimationRef.current === cursorAnimation) {
+                    tapHintCursorAnimationRef.current = null;
+                }
+                if (tapHintRestorePositionRef.current) {
+                    tapHintRestorePositionRef.current();
+                    tapHintRestorePositionRef.current = null;
+                }
+            };
+
+            cursorAnimation.addEventListener("finish", cleanupCursor, { once: true });
+            animation.addEventListener("finish", handleFinish, { once: true });
+
+            return () => {
+                animation.removeEventListener("finish", handleFinish);
+                animation.cancel();
+                if (tapHintAnimationRef.current === animation) {
+                    tapHintAnimationRef.current = null;
+                }
+                cursorAnimation.removeEventListener("finish", cleanupCursor);
+                cursorAnimation.cancel();
+                cleanupCursor();
+            };
         };
 
-        cursorAnimation.addEventListener("finish", cleanupCursor, { once: true });
-        animation.addEventListener("finish", handleFinish, { once: true });
+        const timeoutId = window.setTimeout(() => {
+            teardown = startHint();
+        }, 1500);
 
         return () => {
-            animation.removeEventListener("finish", handleFinish);
-            animation.cancel();
-            if (tapHintAnimationRef.current === animation) {
-                tapHintAnimationRef.current = null;
+            window.clearTimeout(timeoutId);
+            if (teardown) {
+                teardown();
+                teardown = null;
             }
-            cursorAnimation.removeEventListener("finish", cleanupCursor);
-            cursorAnimation.cancel();
-            cleanupCursor();
         };
     }, [cardsVisible, loadingItems, loadingCategories, chunkedItems.length]);
 
@@ -991,7 +1007,7 @@ export default function MenuBrowser({
                         {/* INNER STRIP */}
                         <div
                             className={[
-                                "flex flex-col gap-15 pr-7 pt-1",
+                                "flex flex-col gap-15 pr-5 pt-1",
                                 "transition-all duration-200 ease-out transform-gpu",
                                 cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
                             ].join(" ")}
