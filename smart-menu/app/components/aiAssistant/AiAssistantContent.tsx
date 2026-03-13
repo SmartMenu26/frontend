@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
 import AiAssistantPromptPanel, {
   type AiAssistantRouterResponse,
@@ -55,13 +54,6 @@ const HERO_THINKING_FALLBACK = "/images/ai-assistant-cook-thinking.png";
 const NO_CREDITS_FALLBACK = "/images/no-credits.png";
 const MENU_ITEM_PLACEHOLDER = "/images/menu-item-placeholder.png";
 
-type CachedAssistantState = {
-  prompt: string;
-  assistantText: string;
-  candidates: Candidate[];
-  resultLocale: Locale | null;
-};
-
 function resolveImageSource(
   primary?: string | null,
   fallback?: string,
@@ -112,9 +104,6 @@ export default function AiAssistantContent({
   aiAssistantThinkingImageUrl,
   aiAssistantNoCreditsImageUrl,
 }: Props) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const clientSearchParams = useSearchParams();
   const locale = useLocale() as Locale;
   const t = useTranslations("aiAssistantContent");
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "success">(
@@ -124,76 +113,7 @@ export default function AiAssistantContent({
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const [resultLocale, setResultLocale] = useState<Locale | null>(null);
-  const [shouldAutoPrompt, setShouldAutoPrompt] = useState(false);
   const slugOrId = restaurantSlug ?? restaurantId;
-  const normalizedPrompt = useMemo(() => prompt?.trim() ?? "", [prompt]);
-  const cacheKey = slugOrId ? `ai-assistant:${slugOrId}` : null;
-  const lastPromptRef = useRef<string | null>(normalizedPrompt || null);
-
-  const updatePromptParam = useCallback(
-    (value: string) => {
-      if (!pathname) return;
-      const params = new URLSearchParams(
-        clientSearchParams ? clientSearchParams.toString() : undefined
-      );
-      if (value) {
-        params.set("prompt", value);
-      } else {
-        params.delete("prompt");
-      }
-      const query = params.toString();
-      const target = query ? `${pathname}?${query}` : pathname;
-      router.replace(target, { scroll: false });
-    },
-    [clientSearchParams, pathname, router]
-  );
-
-  const persistCache = useCallback(
-    (payload: CachedAssistantState) => {
-      if (!cacheKey || typeof window === "undefined") return;
-      try {
-        window.sessionStorage.setItem(cacheKey, JSON.stringify(payload));
-      } catch {
-        // silent
-      }
-    },
-    [cacheKey]
-  );
-
-  useEffect(() => {
-    if (!cacheKey) {
-      setShouldAutoPrompt(Boolean(normalizedPrompt));
-      return;
-    }
-    if (typeof window === "undefined") return;
-
-    if (!normalizedPrompt) {
-      setShouldAutoPrompt(false);
-      return;
-    }
-
-    try {
-      const raw = window.sessionStorage.getItem(cacheKey);
-      if (!raw) {
-        setShouldAutoPrompt(true);
-        return;
-      }
-      const parsed = JSON.parse(raw) as CachedAssistantState | null;
-      if (parsed?.prompt === normalizedPrompt) {
-        setAssistantText(parsed.assistantText ?? "");
-        setCandidates(Array.isArray(parsed.candidates) ? parsed.candidates : []);
-        setResultLocale(parsed.resultLocale ?? null);
-        setStatus("success");
-        lastPromptRef.current = parsed.prompt;
-        setShouldAutoPrompt(false);
-      } else {
-        setShouldAutoPrompt(true);
-      }
-    } catch {
-      window.sessionStorage.removeItem(cacheKey);
-      setShouldAutoPrompt(Boolean(normalizedPrompt));
-    }
-  }, [cacheKey, normalizedPrompt]);
   const restaurantHomeHref = useMemo(
     () => buildLocalizedPath(`/restaurant/${slugOrId}`, locale),
     [locale, slugOrId]
@@ -201,39 +121,25 @@ export default function AiAssistantContent({
   const noCreditsTitle = t("noCreditsTitle");
   const backToMenuLabel = t("backToMenu");
 
-  const handleResult = useCallback(
-    (payload?: AiAssistantResponse) => {
-      const dataBlock = payload?.data;
-      const nestedData = Array.isArray(dataBlock) ? undefined : dataBlock;
-      const nestedCandidates = Array.isArray(dataBlock)
-        ? dataBlock
-        : nestedData?.candidates;
+  const handleResult = useCallback((payload?: AiAssistantResponse) => {
+    const dataBlock = payload?.data;
+    const nestedData = Array.isArray(dataBlock) ? undefined : dataBlock;
+    const nestedCandidates = Array.isArray(dataBlock)
+      ? dataBlock
+      : nestedData?.candidates;
 
-      const text =
-        payload?.router?.assistantText ??
-        nestedData?.router?.assistantText ??
-        "";
-      const items = payload?.candidates ?? nestedCandidates ?? [];
-      const routerLanguage =
-        payload?.router?.language ?? nestedData?.router?.language ?? null;
+    const text =
+      payload?.router?.assistantText ??
+      nestedData?.router?.assistantText ??
+      "";
+    const items = payload?.candidates ?? nestedCandidates ?? [];
+    const routerLanguage =
+      payload?.router?.language ?? nestedData?.router?.language ?? null;
 
-      const normalizedCandidates = Array.isArray(items) ? items : [];
-      setAssistantText(text);
-      setCandidates(normalizedCandidates);
-      setResultLocale(routerLanguage ?? null);
-
-      const activePrompt = lastPromptRef.current ?? normalizedPrompt;
-      if (activePrompt?.trim()) {
-        persistCache({
-          prompt: activePrompt.trim(),
-          assistantText: text,
-          candidates: normalizedCandidates,
-          resultLocale: routerLanguage ?? null,
-        });
-      }
-    },
-    [normalizedPrompt, persistCache]
-  );
+    setAssistantText(text);
+    setCandidates(Array.isArray(items) ? items : []);
+    setResultLocale(routerLanguage ?? null);
+  }, []);
 
   const restaurantDisplayName = restaurantName?.trim();
   const heroImageSrc =
@@ -277,18 +183,6 @@ export default function AiAssistantContent({
         return "ден";
     }
   }, [displayLocale]);
-
-  const handlePromptPending = useCallback(
-    (message: string) => {
-      setPendingMessage(message);
-      const trimmed = message.trim();
-      if (trimmed) {
-        lastPromptRef.current = trimmed;
-        updatePromptParam(trimmed);
-      }
-    },
-    [updatePromptParam]
-  );
 
   return (
     <div className="min-h-dvh bg-[#F5F5F5] text-[#1E1F24]">
@@ -352,7 +246,7 @@ export default function AiAssistantContent({
             )}
 
             {status !== "loading" && (assistantText || candidates.length) ? (
-              <div className="mt-4 flex min-h-[40vh] flex-col gap-3 overflow-auto text-left">
+              <div className="mt-4 flex max-h-[40vh] flex-col gap-3 overflow-auto text-left">
                 {assistantText ? (
                   <p className="mt-6 rounded-2xl bg-[#F4F5F7] px-3 py-3 text-left text-sm text-[#4B4F54]">
                     {assistantText}
@@ -478,13 +372,12 @@ export default function AiAssistantContent({
 
             <AiAssistantPromptPanel<Candidate>
               suggestionPrompts={suggestionPrompts}
-              initialMessage={normalizedPrompt}
+              initialMessage={prompt}
               restaurantId={restaurantId}
               restaurantName={restaurantDisplayName}
-              autoSubmitInitialMessage={shouldAutoPrompt}
               onStatusChange={setStatus}
               onResult={handleResult}
-              onPromptPending={handlePromptPending}
+              onPromptPending={setPendingMessage}
               onPromptSettled={() => setPendingMessage(null)}
             />
           </div>

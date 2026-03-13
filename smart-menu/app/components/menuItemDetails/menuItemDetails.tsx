@@ -68,21 +68,12 @@ export default function MenuItemDetails({
   }, [slugOrId, locale, returnKind, returnCategoryId, returnSubcategoryId]);
 
   const handleBack = useCallback(() => {
-    const canNavigateBack =
-      typeof window !== "undefined" && window.history.length > 1;
-
-    if (canNavigateBack) {
-      router.back();
-      return;
-    }
-
     if (backUrl) {
       router.push(backUrl);
       return;
     }
-
-    router.push(buildLocalizedPath("/", locale));
-  }, [backUrl, locale, router]);
+    router.back();
+  }, [backUrl, router]);
 
   const favoritesKey = useMemo(
     () => (restaurantId ? `favorites:${restaurantId}` : "favorites:default"),
@@ -347,7 +338,7 @@ const MenuItemHero = memo(function MenuItemHero({
             imageLoaded ? "opacity-0" : "opacity-100"
           )}
         />
-        <img
+        <Image
           width={HERO_IMAGE_SIZE}
           height={HERO_IMAGE_SIZE}
           src={imageUrl}
