@@ -23,6 +23,8 @@ type Candidate = {
   _id?: string;
   name?: LocalizedField;
   description?: LocalizedField;
+  price?: number | string;
+  priceValue?: number;
   image?: {
     url?: string;
     alt?: Partial<Record<Locale, string>>;
@@ -154,6 +156,33 @@ export default function AiAssistantContent({
   const displayLocale = resultLocale ?? locale;
   const assistantDisplayName =
     resolveLocalizedField(assistantName, displayLocale) || "Асистентот";
+  const numberLocale = useMemo(() => {
+    switch (displayLocale) {
+      case "sq":
+        return "sq-AL";
+      case "en":
+        return "en-US";
+      default:
+        return "mk-MK";
+    }
+  }, [displayLocale]);
+  const priceFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat(numberLocale, {
+        maximumFractionDigits: 2,
+      }),
+    [numberLocale]
+  );
+  const priceSuffix = useMemo(() => {
+    switch (displayLocale) {
+      case "sq":
+        return "ден";
+      case "en":
+        return "MKD";
+      default:
+        return "ден";
+    }
+  }, [displayLocale]);
 
   return (
     <div className="min-h-dvh bg-[#F5F5F5] text-[#1E1F24]">
@@ -252,6 +281,23 @@ export default function AiAssistantContent({
                           locale
                         )
                       : restaurantHomeHref;
+                    const resolvedPriceRaw =
+                      typeof item?.price === "number"
+                        ? item.price
+                        : typeof item?.price === "string"
+                        ? Number(
+                            item.price
+                              .replace(/[^\d.,.-]/g, "")
+                              .replace(/,/g, ".")
+                          )
+                        : typeof item?.priceValue === "number"
+                        ? item.priceValue
+                        : undefined;
+                    const priceLabel =
+                      typeof resolvedPriceRaw === "number" &&
+                      Number.isFinite(resolvedPriceRaw)
+                        ? `${priceFormatter.format(resolvedPriceRaw)} ${priceSuffix}`
+                        : null;
 
                     return (
                       <Link
@@ -276,13 +322,22 @@ export default function AiAssistantContent({
                           sizes={CANDIDATE_IMAGE_SIZES}
                           className="h-14 w-14 rounded-2xl object-cover"
                         />
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold text-[#1E1F24]">
-                            {title}
-                          </p>
-                          <p className="mt-1 text-xs text-[#6B7280] line-clamp-2">
-                            {description}
-                          </p>
+                        <div className="flex flex-1 flex-col">
+                          <div className="flex items-start">
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-[#1E1F24]">
+                                {title}
+                              </p>
+                              <p className="mt-1 text-xs text-[#6B7280] line-clamp-2">
+                                {description}
+                              </p>
+                            </div>
+                            {priceLabel && (
+                              <span className="text-sm font-semibold text-[#1E1F24] whitespace-nowrap">
+                                {priceLabel}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <svg
                           className="h-4 w-4 text-[#4B4F54]"

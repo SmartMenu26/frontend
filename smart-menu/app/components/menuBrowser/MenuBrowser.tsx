@@ -913,7 +913,7 @@ export default function MenuBrowser({
 
 
     return (
-        <section aria-labelledby="menu-browser-heading" className="bg-[#F7F7F7] min-h-[30vh] h-fit max-h-125 flex flex-col justify-start items-center">
+        <section aria-labelledby="menu-browser-heading" className="bg-[#F7F7F7] min-h-[56vh] h-fit flex flex-col justify-start items-center">
             <div className="container mx-auto space-y-1 py-5 pl-4">
                 <h2 id="menu-browser-heading" className="sr-only">
                     Мени
@@ -976,13 +976,14 @@ export default function MenuBrowser({
                         onTouchEnd={resetTouchState}
                         onTouchCancel={resetTouchState}
                         className={[
-                            shouldForcePagedLayout ? "min-h-[330px] max-h-[330px]" : "",
+                            shouldForcePagedLayout ? "h-[380px]" : "",
                             shouldForcePagedLayout
                                 ? "overflow-y-auto snap-y snap-mandatory scroll-smooth"
                                 : "overflow-y-visible",
                             "overflow-x-hidden",
                             "[-webkit-overflow-scrolling:touch]",
                             "[&::-webkit-scrollbar]:hidden",
+                            "py-4 scroll-pt-6",
                         ]
                             .filter(Boolean)
                             .join(" ")}
@@ -990,7 +991,7 @@ export default function MenuBrowser({
                         {/* INNER STRIP */}
                         <div
                             className={[
-                                "flex flex-col gap-6 pr-7",
+                                "flex flex-col gap-15 pr-7 pt-1",
                                 "transition-all duration-200 ease-out transform-gpu",
                                 cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
                             ].join(" ")}
@@ -999,7 +1000,7 @@ export default function MenuBrowser({
                             {(loadingItems || loadingCategories) ? (
                                 <div
                                     className={[
-                                        "snap-start snap-always flex flex-col divide-y divide-[#e1e5e1b3]",
+                                        "snap-start snap-always flex flex-col gap-3 pt-4",
                                         shouldForcePagedLayout ? "min-h-[330px]" : "",
                                     ]
                                         .filter(Boolean)
@@ -1007,7 +1008,7 @@ export default function MenuBrowser({
                                     role="listitem"
                                 >
                                     {Array.from({ length: ITEMS_PER_PAGE }).map((_, idx) => (
-                                        <div key={`skeleton-${idx}`} className="py-3">
+                                        <div key={`skeleton-${idx}`} className="py-0">
                                             <SkeletonCard layout="list" />
                                         </div>
                                     ))}
@@ -1018,14 +1019,14 @@ export default function MenuBrowser({
                                         role="listitem"
                                         key={`menu-page-${pageIdx}`}
                                         className={[
-                                            "snap-start snap-always flex flex-col divide-y divide-[#e1e5e1b3]",
+                                            "snap-start snap-always flex flex-col gap-3",
                                             shouldForcePagedLayout ? "min-h-[330px]" : "",
                                         ]
                                             .filter(Boolean)
                                             .join(" ")}
                                     >
                                         {group.map((it, index) => (
-                                            <div key={it.id} className="w-full py-3" data-menu-card>
+                                            <div key={it.id} className="w-full" data-menu-card>
                                                 <Card
                                                     title={it.title}
                                                     imageUrl={it.imageUrl}
