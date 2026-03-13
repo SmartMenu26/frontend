@@ -22,7 +22,7 @@ export default function MealTypeToggle({ value, onChange, className = "" }: Prop
   const inactive = "bg-white";
 
   return (
-    <div className={`flex justify-end items-end gap-1 px-2 pb-4 ${className}`}>
+    <div className={`flex justify-end items-end gap-1 px-5 pb-4 ${className}`}>
       {/* Food */}
       <button
         type="button"
