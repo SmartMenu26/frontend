@@ -338,7 +338,7 @@ const MenuItemHero = memo(function MenuItemHero({
             imageLoaded ? "opacity-0" : "opacity-100"
           )}
         />
-        <img
+        <Image
           width={HERO_IMAGE_SIZE}
           height={HERO_IMAGE_SIZE}
           src={imageUrl}
