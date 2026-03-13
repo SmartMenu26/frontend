@@ -75,20 +75,30 @@ export default function Card({
       onClick={onClick}
       className={[
         "cursor-pointer text-left",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20",
-        isListLayout ? "block w-full" : "",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#355B4B]/50",
+        isListLayout
+          ? [
+              "block w-full rounded-2xl border border-[#E0E6E2]",
+              "bg-white/95 px-3 py-2.5",
+              "shadow-[0_4px_12px_rgba(47,58,55,0.06)]",
+              "transition duration-200 ease-out",
+              "hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(47,58,55,0.1)]",
+            ].join(" ")
+          : "",
         className,
-      ].join(" ")}
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       {isListLayout ? (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="relative h-[60px] w-[60px] flex-shrink-0">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+            <div className="relative h-[58px] w-[58px] flex-shrink-0">
               <div
                 aria-hidden
                 className={[
-                  "absolute inset-0 rounded-full bg-black/5",
-                  "animate-pulse transition-opacity duration-300",
+                  "absolute inset-0 rounded-full bg-[#F2F4F3]",
+                  "transition-opacity duration-300",
                   imageLoaded ? "opacity-0" : "opacity-100",
                 ].join(" ")}
               />
@@ -109,7 +119,7 @@ export default function Card({
               />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-semibold leading-snug text-[#355B4B] line-clamp-2">
+              <h3 className="text-base font-semibold leading-snug text-[#1E2B27] line-clamp-2">
                 {title}
               </h3>
               {/* {description && (
@@ -120,7 +130,7 @@ export default function Card({
             </div>
           </div>
           {priceLabel && (
-            <div className="ml-4 text-base font-semibold text-[#355B4B] whitespace-nowrap">
+            <div className="ml-2 text-base font-semibold text-[#355B4B] whitespace-nowrap">
               {priceLabel}
             </div>
           )}
@@ -149,7 +159,7 @@ export default function Card({
                 aria-hidden
                 className={[
                   "absolute inset-0 rounded-full bg-white/20",
-                  "animate-pulse transition-opacity duration-300",
+                  "transition-opacity duration-300",
                   imageLoaded ? "opacity-0" : "opacity-100",
                 ].join(" ")}
               />
