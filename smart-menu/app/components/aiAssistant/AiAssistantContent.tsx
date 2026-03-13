@@ -120,6 +120,7 @@ export default function AiAssistantContent({
   );
   const noCreditsTitle = t("noCreditsTitle");
   const backToMenuLabel = t("backToMenu");
+  const noRecommendationsText = t("noRecommendations");
 
   const handleResult = useCallback((payload?: AiAssistantResponse) => {
     const dataBlock = payload?.data;
@@ -356,7 +357,7 @@ export default function AiAssistantContent({
                   })
                 ) : (
                   <p className="rounded-2xl border border-dashed border-[#C8CED8] bg-white/70 px-4 py-4 text-sm text-[#6B7280]">
-                    Нема препораки за ова барање. Пробај да побараш конкретна храна или пијалок.
+                    {noRecommendationsText}
                   </p>
                 )}
               </div>

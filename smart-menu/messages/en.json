@@ -35,7 +35,8 @@
       "caption": "The chef is thinking"
     },
     "noCreditsTitle": "The AI assistant is currently unavailable",
-    "backToMenu": "Back to the menu"
+    "backToMenu": "Back to the menu",
+    "noRecommendations": "No recommendations for this request. Try asking for a specific dish or drink."
   }
   ,
   "aiAssistantSuggestions": {
