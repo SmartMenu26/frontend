@@ -92,7 +92,7 @@ export default function Card({
         .join(" ")}
     >
       {isListLayout ? (
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <div className="relative h-[58px] w-[58px] flex-shrink-0">
               <div

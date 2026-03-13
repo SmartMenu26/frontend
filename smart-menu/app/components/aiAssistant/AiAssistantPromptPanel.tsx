@@ -33,6 +33,7 @@ type Props<TCandidate = unknown> = {
   initialMessage?: string;
   restaurantId: string;
   restaurantName?: string;
+  autoSubmitInitialMessage?: boolean;
   onStatusChange?: (status: "idle" | "loading" | "error" | "success") => void;
   onResult?: (payload: AiAssistantRouterResponse<TCandidate>) => void;
   onPromptPending?: (message: string) => void;
@@ -44,6 +45,7 @@ export default function AiAssistantPromptPanel<TCandidate = unknown>({
   initialMessage = "",
   restaurantId,
   restaurantName,
+  autoSubmitInitialMessage = true,
   onStatusChange,
   onResult,
   onPromptPending,
@@ -107,6 +109,11 @@ export default function AiAssistantPromptPanel<TCandidate = unknown>({
   );
 
   useEffect(() => {
+    if (!autoSubmitInitialMessage) {
+      lastAutoPromptRef.current = null;
+      return;
+    }
+
     const trimmed = initialMessage.trim();
     if (!trimmed) {
       lastAutoPromptRef.current = null;
@@ -121,7 +128,7 @@ export default function AiAssistantPromptPanel<TCandidate = unknown>({
       .finally(() => {
         setMessage("");
       });
-  }, [initialMessage, submitPrompt]);
+  }, [initialMessage, submitPrompt, autoSubmitInitialMessage]);
 
   useEffect(() => {
     onStatusChange?.(status);
