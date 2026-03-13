@@ -38,18 +38,18 @@ export default function AiSuggestion({
       colorClassName:"uppercase"
     },
     {
-      id: "protein",
-      label: t("chips.protein"),
-      icon: <Drumstick size={16} />,
-      variant: "solid",
-      colorClassName: "bg-[#844b38] text-white hover:bg-[#B4654A]/90",
-    },
-    {
       id: "low-cal",
       label: t("chips.healthy"),
       icon: <Leaf size={16} />,
       variant: "solid",
       colorClassName: "bg-[#386c42] text-white hover:bg-[#70B77E]/90",
+    },
+    {
+      id: "protein",
+      label: t("chips.protein"),
+      icon: <Drumstick size={16} />,
+      variant: "solid",
+      colorClassName: "bg-[#844b38] text-white hover:bg-[#B4654A]/90",
     },
     {
       id: "protein2",
