@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import CategoryLink from "../ui/CategoryLink";
 import ChipsRow, { ChipItem } from "../ui/ChipsRow";
 import Card from "../ui/Card";
@@ -75,6 +75,7 @@ export default function MenuBrowser({
     const touchStateRef = useRef<{ lastY: number } | null>(null);
     const requestedItemsKeyRef = useRef<string | null>(null);
     const fulfilledItemsKeyRef = useRef<string | null>(null);
+    const hasCompletedInitialRestoreRef = useRef(false);
     const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
     const labelPriority = useMemo(() => {
@@ -184,6 +185,9 @@ export default function MenuBrowser({
         total: 1,
         index: 0,
     }));
+    const [pendingScrollTop, setPendingScrollTop] = useState<number | null>(null);
+    const [pendingPageIndex, setPendingPageIndex] = useState<number | null>(null);
+    const [restoringScroll, setRestoringScroll] = useState(false);
 
     const chunkedItems = useMemo(() => {
         if (!items.length) return [];
@@ -274,6 +278,7 @@ export default function MenuBrowser({
 
     useEffect(() => {
         initialSelectionAppliedRef.current = false;
+        hasCompletedInitialRestoreRef.current = false;
     }, [restaurantId, mealType]);
 
     useEffect(() => {
@@ -334,65 +339,89 @@ export default function MenuBrowser({
     }, [restaurantId, mealType, mapCategories, prefetchedData]);
 
     useEffect(() => {
-  if (!categories.length) return;
+        if (!categories.length) return;
 
-  let storedCategoryId: string | null = null;
-  let storedSubcategoryId: string | null = null;
+        let storedCategoryId: string | null = null;
+        let storedSubcategoryId: string | null = null;
+        let storedScrollTop: number | null = null;
+        let storedPageIndex: number | null = null;
 
-  if (typeof window !== "undefined") {
-    try {
-      const storedRaw = window.sessionStorage.getItem(selectionStorageKey);
-      if (storedRaw) {
-        const stored = JSON.parse(storedRaw) as {
-          categoryId?: string;
-          subcategoryId?: string;
-        };
-        storedCategoryId = stored.categoryId ?? null;
-        storedSubcategoryId = stored.subcategoryId ?? null;
-      }
-    } catch {}
-  }
+        if (typeof window !== "undefined") {
+            try {
+                const storedRaw = window.sessionStorage.getItem(selectionStorageKey);
+                if (storedRaw) {
+                    const stored = JSON.parse(storedRaw) as {
+                        categoryId?: string;
+                        subcategoryId?: string;
+                        scrollTop?: number;
+                        pageIndex?: number;
+                    };
+                    storedCategoryId = stored.categoryId ?? null;
+                    storedSubcategoryId = stored.subcategoryId ?? null;
+                    storedPageIndex =
+                        typeof stored.pageIndex === "number" && stored.pageIndex >= 0
+                            ? Math.floor(stored.pageIndex)
+                            : null;
+                    if (typeof stored.scrollTop === "number" && stored.scrollTop >= 0) {
+                        storedScrollTop = stored.scrollTop;
+                    } else if (storedPageIndex !== null) {
+                        storedScrollTop = Math.max(0, storedPageIndex) * PAGE_VIEWPORT_PX;
+                    } else {
+                        storedScrollTop = null;
+                    }
+                }
+            } catch {}
+        }
 
-  const validStoredCategory =
-    storedCategoryId && categories.some((cat) => cat.id === storedCategoryId)
-      ? storedCategoryId
-      : null;
+        const validStoredCategory =
+            storedCategoryId && categories.some((cat) => cat.id === storedCategoryId)
+                ? storedCategoryId
+                : null;
 
-  const validPrefetchedCategory =
-    prefetchedData?.categoryId &&
-    categories.some((cat) => cat.id === prefetchedData.categoryId)
-      ? prefetchedData.categoryId
-      : null;
+        const validPrefetchedCategory =
+            prefetchedData?.categoryId &&
+            categories.some((cat) => cat.id === prefetchedData.categoryId)
+                ? prefetchedData.categoryId
+                : null;
 
-  const nextCategoryId =
-    validStoredCategory ??
-    validPrefetchedCategory ??
-    categories[0]?.id ??
-    "";
+        const nextCategoryId =
+            validStoredCategory ?? validPrefetchedCategory ?? categories[0]?.id ?? "";
 
-  const category = categories.find((cat) => cat.id === nextCategoryId);
-  const defaultSubId = pickDefaultSubcategoryId(nextCategoryId, categories);
+        const category = categories.find((cat) => cat.id === nextCategoryId);
+        const defaultSubId = pickDefaultSubcategoryId(nextCategoryId, categories);
 
-  let nextSubcategoryId = defaultSubId;
+        let nextSubcategoryId = defaultSubId;
 
-  const candidateSubId =
-    validStoredCategory === nextCategoryId
-      ? storedSubcategoryId
-      : prefetchedData?.subcategoryId ?? null;
+        const candidateSubId =
+            validStoredCategory === nextCategoryId
+                ? storedSubcategoryId
+                : prefetchedData?.subcategoryId ?? null;
 
-  if (candidateSubId === "all") {
-    nextSubcategoryId = "all";
-  } else if (
-    candidateSubId &&
-    category?.subcategories.some((sub) => sub.id === candidateSubId)
-  ) {
-    nextSubcategoryId = candidateSubId;
-  }
+        if (candidateSubId === "all") {
+            nextSubcategoryId = "all";
+        } else if (
+            candidateSubId &&
+            category?.subcategories.some((sub) => sub.id === candidateSubId)
+        ) {
+            nextSubcategoryId = candidateSubId;
+        }
 
-  setSelectedCategoryId(nextCategoryId);
-  setSelectedSubcategoryId(nextSubcategoryId);
-  initialSelectionAppliedRef.current = true;
-}, [categories, selectionStorageKey, prefetchedData]);
+        const shouldRestoreStoredScroll =
+            validStoredCategory === nextCategoryId &&
+            (storedSubcategoryId ?? "all") === nextSubcategoryId;
+
+        const initialScrollTop =
+            shouldRestoreStoredScroll && storedScrollTop !== null ? storedScrollTop : 0;
+        const initialPageIndex =
+            shouldRestoreStoredScroll && storedPageIndex !== null ? storedPageIndex : 0;
+
+        setSelectedCategoryId(nextCategoryId);
+        setSelectedSubcategoryId(nextSubcategoryId);
+        setPendingScrollTop(initialScrollTop);
+        setPendingPageIndex(initialPageIndex);
+        userInteractedRef.current = false;
+        initialSelectionAppliedRef.current = true;
+    }, [categories, selectionStorageKey, prefetchedData]);
 
 
     const allChipLabel = useMemo(
@@ -430,10 +459,24 @@ export default function MenuBrowser({
     const handleCategorySelect = useCallback(
         (categoryId: string) => {
             if (categoryId === selectedCategoryId) return;
+            setPendingScrollTop(0);
+            setPendingPageIndex(0);
+            userInteractedRef.current = true;
             setSelectedCategoryId(categoryId);
             setSelectedSubcategoryId(pickDefaultSubcategoryId(categoryId, categories));
         },
         [selectedCategoryId, categories]
+    );
+
+    const handleSubcategorySelect = useCallback(
+        (subcategoryId: string) => {
+            if (subcategoryId === selectedSubcategoryId) return;
+            setPendingScrollTop(0);
+            setPendingPageIndex(0);
+            userInteractedRef.current = true;
+            setSelectedSubcategoryId(subcategoryId);
+        },
+        [selectedSubcategoryId]
     );
 
     // keep active category centered in scroll container
@@ -477,7 +520,7 @@ export default function MenuBrowser({
     }, [chunkedItems.length]);
 
     const scrollToPage = useCallback(
-        (targetIndex: number) => {
+        (targetIndex: number, behavior: ScrollBehavior = "smooth") => {
             const container = cardsContainerRef.current;
             if (!container) return;
 
@@ -493,19 +536,69 @@ export default function MenuBrowser({
 
             container.scrollTo({
                 top: clampedIndex * viewport,
-                behavior: "smooth",
+                behavior,
             });
         },
         [chunkedItems.length]
     );
 
     useEffect(() => {
+        if (pendingScrollTop !== null || pendingPageIndex !== null) {
+            setRestoringScroll(true);
+        }
+    }, [pendingScrollTop, pendingPageIndex]);
+
+    useLayoutEffect(() => {
+        const hasPendingScroll = pendingScrollTop !== null;
+        const hasPendingPage = pendingPageIndex !== null;
+        if (!hasPendingScroll && !hasPendingPage) return;
+        if (loadingItems || loadingCategories) return;
         const container = cardsContainerRef.current;
         if (!container) return;
-        markProgrammaticScroll(200);
-        container.scrollTop = 0;
-        requestAnimationFrame(() => updateCardScrollState());
-    }, [selectedCategoryId, selectedSubcategoryId, updateCardScrollState, markProgrammaticScroll]);
+
+        let applied = false;
+        const previousScrollBehavior = container.style.scrollBehavior;
+        container.style.scrollBehavior = "auto";
+
+        if (hasPendingPage && chunkedItems.length > 1) {
+            markProgrammaticScroll(200);
+            scrollToPage(pendingPageIndex ?? 0, "auto");
+            applied = true;
+        } else if (hasPendingScroll) {
+            const maxScroll =
+                container.scrollHeight > container.clientHeight
+                    ? container.scrollHeight - container.clientHeight
+                    : 0;
+            const targetScrollTop = Math.max(0, Math.min(pendingScrollTop ?? 0, maxScroll));
+            markProgrammaticScroll(200);
+            container.scrollTo({ top: targetScrollTop, behavior: "auto" });
+            applied = true;
+        }
+
+        container.style.scrollBehavior = previousScrollBehavior;
+
+        if (applied) {
+            requestAnimationFrame(() => {
+                updateCardScrollState();
+                setRestoringScroll(false);
+            });
+            hasCompletedInitialRestoreRef.current = true;
+        } else {
+            setRestoringScroll(false);
+        }
+
+        if (hasPendingScroll) setPendingScrollTop(null);
+        if (hasPendingPage) setPendingPageIndex(null);
+    }, [
+        pendingScrollTop,
+        pendingPageIndex,
+        loadingItems,
+        loadingCategories,
+        chunkedItems.length,
+        updateCardScrollState,
+        markProgrammaticScroll,
+        scrollToPage,
+    ]);
 
     useEffect(() => {
         const container = cardsContainerRef.current;
@@ -911,20 +1004,34 @@ export default function MenuBrowser({
 
     // Removed URL-sync effect to keep menu links clean
 
-    useEffect(() => {
-        if (!initialSelectionAppliedRef.current) return;
-        if (typeof window === "undefined") return;
+    const persistSelectionState = useCallback(
+        (options?: { scrollTop?: number; pageIndex?: number }) => {
+            if (!initialSelectionAppliedRef.current) return;
+            if (typeof window === "undefined") return;
+            if (options?.pageIndex === undefined && !hasCompletedInitialRestoreRef.current) return;
 
-        try {
-            const payload = JSON.stringify({
-                categoryId: selectedCategoryId,
-                subcategoryId: selectedSubcategoryId,
-            });
-            window.sessionStorage.setItem(selectionStorageKey, payload);
-        } catch {
-            // ignore storage errors
-        }
-    }, [selectedCategoryId, selectedSubcategoryId, selectionStorageKey]);
+            const container = cardsContainerRef.current;
+            const scrollTopValue =
+                typeof options?.scrollTop === "number"
+                    ? options.scrollTop
+                    : container?.scrollTop ?? 0;
+            const pageIndexValue =
+                typeof options?.pageIndex === "number" ? options.pageIndex : pageIndicator.index;
+
+            try {
+                const payload = JSON.stringify({
+                    categoryId: selectedCategoryId,
+                    subcategoryId: selectedSubcategoryId,
+                    scrollTop: scrollTopValue,
+                    pageIndex: pageIndexValue,
+                });
+                window.sessionStorage.setItem(selectionStorageKey, payload);
+            } catch {
+                // ignore storage errors
+            }
+        },
+        [selectedCategoryId, selectedSubcategoryId, selectionStorageKey, pageIndicator.index]
+    );
 
 
 
@@ -977,7 +1084,7 @@ export default function MenuBrowser({
                         <ChipsRow
                             items={chipItems}
                             activeId={selectedSubcategoryId}
-                            onChipClick={(id) => setSelectedSubcategoryId(id)}
+                            onChipClick={handleSubcategorySelect}
                             className="gap-1!"
                         />
                     )
@@ -1000,6 +1107,9 @@ export default function MenuBrowser({
                             "[-webkit-overflow-scrolling:touch]",
                             "[&::-webkit-scrollbar]:hidden",
                             "py-4 scroll-pt-6",
+                            "transition-opacity transition-transform duration-150 ease-out",
+                            "transform",
+                            restoringScroll ? "opacity-95 scale-[0.995]" : "opacity-100 scale-100",
                         ]
                             .filter(Boolean)
                             .join(" ")}
@@ -1043,17 +1153,23 @@ export default function MenuBrowser({
                                     >
                                         {group.map((it, index) => (
                                             <div key={it.id} className="w-full" data-menu-card>
-                                                <Card
-                                                    title={it.title}
-                                                    imageUrl={it.imageUrl}
-                                                    priceLabel={`${it.price}ден`}
-                                                    kind={it.kind ?? mealType}
+                                                    <Card
+                                                        title={it.title}
+                                                        imageUrl={it.imageUrl}
+                                                        priceLabel={`${it.price}ден`}
+                                                        kind={it.kind ?? mealType}
                                                     description={it.description}
                                                     layout="list"
-                                                    onClick={() => {
-                                                        void incrementMenuItemView({
-                                                            restaurantId,
-                                                            menuItemId: it.id,
+                                                        onClick={() => {
+                                                            userInteractedRef.current = true;
+                                                            void incrementMenuItemView({
+                                                                restaurantId,
+                                                                menuItemId: it.id,
+                                                            });
+                                                            const container = cardsContainerRef.current;
+                                                        persistSelectionState({
+                                                            scrollTop: container?.scrollTop ?? 0,
+                                                            pageIndex: pageIndicator.index,
                                                         });
                                                         const detailParams = new URLSearchParams();
                                                         detailParams.set("kind", mealType);
