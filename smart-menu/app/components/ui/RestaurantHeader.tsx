@@ -62,7 +62,7 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
           <h1
             className={[
               greatVibes.className,
-              "pt-3 mx-6 md:mx-0",
+              "pt-3 mx-4 md:mx-0",
               headingSizeClass,
               "text-[#6B2E2E]",
             ].join(" ")}
