@@ -16,7 +16,7 @@ export default function Footer() {
 
   return (
     <footer className="mt-1 border-t border-black/5 bg-[#F7F7F7] backdrop-blur">
-      <div className="container mx-auto flex flex-col justify-center items-center gap-2 px-6 text-[#2F3A37] md:flex-row md:items-center md:justify-between pt-4 pb-2">
+      <div className="container mx-auto flex flex-col justify-center items-center gap-2 px-6 text-[#2F3A37] md:flex-row md:items-center md:justify-between pt-4 pb-2 md:max-w-75">
         <div className="flex flex-col items-center gap-2">
           <img
             src="/icons/smart-logo-80x80.png"
