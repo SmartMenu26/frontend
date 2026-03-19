@@ -270,6 +270,41 @@
       }
     }
   },
+  "blogPage": {
+    "hero": {
+      "eyebrow": "Smart Menu Blog",
+      "typeLabel": "Article"
+    },
+    "meta": {
+      "readingTime": "{minutes} min read"
+    },
+    "suggested": {
+      "eyebrow": "Keep exploring",
+      "title": "Recommended articles",
+      "cta": "Read article"
+    }
+  },
+  "blogIndex": {
+    "meta": {
+      "title": "Smart Menu Blog",
+      "description": "Product launches, customer stories, and AI insights for hospitality teams."
+    },
+    "hero": {
+      "eyebrow": "Smart Menu Blog",
+      "title": "Ideas for modern hospitality teams",
+      "description": "Stories about digital experiences, AI concierges, and guest engagement from Smart Menu partners.",
+      "count": "{count, plural, one {# published article} other {# published articles}}"
+    },
+    "grid": {
+      "tag": "Article",
+      "readMore": "Read more",
+      "empty": "Stay tuned—new stories are coming soon."
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
   "menuItemDetails": {
     "assistantButton": "AI Recommendation",
     "assistantPrompt": "What pairs well with {dish}?",
