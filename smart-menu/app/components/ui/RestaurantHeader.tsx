@@ -19,6 +19,7 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
   const displayName = name?.trim() || t("fallbackName");
   const menuLabel = t("menuLabel");
   const homeHref = locale ? `/${locale}` : "/";
+  const blogHref = locale ? `/${locale}/blog` : "/blog";
   const navLinks = useMemo(() => {
     return [
       {
@@ -34,11 +35,15 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
         label: t("nav.aboutUs"),
       },
       {
+        href: blogHref,
+        label: t("nav.blog"),
+      },
+      {
         href: `${homeHref}#contact`,
         label: t("nav.contact"),
       },
     ];
-  }, [homeHref, t]);
+  }, [blogHref, homeHref, t]);
   const desktopNavLinks = navLinks.slice(1);
   const headingSizeClass = useMemo(() => {
     if (displayName.length > 28) return "text-4xl md:text-5xl";

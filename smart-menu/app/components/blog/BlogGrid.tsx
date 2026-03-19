@@ -4,6 +4,7 @@ import type { SuggestedBlog } from "@/app/lib/blogs";
 import type { Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { formatPublishedDate } from "./utils";
+import Image from "next/image";
 
 type BlogGridProps = {
   items: SuggestedBlog[];
@@ -35,11 +36,13 @@ export default function BlogGrid({ items, locale, copy }: BlogGridProps) {
           <article>
             <div className="relative overflow-hidden rounded-[28px] rounded-b-none">
               {item.coverImage ? (
-                <img
+                <Image
                   src={item.coverImage}
                   alt={item.title}
                   className="h-56 w-full object-cover"
                   loading="lazy"
+                  width={200}
+                  height={200}
                 />
               ) : (
                 <div className="flex h-56 items-center justify-center bg-gradient-to-br from-[#F0E3D0] to-[#F6F1EA] text-sm font-semibold uppercase tracking-wide text-[#A16B00]">
