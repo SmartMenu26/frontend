@@ -145,7 +145,7 @@ export default async function Home({ params }: Props) {
       <div className="bg-[#F7F7F7] text-[#1B1F1E]">
       <RestaurantHeader showName={false} />
       <section className="relative overflow-hidden bg-gradient-to-b from-[#F7F7F7] to-white">
-        <div className="container mx-auto flex flex-col gap-[60px] md:gap-10 px-4 pb-20 pt-24 md:flex-row md:items-center">
+        <div className="container mx-auto flex flex-col gap-[60px] md:gap-10 px-4 pb-20 pt-24 md:pt-10 md:flex-row md:items-center">
           <div className="landing-fade max-w-2xl" style={{ animationDelay: "120ms" }}>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#7A5A2A]">
               {hero.eyebrow}

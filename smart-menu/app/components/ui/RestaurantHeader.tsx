@@ -18,8 +18,8 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const displayName = name?.trim() || t("fallbackName");
   const menuLabel = t("menuLabel");
+  const homeHref = locale ? `/${locale}` : "/";
   const navLinks = useMemo(() => {
-    const homeHref = locale ? `/${locale}` : "/";
     return [
       {
         href: homeHref,
@@ -38,7 +38,8 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
         label: t("nav.contact"),
       },
     ];
-  }, [locale, t]);
+  }, [homeHref, t]);
+  const desktopNavLinks = navLinks.slice(1);
   const headingSizeClass = useMemo(() => {
     if (displayName.length > 28) return "text-4xl md:text-5xl";
     if (displayName.length > 22) return "text-5xl md:text-6xl";
@@ -50,11 +51,14 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
   return (
     <>
       {/* HEADER */}
-      <header className="container mx-auto relative" role="banner">
+      <header
+        className="container mx-auto relative flex flex-col-reverse gap-10 md:items-base md:justify-between md:rounded-[32px]"
+        role="banner"
+      >
         <HamburgerButton
           open={menuOpen}
           onToggle={() => setMenuOpen((v) => !v)}
-          className="absolute top-5 right-6 z-100 text-[#1B1F1E]"
+          className="absolute top-5 right-6 z-100 text-[#1B1F1E] md:hidden"
           ariaLabel={t("toggleLabel")}
         />
 
@@ -73,13 +77,49 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
             </span>
           </h1>
         )}
+
+        <nav
+          className="hidden md:flex items-center gap-6 text-base font-semibold text-[#1B1F1E] rounded-full border border-[#EADFD2]/70 bg-white/80 px-6 py-3 mt-4"
+          aria-label={menuLabel}
+        >
+          <Link
+            href={homeHref}
+            className="flex items-center gap-3 pr-5 mr-1 border-r border-[#EADFD2]/80"
+            aria-label={displayName}
+          >
+            <img
+              src="/icons/smart-logo-80x80.png"
+              alt={`${displayName} logo`}
+              width={48}
+              height={48}
+              loading="lazy"
+              className="h-10 w-10 rounded-full border border-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.12)]"
+            />
+            <span className="text-sm uppercase tracking-[0.25em] text-[#6B2E2E]">
+              Menu
+            </span>
+          </Link>
+
+          <ul className="flex items-center gap-6">
+            {desktopNavLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="relative inline-flex items-center gap-2 px-1 py-1 text-[#2F3A37] transition hover:text-[#6B2E2E]"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </header>
 
       {/* BACKDROP */}
       <div
         onClick={() => setMenuOpen(false)}
         className={[
-          "fixed inset-0 bg-black/30 z-40 transition-opacity duration-300",
+          "fixed inset-0 bg-black/30 z-40 transition-opacity duration-300 md:hidden",
           menuOpen ? "opacity-100" : "opacity-0 pointer-events-none",
         ].join(" ")}
         aria-hidden={!menuOpen}
@@ -87,7 +127,7 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
       {/* SLIDE-IN MENU (glass) */}
       <nav
         className={[
-          "fixed top-0 left-0 h-screen w-full z-50",
+          "fixed top-0 left-0 h-screen w-full z-50 md:hidden",
           "transform transition-transform duration-300 ease-out",
           menuOpen ? "translate-x-0" : "-translate-x-full",
 
