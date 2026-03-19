@@ -84,7 +84,7 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
         )}
 
         <nav
-          className="hidden md:flex items-center gap-6 text-base font-semibold text-[#1B1F1E] rounded-full border border-[#EADFD2]/70 bg-white/80 px-6 py-3 mt-4"
+          className="hidden md:flex items-center gap-6 text-base font-semibold text-[#1B1F1E] rounded-full border border-[#EADFD2]/70 bg-white/80 px-6 py-3 my-4"
           aria-label={menuLabel}
         >
           <Link
