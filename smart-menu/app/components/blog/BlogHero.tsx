@@ -42,12 +42,12 @@ export default function BlogHero({
           {title}
         </h1>
         {metaLine && (
-          <p className="mt-4 text-sm font-medium uppercase tracking-wide text-[#4A4D52]">
+          <p className="mt-4 text-xs md:text-sm font-medium uppercase tracking-wide text-[#4A4D52]">
             {metaLine}
           </p>
         )}
         {excerpt && (
-          <p className="mt-6 text-lg text-[#4A4D52] md:text-xl">
+          <p className="mt-10 text-lg text-[#4A4D52] md:text-xl">
             {excerpt}
           </p>
         )}
