@@ -167,7 +167,7 @@ export default async function Home({ params }: Props) {
           </div>
 
             <div
-              className="landing-fade mx-auto w-full md:w-1/2 p-4"
+              className="landing-fade mx-auto w-full md:w-1/2 md:p-4"
               style={{ animationDelay: "260ms" }}
             >
               <video
