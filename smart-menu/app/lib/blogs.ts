@@ -43,8 +43,8 @@ const getBackendBase = () => process.env.BACKEND_URL?.trim().replace(/\/$/, "") 
 
 const unwrap = <T>(payload: BackendResponse<T>): T | null => {
   if (!payload) return null;
-  if (isRecord(payload) && "data" in payload) {
-    return (payload as { data?: T }).data ?? null;
+  if (typeof payload === "object" && payload !== null && "data" in payload) {
+    return ((payload as { data?: T }).data ?? null) as T | null;
   }
   return payload as T;
 };
@@ -187,9 +187,9 @@ export async function fetchBlogList(
             restaurantId: cleanString(entry.restaurantId) ?? null,
             publishedAt: cleanString(entry.publishedAt) ?? null,
             tags: normalizeTags(entry.tags),
-          };
+          } satisfies SuggestedBlog;
         })
-        .filter((value): value is SuggestedBlog => Boolean(value)) as SuggestedBlog[])
+        .filter(Boolean) as SuggestedBlog[])
     : [];
 
   const fallbackMeta: BlogListMeta = {
@@ -237,7 +237,7 @@ export async function fetchBlogSuggestions(slug: string, limit = 3): Promise<Sug
   const query = params.size ? `?${params.toString()}` : "";
   const data = await fetchJson<unknown>(`/api/blogs/${encodeURIComponent(safeSlug)}/suggestions${query}`);
   if (!Array.isArray(data)) return [];
-  return data
+  const mapped = data
     .map((entry) => {
       if (!isRecord(entry)) return null;
       const title = cleanString(entry.title);
@@ -253,7 +253,9 @@ export async function fetchBlogSuggestions(slug: string, limit = 3): Promise<Sug
         tags: normalizeTags(entry.tags),
       };
     })
-    .filter((value): value is SuggestedBlog => Boolean(value));
+    .filter(Boolean) as SuggestedBlog[];
+
+  return mapped;
 }
 
 const WORDS_PER_MINUTE = 220;
