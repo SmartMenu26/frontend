@@ -270,6 +270,41 @@
       }
     }
   },
+  "blogPage": {
+    "hero": {
+      "eyebrow": "Smart Menu блог",
+      "typeLabel": "Статија"
+    },
+    "meta": {
+      "readingTime": "{minutes} мин читање"
+    },
+    "suggested": {
+      "eyebrow": "Продолжи со читање",
+      "title": "Препорачани статии",
+      "cta": "Прочитај статија"
+    }
+  },
+  "blogIndex": {
+    "meta": {
+      "title": "Smart Menu блог",
+      "description": "Приказни за дигитални менија, AI асистенти и раст на современите ресторани."
+    },
+    "hero": {
+      "eyebrow": "Smart Menu блог",
+      "title": "Статии за најдобрите ресторани во Македонија",
+      "description": "Новитети од локални шефови, трендови во модерните менија и инспирации како да им служите подобро на гостите.",
+      "count": "{count, plural, one {# објавена статија} other {# објавени статии}}"
+    },
+    "grid": {
+      "tag": "Статија",
+      "readMore": "Прочитај повеќе",
+      "empty": "Во подготовка се нови приказни."
+    },
+    "pagination": {
+      "previous": "Претходна",
+      "next": "Следна"
+    }
+  },
   "menuItemDetails": {
     "assistantButton": "AI ПРЕПОРАКА",
     "assistantPrompt": "Што оди со {dish}?",

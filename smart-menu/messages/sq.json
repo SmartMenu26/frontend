@@ -270,6 +270,41 @@
       }
     }
   },
+  "blogPage": {
+    "hero": {
+      "eyebrow": "Smart Menu Blog",
+      "typeLabel": "Artikull"
+    },
+    "meta": {
+      "readingTime": "{minutes} min leximi"
+    },
+    "suggested": {
+      "eyebrow": "Lexo më tej",
+      "title": "Artikuj të rekomanduar",
+      "cta": "Lexo artikullin"
+    }
+  },
+  "blogIndex": {
+    "meta": {
+      "title": "Smart Menu Blog",
+      "description": "Lajme për produkte, histori nga klientët dhe këshilla AI për restorante."
+    },
+    "hero": {
+      "eyebrow": "Smart Menu Blog",
+      "title": "Ide për restorante moderne",
+      "description": "Shkruajmë për eksperienca dixhitale, asistencë AI dhe mënyra të reja për të angazhuar mysafirët.",
+      "count": "{count, plural, one {# artikull i botuar} other {# artikuj të botuar}}"
+    },
+    "grid": {
+      "tag": "Artikull",
+      "readMore": "Lexo më shumë",
+      "empty": "Së shpejti do të publikojmë histori të reja."
+    },
+    "pagination": {
+      "previous": "Më parë",
+      "next": "Tjetra"
+    }
+  },
   "menuItemDetails": {
     "assistantButton": "Rekomandim AI",
     "assistantPrompt": "Çfarë përshtatet me {dish}?",
