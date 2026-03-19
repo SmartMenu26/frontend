@@ -237,6 +237,7 @@ export default async function Home({ params }: Props) {
         </div>
       </section>
 
+      {restaurants.length > 0 ? (
         <section className="bg-[#F7F7F7] py-16">
           <div className="container mx-auto px-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -282,6 +283,7 @@ export default async function Home({ params }: Props) {
             </div>
           </div>
         </section>
+      ) : null}
 
       <section id="contact" className="bg-[#1B1F1E] py-16 text-white">
         <div className="container mx-auto grid gap-12 px-4 lg:grid-cols-2">
