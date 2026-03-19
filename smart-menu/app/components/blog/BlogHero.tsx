@@ -38,7 +38,7 @@ export default function BlogHero({
           </p>
         )}
         <BlogTags tags={tags} className="mt-4 justify-center" />
-        <h1 className="mt-4 text-4xl font-semibold leading-tight text-[#1B1F1E] md:text-5xl">
+        <h1 className="mt-4 text-2xl font-semibold leading-tight text-[#1B1F1E] md:text-5xl">
           {title}
         </h1>
         {metaLine && (

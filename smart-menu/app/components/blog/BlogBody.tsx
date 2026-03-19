@@ -25,7 +25,7 @@ export default function BlogBody({ blocks }: BlogBodyProps) {
             return (
               <h2
                 key={`heading-${index}`}
-                className="mt-12 text-3xl font-semibold leading-snug text-[#1B1F1E] first:mt-0"
+                className="mt-12 text-2xl font-semibold leading-snug text-[#1B1F1E] first:mt-0"
               >
                 {block.text}
               </h2>
