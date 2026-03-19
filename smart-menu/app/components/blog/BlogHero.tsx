@@ -46,11 +46,11 @@ export default function BlogHero({
             {metaLine}
           </p>
         )}
-        {excerpt && (
+        {/* {excerpt && (
           <p className="mt-10 text-lg text-[#4A4D52] md:text-xl">
             {excerpt}
           </p>
-        )}
+        )} */}
       </div>
       {coverImage && (
         <div className="container mx-auto px-4 pb-12">
