@@ -114,6 +114,7 @@ type LoginStatus = "idle" | "submitting" | "success" | "error";
 
 const SESSION_KEY = "smart-menu::restaurant-admin-session";
 const REMEMBER_KEY = "smart-menu::restaurant-admin-remember";
+const SESSION_EXPIRED_ERROR = "ADMIN_SESSION_EXPIRED";
 
 const LANGUAGE_LABELS: Record<string, string> = {
   mk: "Македонски",
@@ -233,6 +234,7 @@ export default function AdminDashboardPage() {
           body: JSON.stringify({
             username: formState.username.trim(),
             password: formState.password,
+            rememberMe,
           }),
         });
         const data = (await response.json().catch(() => null)) as AdminLoginResponse;
@@ -261,7 +263,7 @@ export default function AdminDashboardPage() {
         );
       }
     },
-    [formState, t]
+    [formState, rememberMe, t]
   );
 
   const handleLogout = useCallback(() => {
@@ -269,6 +271,13 @@ export default function AdminDashboardPage() {
     setLoginState("idle");
     setFormState({ username: "", password: "" });
   }, []);
+
+  const handleSessionExpired = useCallback(() => {
+    setSession(null);
+    setLoginState("error");
+    setLoginError(t("login.messages.sessionExpired"));
+    setFormState({ username: "", password: "" });
+  }, [t]);
 
   return (
     <div className="min-h-dvh bg-slate-50 text-slate-900">
@@ -297,7 +306,7 @@ export default function AdminDashboardPage() {
         </header>
 
         {session ? (
-          <Dashboard session={session} />
+          <Dashboard session={session} onSessionExpired={handleSessionExpired} />
         ) : (
           <LoginPanel
             formState={formState}
@@ -426,9 +435,10 @@ function LoginPanel({
 
 type DashboardProps = {
   session: AdminSession;
+  onSessionExpired: () => void;
 };
 
-function Dashboard({ session }: DashboardProps) {
+function Dashboard({ session, onSessionExpired }: DashboardProps) {
   const t = useTranslations("adminDashboard");
   const { admin, restaurant } = session;
 
@@ -577,9 +587,9 @@ function Dashboard({ session }: DashboardProps) {
         <AssistantPortraitCard name={assistantPrimaryName} />
       </div>
 
-      <TopViewedItemsPanel session={session} />
-      <RestaurantFeedbackPanel session={session} />
-      <MenuItemsPanel session={session} />
+      <TopViewedItemsPanel session={session} onSessionExpired={onSessionExpired} />
+      <RestaurantFeedbackPanel session={session} onSessionExpired={onSessionExpired} />
+      <MenuItemsPanel session={session} onSessionExpired={onSessionExpired} />
     </div>
   );
 }
@@ -692,6 +702,7 @@ function AssistantPortraitCard({ name }: { name: string }) {
 
 type TopViewedPanelProps = {
   session: AdminSession;
+  onSessionExpired: () => void;
 };
 
 type TopViewedItem = {
@@ -704,7 +715,7 @@ type TopViewedItem = {
   };
 };
 
-function TopViewedItemsPanel({ session }: TopViewedPanelProps) {
+function TopViewedItemsPanel({ session, onSessionExpired }: TopViewedPanelProps) {
   const t = useTranslations("adminDashboard.topViewed");
   const locale = useLocale();
   const restaurantId = session.restaurant._id;
@@ -714,6 +725,12 @@ function TopViewedItemsPanel({ session }: TopViewedPanelProps) {
   );
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<TopViewedItem[]>([]);
+
+  useEffect(() => {
+    setItems([]);
+    setStatus("idle");
+    setError(null);
+  }, [restaurantId, session.token]);
 
   useEffect(() => {
     if (!restaurantId) return;
@@ -733,6 +750,10 @@ function TopViewedItemsPanel({ session }: TopViewedPanelProps) {
           }
         );
         const payload = await response.json().catch(() => null);
+        if (response.status === 401) {
+          onSessionExpired();
+          throw new Error(SESSION_EXPIRED_ERROR);
+        }
         if (!response.ok) {
           const message = payload?.error ?? `Request failed (${response.status})`;
           throw new Error(message);
@@ -755,19 +776,20 @@ function TopViewedItemsPanel({ session }: TopViewedPanelProps) {
           setStatus("success");
         }
       } catch (fetchError) {
-        if (!cancelled) {
-          setStatus("error");
-          setError(
-            fetchError instanceof Error ? fetchError.message : t("error")
-          );
+        if (cancelled || isSessionExpiredError(fetchError)) {
+          return;
         }
+        setStatus("error");
+        setError(
+          fetchError instanceof Error ? fetchError.message : t("error")
+        );
       }
     };
     fetchTopViewed();
     return () => {
       cancelled = true;
     };
-  }, [restaurantId, session.token, t]);
+  }, [onSessionExpired, restaurantId, session.token, t]);
 
   if (!restaurantId) return null;
 
@@ -845,6 +867,7 @@ function TopViewedItemsPanel({ session }: TopViewedPanelProps) {
 
 type FeedbackPanelProps = {
   session: AdminSession;
+  onSessionExpired: () => void;
 };
 
 type FeedbackSummary = {
@@ -859,7 +882,7 @@ const EMPTY_FEEDBACK_SUMMARY: FeedbackSummary = {
   avgService: 0,
 };
 
-function RestaurantFeedbackPanel({ session }: FeedbackPanelProps) {
+function RestaurantFeedbackPanel({ session, onSessionExpired }: FeedbackPanelProps) {
   const t = useTranslations("adminDashboard.feedback");
   const restaurantId = session.restaurant._id;
   const timezone = session.restaurant.timezone ?? undefined;
@@ -869,6 +892,15 @@ function RestaurantFeedbackPanel({ session }: FeedbackPanelProps) {
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoadingMore, setLoadingMore] = useState(false);
+
+  useEffect(() => {
+    setItems([]);
+    setSummary(EMPTY_FEEDBACK_SUMMARY);
+    setNextCursor(null);
+    setStatus("idle");
+    setError(null);
+    setLoadingMore(false);
+  }, [restaurantId, session.token]);
 
   const fetchFeedback = useCallback(
     async (cursorParam?: string) => {
@@ -888,6 +920,10 @@ function RestaurantFeedbackPanel({ session }: FeedbackPanelProps) {
         }
       );
       const payload = await response.json().catch(() => null);
+      if (response.status === 401) {
+        onSessionExpired();
+        throw new Error(SESSION_EXPIRED_ERROR);
+      }
       if (!response.ok || payload?.ok === false) {
         const message =
           payload?.error ||
@@ -933,7 +969,7 @@ function RestaurantFeedbackPanel({ session }: FeedbackPanelProps) {
 
       return { items: cleanedItems, summary: normalizedSummary, nextCursor: next };
     },
-    [restaurantId, session.token]
+    [onSessionExpired, restaurantId, session.token]
   );
 
   useEffect(() => {
@@ -950,12 +986,13 @@ function RestaurantFeedbackPanel({ session }: FeedbackPanelProps) {
         setNextCursor(data.nextCursor ?? null);
         setStatus("success");
       } catch (fetchError) {
-        if (!cancelled) {
-          setStatus("error");
-          setError(
-            fetchError instanceof Error ? fetchError.message : t("error")
-          );
+        if (cancelled || isSessionExpiredError(fetchError)) {
+          return;
         }
+        setStatus("error");
+        setError(
+          fetchError instanceof Error ? fetchError.message : t("error")
+        );
       }
     };
     loadFeedback();
@@ -975,11 +1012,14 @@ function RestaurantFeedbackPanel({ session }: FeedbackPanelProps) {
       setNextCursor(data.nextCursor ?? null);
       setStatus("success");
     } catch (fetchError) {
+      if (isSessionExpiredError(fetchError)) {
+        return;
+      }
       setError(fetchError instanceof Error ? fetchError.message : t("error"));
     } finally {
       setLoadingMore(false);
     }
-  }, [nextCursor, isLoadingMore, fetchFeedback, t]);
+  }, [fetchFeedback, isLoadingMore, nextCursor, t]);
 
   if (!restaurantId) return null;
 
@@ -1087,9 +1127,10 @@ function RestaurantFeedbackPanel({ session }: FeedbackPanelProps) {
 
 type MenuItemsPanelProps = {
   session: AdminSession;
+  onSessionExpired: () => void;
 };
 
-function MenuItemsPanel({ session }: MenuItemsPanelProps) {
+function MenuItemsPanel({ session, onSessionExpired }: MenuItemsPanelProps) {
   const t = useTranslations("adminDashboard.menuItems");
   const locale = useLocale() as Locale;
   const [items, setItems] = useState<AdminMenuItem[]>([]);
@@ -1102,6 +1143,13 @@ function MenuItemsPanel({ session }: MenuItemsPanelProps) {
   const timezone = session.restaurant.timezone ?? undefined;
   const currency = session.restaurant.currency ?? "MKD";
   const sessionToken = session.token;
+
+  useEffect(() => {
+    setItems([]);
+    setStatus("idle");
+    setError(null);
+    setPage({ food: 1, drink: 1 });
+  }, [restaurantId, sessionToken]);
 
   useEffect(() => {
     if (!restaurantId) return;
@@ -1119,6 +1167,10 @@ function MenuItemsPanel({ session }: MenuItemsPanelProps) {
           }
         );
         const payload = await response.json().catch(() => null);
+        if (response.status === 401) {
+          onSessionExpired();
+          throw new Error(SESSION_EXPIRED_ERROR);
+        }
         if (!response.ok) {
           const message = payload?.error ?? `Request failed (${response.status})`;
           throw new Error(message);
@@ -1137,14 +1189,15 @@ function MenuItemsPanel({ session }: MenuItemsPanelProps) {
           setStatus("success");
         }
       } catch (fetchError) {
-        if (!cancelled) {
-          setStatus("error");
-          setError(
-            fetchError instanceof Error
-              ? fetchError.message
-              : "Failed to load menu items."
-          );
+        if (cancelled || isSessionExpiredError(fetchError)) {
+          return;
         }
+        setStatus("error");
+        setError(
+          fetchError instanceof Error
+            ? fetchError.message
+            : "Failed to load menu items."
+        );
       }
     };
 
@@ -1152,7 +1205,7 @@ function MenuItemsPanel({ session }: MenuItemsPanelProps) {
     return () => {
       cancelled = true;
     };
-  }, [restaurantId, session.token]);
+  }, [onSessionExpired, restaurantId, session.token]);
 
   useEffect(() => {
     setPage({ food: 1, drink: 1 });
@@ -1340,6 +1393,7 @@ function MenuItemsPanel({ session }: MenuItemsPanelProps) {
             timezone={timezone}
             sessionToken={sessionToken}
             onItemUpdated={handleItemUpdated}
+            onSessionExpired={onSessionExpired}
           />
         ))}
       </div>
@@ -1358,6 +1412,7 @@ type MenuItemsGroupProps = {
   timezone?: string | null;
   sessionToken: string;
   onItemUpdated: (item: AdminMenuItem) => void;
+  onSessionExpired: () => void;
 };
 
 function MenuItemsGroup({
@@ -1370,6 +1425,7 @@ function MenuItemsGroup({
   timezone,
   sessionToken,
   onItemUpdated,
+  onSessionExpired,
 }: MenuItemsGroupProps) {
   const t = useTranslations("adminDashboard.menuItems");
   if (items.length === 0) {
@@ -1402,6 +1458,7 @@ function MenuItemsGroup({
             timezone={timezone}
             sessionToken={sessionToken}
             onItemUpdated={onItemUpdated}
+            onSessionExpired={onSessionExpired}
           />
         ))}
       </div>
@@ -1449,6 +1506,7 @@ type MenuItemCardProps = {
   timezone?: string | null;
   sessionToken: string;
   onItemUpdated: (item: AdminMenuItem) => void;
+  onSessionExpired: () => void;
 };
 
 function MenuItemCard({
@@ -1458,6 +1516,7 @@ function MenuItemCard({
   timezone,
   sessionToken,
   onItemUpdated,
+  onSessionExpired,
 }: MenuItemCardProps) {
   const t = useTranslations("adminDashboard.menuItems");
   const resolvedName = resolveLocalizedText(item.name, locale) ?? t("card.unknownName");
@@ -1549,6 +1608,10 @@ function MenuItemCard({
         body: JSON.stringify(payload),
       });
       const data = await response.json().catch(() => null);
+      if (response.status === 401) {
+        onSessionExpired();
+        throw new Error(SESSION_EXPIRED_ERROR);
+      }
       if (!response.ok) {
         const message =
           (isPlainObject<{ error?: string }>(data) && typeof data.error === "string" && data.error) ||
@@ -1565,6 +1628,9 @@ function MenuItemCard({
       onItemUpdated(updated);
       setIsEditing(false);
     } catch (error) {
+      if (isSessionExpiredError(error)) {
+        return;
+      }
       setSaveError(error instanceof Error ? error.message : t("card.updateError"));
     } finally {
       setIsSaving(false);
@@ -1797,6 +1863,10 @@ function isMenuItemShape(value: unknown): value is AdminMenuItem {
     isPlainObject<{ _id?: unknown }>(value) &&
     typeof value._id === "string"
   );
+}
+
+function isSessionExpiredError(error: unknown) {
+  return error instanceof Error && error.message === SESSION_EXPIRED_ERROR;
 }
 
 function FeedbackSummaryCard({ label, value }: { label: string; value: string }) {

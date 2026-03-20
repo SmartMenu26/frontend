@@ -69,6 +69,7 @@
         "success": "Identifikimi u krye me sukses. Po ngarkojmë panelin...",
         "missingCredentials": "Shkruani emrin e përdoruesit dhe fjalëkalimin për të vazhduar.",
         "genericError": "Identifikimi dështoi. Provoni sërish.",
+        "sessionExpired": "Sesioni ka skaduar. Ju lutemi hyni përsëri për të vazhduar.",
         "proxyNote": "Kërkesat kalojnë përmes <code>{endpoint}</code>. Përdorni kredencialet e dhëna nga Smart Menu (shembull: {example})."
       }
     },
