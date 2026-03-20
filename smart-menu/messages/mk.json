@@ -121,6 +121,26 @@
       "alt": "Илустрација на AI асистентот {name}",
       "fallbackName": "Паметен асистент"
     },
+    "feedback": {
+      "title": "Повратни информации од гости",
+      "subtitle": "Најнови впечатоци од QR менито.",
+      "loading": "Се вчитуваат впечатоците...",
+      "error": "Не можевме да ги вчитаме впечатоците.",
+      "empty": "Сè уште нема оставено мислење.",
+      "loadMore": "Вчитај уште",
+      "avgFood": "Просек храна",
+      "avgService": "Просек услуга",
+      "total": "{count, plural, one {# мислење} few {# мислења} other {# мислења}}",
+      "submittedAt": "Испратено {value}",
+      "origin": "IP {value}",
+      "suggestionLabel": "Предлог",
+      "suggestionEmpty": "Нема оставен предлог.",
+      "ratingLabel": "{type}: {value}/5",
+      "ratingTypes": {
+        "food": "Храна",
+        "service": "Услуга"
+      }
+    },
     "topViewed": {
       "title": "Најпрегледувани производи",
       "subtitle": "Врз основа на вкупни прегледи во апликацијата.",
@@ -310,6 +330,23 @@
     "assistantButton": "AI ПРЕПОРАКА",
     "assistantPrompt": "Што оди со {dish}?",
     "shareCta": "Сподели го твоето мислење",
+    "shareModal": {
+      "title": "Вашето мислење ни значи",
+      "foodLabel": "Оценете ја нашата храна",
+      "serviceLabel": "Оценете ја нашата услуга",
+      "feedbackLabel": "Ваш предлог",
+      "feedbackPlaceholder": "Кажете ни идеја или што може да подобриме...",
+      "submit": "Испрати мислење",
+      "closeAriaLabel": "Затвори прозорец",
+      "ratings": {
+        "negative": "Не ми се допаѓа",
+        "neutral": "Добро е",
+        "positive": "Одлично е"
+      },
+      "successTitle": "Благодариме!",
+      "successDescription": "Твоето мислење е успешно испратено.",
+      "errorMessage": "Не можевме да го испратиме мислењето. Обиди се повторно."
+    },
     "priceLabel": "{price} ден",
     "favorite": {
       "add": "Додај во омилени",

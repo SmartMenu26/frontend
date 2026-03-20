@@ -65,6 +65,15 @@ type AdminMenuItem = {
   updatedAt?: string | null;
 };
 
+type RestaurantFeedbackEntry = {
+  _id: string;
+  foodRating: number;
+  serviceRating: number;
+  suggestion?: string | null;
+  submittedFrom?: string | null;
+  createdAt?: string | null;
+};
+
 const MENU_ITEMS_PER_PAGE = 6;
 
 type AdminLoginSuccess = {
@@ -569,6 +578,7 @@ function Dashboard({ session }: DashboardProps) {
       </div>
 
       <TopViewedItemsPanel session={session} />
+      <RestaurantFeedbackPanel session={session} />
       <MenuItemsPanel session={session} />
     </div>
   );
@@ -828,6 +838,248 @@ function TopViewedItemsPanel({ session }: TopViewedPanelProps) {
             </div>
           )}
         </>
+      )}
+    </section>
+  );
+}
+
+type FeedbackPanelProps = {
+  session: AdminSession;
+};
+
+type FeedbackSummary = {
+  total: number;
+  avgFood: number;
+  avgService: number;
+};
+
+const EMPTY_FEEDBACK_SUMMARY: FeedbackSummary = {
+  total: 0,
+  avgFood: 0,
+  avgService: 0,
+};
+
+function RestaurantFeedbackPanel({ session }: FeedbackPanelProps) {
+  const t = useTranslations("adminDashboard.feedback");
+  const restaurantId = session.restaurant._id;
+  const timezone = session.restaurant.timezone ?? undefined;
+  const [items, setItems] = useState<RestaurantFeedbackEntry[]>([]);
+  const [summary, setSummary] = useState<FeedbackSummary>(EMPTY_FEEDBACK_SUMMARY);
+  const [status, setStatus] = useState<"idle" | "loading" | "error" | "success">("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [isLoadingMore, setLoadingMore] = useState(false);
+
+  const fetchFeedback = useCallback(
+    async (cursorParam?: string) => {
+      if (!restaurantId) {
+        throw new Error("Missing restaurant identifier.");
+      }
+      const params = new URLSearchParams({ limit: "6" });
+      if (cursorParam) params.set("cursor", cursorParam);
+
+      const response = await fetch(
+        `/api/restaurant-admin/restaurants/${restaurantId}/feedback?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.token}`,
+          },
+          cache: "no-store",
+        }
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.ok === false) {
+        const message =
+          payload?.error ||
+          payload?.message ||
+          `Request failed (${response.status})`;
+        throw new Error(message);
+      }
+
+      const dataBlock = (payload?.data ?? payload) as {
+        items?: unknown;
+        summary?: Partial<FeedbackSummary>;
+        nextCursor?: string | null;
+      };
+
+      const rawItems = Array.isArray(dataBlock?.items)
+        ? dataBlock.items
+        : Array.isArray(payload)
+        ? payload
+        : [];
+
+      const cleanedItems: RestaurantFeedbackEntry[] = rawItems.map(
+        (entry: any, index: number) => ({
+          _id: String(entry?._id ?? entry?.id ?? `${Date.now()}-${index}`),
+          foodRating: Number(entry?.foodRating ?? 0),
+          serviceRating: Number(entry?.serviceRating ?? 0),
+          suggestion:
+            typeof entry?.suggestion === "string" ? entry.suggestion : "",
+          submittedFrom:
+            typeof entry?.submittedFrom === "string" ? entry.submittedFrom : "",
+          createdAt: entry?.createdAt ?? null,
+        })
+      );
+
+      const normalizedSummary: FeedbackSummary = dataBlock?.summary
+        ? {
+            total: Number(dataBlock.summary.total ?? 0),
+            avgFood: Number(dataBlock.summary.avgFood ?? 0),
+            avgService: Number(dataBlock.summary.avgService ?? 0),
+          }
+        : EMPTY_FEEDBACK_SUMMARY;
+
+      const next = dataBlock?.nextCursor ?? payload?.nextCursor ?? null;
+
+      return { items: cleanedItems, summary: normalizedSummary, nextCursor: next };
+    },
+    [restaurantId, session.token]
+  );
+
+  useEffect(() => {
+    if (!restaurantId) return;
+    let cancelled = false;
+    const loadFeedback = async () => {
+      setStatus("loading");
+      setError(null);
+      try {
+        const data = await fetchFeedback();
+        if (cancelled) return;
+        setItems(data.items);
+        setSummary(data.summary ?? EMPTY_FEEDBACK_SUMMARY);
+        setNextCursor(data.nextCursor ?? null);
+        setStatus("success");
+      } catch (fetchError) {
+        if (!cancelled) {
+          setStatus("error");
+          setError(
+            fetchError instanceof Error ? fetchError.message : t("error")
+          );
+        }
+      }
+    };
+    loadFeedback();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchFeedback, restaurantId, t]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!nextCursor || isLoadingMore) return;
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const data = await fetchFeedback(nextCursor);
+      setItems((previous) => [...previous, ...data.items]);
+      setSummary(data.summary ?? EMPTY_FEEDBACK_SUMMARY);
+      setNextCursor(data.nextCursor ?? null);
+      setStatus("success");
+    } catch (fetchError) {
+      setError(fetchError instanceof Error ? fetchError.message : t("error"));
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [nextCursor, isLoadingMore, fetchFeedback, t]);
+
+  if (!restaurantId) return null;
+
+  const isEmpty = status === "success" && items.length === 0;
+
+  return (
+    <section className="rounded-3xl bg-white p-6 shadow-lg shadow-slate-950/5 ring-1 ring-slate-100">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+            {t("title")}
+          </p>
+          <p className="mt-1 text-base text-slate-600">{t("subtitle")}</p>
+        </div>
+        <div className="flex flex-wrap gap-3 text-sm text-slate-600">
+          <FeedbackSummaryCard
+            label={t("avgFood")}
+            value={summary.avgFood.toFixed(1)}
+          />
+          <FeedbackSummaryCard
+            label={t("avgService")}
+            value={summary.avgService.toFixed(1)}
+          />
+          <div className="rounded-2xl bg-slate-50 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-600">
+            {t("total", { count: summary.total })}
+          </div>
+        </div>
+      </div>
+
+      {status === "loading" && (
+        <p className="mt-6 text-sm text-slate-500">{t("loading")}</p>
+      )}
+
+      {status === "error" && (
+        <p className="mt-6 text-sm text-rose-600">{error ?? t("error")}</p>
+      )}
+
+      {isEmpty && (
+        <p className="mt-6 rounded-2xl border border-dashed border-slate-200 px-4 py-4 text-sm text-slate-500">
+          {t("empty")}
+        </p>
+      )}
+
+      {items.length > 0 && (
+        <div className="mt-6 space-y-4">
+          {items.map((entry) => (
+            <article
+              key={entry._id}
+              className="rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-4"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {t("submittedAt", {
+                      value: formatDateTime(entry.createdAt, timezone),
+                    })}
+                  </p>
+                </div>
+                <div className="flex flex-wrap justify-end gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  <span className="rounded-full bg-white px-3 py-1 text-[11px] shadow-sm">
+                    {t("ratingLabel", {
+                      type: t("ratingTypes.food"),
+                      value: entry.foodRating ?? 0,
+                    })}
+                  </span>
+                  <span className="rounded-full bg-white px-3 py-1 text-[11px] shadow-sm">
+                    {t("ratingLabel", {
+                      type: t("ratingTypes.service"),
+                      value: entry.serviceRating ?? 0,
+                    })}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-3 rounded-2xl bg-white px-4 py-3 text-sm text-slate-700 shadow-inner">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  {t("suggestionLabel")}
+                </p>
+                <p className="mt-1 whitespace-pre-line text-slate-800">
+                  {entry.suggestion?.trim() || t("suggestionEmpty")}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {nextCursor && status === "success" && (
+        <button
+          type="button"
+          onClick={handleLoadMore}
+          disabled={isLoadingMore}
+          className={clsx(
+            "mt-6 inline-flex items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition",
+            isLoadingMore
+              ? "cursor-wait border-slate-100 text-slate-400"
+              : "cursor-pointer border-slate-200 text-slate-700 hover:border-slate-300"
+          )}
+        >
+          {isLoadingMore ? `${t("loadMore")}…` : t("loadMore")}
+        </button>
       )}
     </section>
   );
@@ -1544,6 +1796,15 @@ function isMenuItemShape(value: unknown): value is AdminMenuItem {
   return (
     isPlainObject<{ _id?: unknown }>(value) &&
     typeof value._id === "string"
+  );
+}
+
+function FeedbackSummaryCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-slate-50 px-4 py-3 text-center">
+      <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-slate-900">{value}</p>
+    </div>
   );
 }
 

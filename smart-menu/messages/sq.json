@@ -121,6 +121,26 @@
       "alt": "Ilustrim i asistentit AI {name}",
       "fallbackName": "Asistenti i mençur"
     },
+    "feedback": {
+      "title": "Komente nga mysafirët",
+      "subtitle": "Vlerësimet më të reja nga menuja QR.",
+      "loading": "Po i ngarkojmë komentet...",
+      "error": "Nuk mundëm t'i ngarkojmë komentet.",
+      "empty": "Ende nuk ka komente.",
+      "loadMore": "Shfaq më shumë",
+      "avgFood": "Mes. ushqim",
+      "avgService": "Mes. shërbim",
+      "total": "{count, plural, one {# koment} other {# komente}}",
+      "submittedAt": "Dërguar më {value}",
+      "origin": "IP {value}",
+      "suggestionLabel": "Sugjerim",
+      "suggestionEmpty": "Nuk ka sugjerim.",
+      "ratingLabel": "{type}: {value}/5",
+      "ratingTypes": {
+        "food": "Ushqim",
+        "service": "Shërbim"
+      }
+    },
     "topViewed": {
       "title": "Artikujt më të shikuar",
       "subtitle": "Bazuar në shikimet brenda aplikacionit.",
@@ -310,6 +330,23 @@
     "assistantButton": "Rekomandim AI",
     "assistantPrompt": "Çfarë përshtatet me {dish}?",
     "shareCta": "Ndaj mendimin tënd",
+    "shareModal": {
+      "title": "Mendimi yt na ndihmon",
+      "foodLabel": "Vlerëso ushqimin tonë",
+      "serviceLabel": "Vlerëso shërbimin tonë",
+      "feedbackLabel": "Sugjerimi yt",
+      "feedbackPlaceholder": "Na shkruaj çdo ide ose përmirësim...",
+      "submit": "Dërgo mendimin",
+      "closeAriaLabel": "Mbyll dritaren",
+      "ratings": {
+        "negative": "Nuk më pëlqeu",
+        "neutral": "Është në rregull",
+        "positive": "Më pëlqeu shumë"
+      },
+      "successTitle": "Faleminderit!",
+      "successDescription": "Mendimi yt u dërgua.",
+      "errorMessage": "Nuk mundëm të dërgojmë mendimin. Provo përsëri."
+    },
     "priceLabel": "{price} den",
     "favorite": {
       "add": "Shto tek të preferuarat",

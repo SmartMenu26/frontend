@@ -1,9 +1,19 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FormEvent,
+  MouseEvent,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useId,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
-import { ArrowLeft, Heart } from "lucide-react";
+import { ArrowLeft, Heart, Smile, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import {
   getAllergenIconEntry,
   resolveTooltipLabel,
@@ -51,6 +61,7 @@ export default function MenuItemDetails({
   const t = useTranslations("menuItemDetails");
   const tAllergens = useTranslations("menuItemDetails.allergens");
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+  const [isShareModalOpen, setShareModalOpen] = useState(false);
   const returnKind = searchParams?.get("kind") ?? undefined;
   const returnCategoryId = searchParams?.get("categoryId") ?? undefined;
   const returnSubcategoryId = searchParams?.get("subcategoryId") ?? undefined;
@@ -128,15 +139,96 @@ export default function MenuItemDetails({
   );
   const assistantButtonLabel = t("assistantButton");
   const shareLabel = t("shareCta");
+  const shareModalLabels = useMemo(
+    () => ({
+      title: t("shareModal.title"),
+      foodLabel: t("shareModal.foodLabel"),
+      serviceLabel: t("shareModal.serviceLabel"),
+      feedbackLabel: t("shareModal.feedbackLabel"),
+      feedbackPlaceholder: t("shareModal.feedbackPlaceholder"),
+      submit: t("shareModal.submit"),
+      closeAriaLabel: t("shareModal.closeAriaLabel"),
+      successTitle: t("shareModal.successTitle"),
+      successDescription: t("shareModal.successDescription"),
+      errorMessage: t("shareModal.errorMessage"),
+    }),
+    [t]
+  );
+  const shareRatingLabels = useMemo(
+    () => ({
+      negative: t("shareModal.ratings.negative"),
+      neutral: t("shareModal.ratings.neutral"),
+      positive: t("shareModal.ratings.positive"),
+    }),
+    [t]
+  );
   const priceText = priceLabel ? t("priceLabel", { price: priceLabel }) : null;
   const favoriteLabels = {
     add: t("favorite.add"),
     remove: t("favorite.remove"),
   };
   const backLabel = t("back");
+  const handleShareClick = useCallback(() => {
+    setShareModalOpen(true);
+    trackEvent("menu_item_feedback_opened", {
+      itemId: id,
+      dish: name,
+      locale,
+    });
+  }, [id, locale, name]);
+  const handleShareSubmit = useCallback(
+    async (payload: ShareFeedbackPayload) => {
+      if (!restaurantId) {
+        throw new Error(shareModalLabels.errorMessage);
+      }
+
+      const foodRating = ratingValueToScore(payload.foodRating);
+      const serviceRating = ratingValueToScore(payload.serviceRating);
+      if (foodRating === null || serviceRating === null) {
+        throw new Error(shareModalLabels.errorMessage);
+      }
+
+      const suggestion = payload.comment.trim();
+
+      const response = await fetch(`/api/restaurants/${restaurantId}/feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          foodRating,
+          serviceRating,
+          suggestion,
+        }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || result?.ok === false) {
+        const message =
+          result?.message || result?.error || shareModalLabels.errorMessage;
+        throw new Error(message);
+      }
+
+      trackEvent("menu_item_feedback_submitted", {
+        itemId: id,
+        dish: name,
+        locale,
+        restaurantId,
+        restaurantSlug,
+        foodRating,
+        serviceRating,
+        comment: suggestion,
+        commentLength: suggestion.length,
+      });
+    },
+    [restaurantId, shareModalLabels.errorMessage, id, name, locale, restaurantSlug]
+  );
+  const handleShareClose = useCallback(() => {
+    setShareModalOpen(false);
+  }, []);
 
   return (
-    <div className="min-h-dvh bg-[#3F5D50] flex flex-col justify-between gap-5">
+    <>
+      <div className="min-h-dvh bg-[#3F5D50] flex flex-col justify-between gap-5">
       <MenuItemHero
         name={name}
         imageUrl={imageUrl}
@@ -272,12 +364,21 @@ export default function MenuItemDetails({
           <button
             type="button"
             className="cursor-pointer mt-6 pb-6 w-full text-center text-xs text-[#2F3A37]/70 underline underline-offset-4"
+            onClick={handleShareClick}
           >
             {shareLabel}
           </button>
         </section>
       </div>
     </div>
+      <ShareFeedbackModal
+        open={isShareModalOpen}
+        onClose={handleShareClose}
+        onSubmit={handleShareSubmit}
+        labels={shareModalLabels}
+        ratingLabels={shareRatingLabels}
+      />
+    </>
   );
 }
 
@@ -436,5 +537,316 @@ function FavoriteButton({ itemId, storageKey, addLabel, removeLabel }: FavoriteB
         />
       </span>
     </button>
+  );
+}
+
+type RatingValue = "negative" | "neutral" | "positive";
+
+type ShareFeedbackPayload = {
+  foodRating: RatingValue | null;
+  serviceRating: RatingValue | null;
+  comment: string;
+};
+
+function ratingValueToScore(value: RatingValue | null): 1 | 3 | 5 | null {
+  switch (value) {
+    case "negative":
+      return 1;
+    case "neutral":
+      return 3;
+    case "positive":
+      return 5;
+    default:
+      return null;
+  }
+}
+
+type ShareFeedbackModalProps = {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (payload: ShareFeedbackPayload) => Promise<void>;
+  labels: {
+    title: string;
+    foodLabel: string;
+    serviceLabel: string;
+    feedbackLabel: string;
+    feedbackPlaceholder: string;
+    submit: string;
+    closeAriaLabel: string;
+    successTitle: string;
+    successDescription: string;
+    errorMessage: string;
+  };
+  ratingLabels: Record<RatingValue, string>;
+};
+
+function ShareFeedbackModal({
+  open,
+  onClose,
+  onSubmit,
+  labels,
+  ratingLabels,
+}: ShareFeedbackModalProps) {
+  const [foodRating, setFoodRating] = useState<RatingValue | null>(null);
+  const [serviceRating, setServiceRating] = useState<RatingValue | null>(null);
+  const [comment, setComment] = useState("");
+  const [submitState, setSubmitState] = useState<"idle" | "submitting" | "success" | "error">(
+    "idle"
+  );
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(open);
+  const [isVisible, setIsVisible] = useState(open);
+  const titleId = useId();
+  const messageInputId = useId();
+  const TRANSITION_MS = 300;
+
+  useEffect(() => {
+    if (!open) {
+      setFoodRating(null);
+      setServiceRating(null);
+      setComment("");
+      setSubmitState("idle");
+      setSubmitError(null);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let rafId: number | null = null;
+
+    if (open) {
+      setIsMounted(true);
+      rafId = requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
+    } else {
+      setIsVisible(false);
+      timeoutId = setTimeout(() => {
+        setIsMounted(false);
+      }, TRANSITION_MS);
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (typeof document === "undefined") return;
+
+    const { body } = document;
+    const previousOverflow = body.style.overflow;
+    body.style.overflow = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, onClose]);
+
+  if (!isMounted) return null;
+
+  const ratingOptions: Array<{
+    value: RatingValue;
+    Icon: typeof ThumbsUp;
+    ariaLabel: string;
+  }> = [
+    { value: "negative", Icon: ThumbsDown, ariaLabel: ratingLabels.negative },
+    { value: "neutral", Icon: Smile, ariaLabel: ratingLabels.neutral },
+    { value: "positive", Icon: ThumbsUp, ariaLabel: ratingLabels.positive },
+  ];
+
+  const formDisabled = submitState === "submitting" || submitState === "success";
+  const canSubmit = foodRating !== null && serviceRating !== null && !formDisabled;
+
+  const resetErrorState = () => {
+    if (submitState === "error") {
+      setSubmitState("idle");
+    }
+    if (submitError) {
+      setSubmitError(null);
+    }
+  };
+
+  const handleOverlayClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget && submitState !== "submitting") {
+      onClose();
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (formDisabled) return;
+    if (foodRating === null || serviceRating === null) {
+      setSubmitState("error");
+      setSubmitError(labels.errorMessage);
+      return;
+    }
+
+    setSubmitState("submitting");
+    setSubmitError(null);
+    try {
+      await onSubmit({
+        foodRating,
+        serviceRating,
+        comment: comment.trim(),
+      });
+      setSubmitState("success");
+      onClose();
+    } catch (error) {
+      setSubmitState("error");
+      setSubmitError(
+        error instanceof Error ? error.message : labels.errorMessage
+      );
+    }
+  };
+
+  const renderRatingRow = (
+    label: string,
+    value: RatingValue | null,
+    setter: (value: RatingValue | null) => void
+  ) => (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm font-medium text-[#1B1F1E]">{label}</p>
+      <div className="flex gap-3">
+        {ratingOptions.map(({ value: optionValue, Icon, ariaLabel }) => {
+          const isActive = value === optionValue;
+          return (
+            <button
+              key={optionValue}
+              type="button"
+              aria-pressed={isActive}
+              aria-label={ariaLabel}
+              disabled={formDisabled}
+              className={clsx(
+                "grid h-12 w-12 place-items-center rounded-2xl border border-[#2F3A37]/15 bg-white text-[#1B1F1E]/70 shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/30",
+                isActive &&
+                  "border-transparent !bg-slate-600 shadow-[0_12px_35px_rgba(0,0,0,0.18)]",
+                formDisabled && "opacity-50"
+              )}
+              onClick={() => {
+                if (formDisabled) return;
+                resetErrorState();
+                setter(isActive ? null : optionValue);
+              }}
+            >
+              <Icon
+                className={clsx(
+                  "h-5 w-5",
+                  isActive ? "text-white" : "text-[#1B1F1E]"
+                )}
+                strokeWidth={1.8}
+                fill="none"
+              />
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const submitLabel =
+    submitState === "submitting" ? `${labels.submit}…` : labels.submit;
+
+  return (
+    <div
+      className={clsx(
+        "fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 pt-10 transition-opacity duration-300 ease-out sm:items-center sm:pb-0",
+        isVisible ? "opacity-100" : "pointer-events-none opacity-0"
+      )}
+      onClick={handleOverlayClick}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className={clsx(
+          "w-full max-w-md rounded-[32px] bg-white p-6 text-left shadow-[0_30px_120px_rgba(0,0,0,0.35)] transition-all duration-300 ease-out will-change-transform will-change-opacity",
+          isVisible
+            ? "translate-y-0 scale-100 opacity-100"
+            : "translate-y-6 scale-95 opacity-0 sm:-translate-y-2 sm:scale-100"
+        )}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <h2 id={titleId} className="text-2xl font-semibold text-[#1B1F1E]">
+            {labels.title}
+          </h2>
+          <button
+            type="button"
+            aria-label={labels.closeAriaLabel}
+            onClick={() => {
+              if (submitState === "submitting") return;
+              onClose();
+            }}
+            className="cursor-pointer rounded-full bg-[#EFF1F0] p-2 text-[#1B1F1E]/60 transition hover:text-[#1B1F1E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/30"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form className="mt-6 flex flex-col gap-6" onSubmit={handleSubmit}>
+          {renderRatingRow(labels.foodLabel, foodRating, setFoodRating)}
+          {renderRatingRow(labels.serviceLabel, serviceRating, setServiceRating)}
+
+          <div className="flex flex-col gap-3">
+            <label
+              htmlFor={messageInputId}
+              className="text-sm font-medium text-[#1B1F1E]"
+            >
+              {`${labels.feedbackLabel}:`}
+            </label>
+            <textarea
+              id={messageInputId}
+              rows={4}
+              disabled={formDisabled}
+              className={clsx(
+                "w-full rounded-2xl border border-[#2F3A37]/15 bg-[#FDFDFD] px-4 py-3 text-sm text-[#1B1F1E] shadow-inner placeholder:text-[#1B1F1E]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/30",
+                formDisabled && "opacity-60"
+              )}
+              placeholder={labels.feedbackPlaceholder}
+              value={comment}
+              onChange={(event) => {
+                resetErrorState();
+                setComment(event.target.value);
+              }}
+            />
+          </div>
+
+          <div className="space-y-3">
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className={clsx(
+                "mt-2 w-full cursor-pointer rounded-full bg-[#1B1F1E] py-4 text-center text-sm font-semibold text-white shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/40",
+                !canSubmit && "cursor-not-allowed opacity-60"
+              )}
+            >
+              {submitLabel}
+            </button>
+
+            {submitError && (
+              <p className="text-sm text-rose-600">{submitError}</p>
+            )}
+
+            {submitState === "success" && (
+              <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-inner">
+                <p className="font-semibold">{labels.successTitle}</p>
+                <p className="text-xs text-emerald-700">{labels.successDescription}</p>
+              </div>
+            )}
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

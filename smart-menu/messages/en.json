@@ -121,6 +121,26 @@
       "alt": "Illustration of AI assistant {name}",
       "fallbackName": "Smart Assistant"
     },
+    "feedback": {
+      "title": "Guest feedback",
+      "subtitle": "Latest responses shared from the QR experience.",
+      "loading": "Loading feedback...",
+      "error": "We couldn't load the feedback right now.",
+      "empty": "No feedback has been submitted yet.",
+      "loadMore": "Load more",
+      "avgFood": "Avg food",
+      "avgService": "Avg service",
+      "total": "{count, plural, one {# response} other {# responses}}",
+      "submittedAt": "Submitted {value}",
+      "origin": "IP {value}",
+      "suggestionLabel": "Suggestion",
+      "suggestionEmpty": "No suggestion was shared.",
+      "ratingLabel": "{type}: {value}/5",
+      "ratingTypes": {
+        "food": "Food",
+        "service": "Service"
+      }
+    },
     "topViewed": {
       "title": "Most viewed menu items",
       "subtitle": "Based on in-app product views.",
@@ -310,6 +330,23 @@
     "assistantButton": "AI Recommendation",
     "assistantPrompt": "What pairs well with {dish}?",
     "shareCta": "Share your thoughts",
+    "shareModal": {
+      "title": "Your opinion matters to us",
+      "foodLabel": "Rate our food",
+      "serviceLabel": "Rate our service",
+      "feedbackLabel": "Your suggestion",
+      "feedbackPlaceholder": "Share any idea or improvement...",
+      "submit": "Send feedback",
+      "closeAriaLabel": "Close feedback dialog",
+      "ratings": {
+        "negative": "Didn't like it",
+        "neutral": "It was ok",
+        "positive": "Loved it"
+      },
+      "successTitle": "Thank you!",
+      "successDescription": "We received your feedback.",
+      "errorMessage": "We couldn't send your feedback. Please try again."
+    },
     "priceLabel": "{price} den",
     "favorite": {
       "add": "Add to favorites",
