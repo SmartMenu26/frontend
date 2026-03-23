@@ -51,6 +51,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/restaurant/6957e610dfe0f2ca815211f8",
+        destination: "/restaurant/bakal",
+        permanent: true,
+      },
+      {
         source: "/mk/restaurant/:path*",
         destination: "/restaurant/:path*",
         permanent: true,
