@@ -19,7 +19,7 @@ const CategoryLink = forwardRef<HTMLButtonElement, CategoryLinkProps>(
         onClick={onClick}
         className={[
           "relative pb-2 shrink-0 cursor-pointer",
-          "text-lg md:text-3xl",
+          "text-xl md:text-3xl",
           active
             ? "text-[#074128] font-semibold underline"
             : "text-[#074128]/80 font-normal",
