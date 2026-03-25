@@ -379,6 +379,9 @@
       "milk": {
         "contains": "Contains milk"
       },
+      "mushroom": {
+        "contains": "Contains mushrooms"
+      },
       "soy": {
         "contains": "Contains soy"
       },

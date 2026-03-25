@@ -379,6 +379,9 @@
       "milk": {
         "contains": "Содржи млеко"
       },
+      "mushroom": {
+        "contains": "Содржи печурки"
+      },
       "soy": {
         "contains": "Содржи соја"
       },

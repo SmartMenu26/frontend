@@ -23,7 +23,7 @@ export default function MealTypeToggle({ value, onChange, className = "" }: Prop
   const inactive = "text-[#6A736F] hover:text-[#44504A]";
 
   return (
-    <div className={`flex justify-center gap-6 px-5 pb-4 ${className}`}>
+    <div className={`flex justify-center gap-6 px-5 pb-8 ${className}`}>
       <button
         type="button"
         aria-label="Food"

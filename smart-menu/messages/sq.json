@@ -379,6 +379,9 @@
       "milk": {
         "contains": "Përmban qumësht"
       },
+      "mushroom": {
+        "contains": "Përmban kërpudha"
+      },
       "soy": {
         "contains": "Përmban sojë"
       },
