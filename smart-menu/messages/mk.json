@@ -1,7 +1,7 @@
 {
   "aiSuggestion": {
     "subtitle": "БРЗИ AI ПРЕПОРАКИ ЗА ТЕБЕ",
-    "title": "Што сте расположени да јадете?",
+    "title": "Препораки за тебе",
     "chips": {
       "askAssistant": "Прашај го асистентот",
       "askNamed": "Прашај го {name}",

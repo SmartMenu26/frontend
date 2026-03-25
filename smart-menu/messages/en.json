@@ -1,7 +1,7 @@
 {
   "aiSuggestion": {
     "subtitle": "QUICK AI PICKS FOR YOU",
-    "title": "What are you in the mood to eat?",
+    "title": "Recommendations for you",
     "chips": {
       "askAssistant": "Ask the assistant",
       "askNamed": "Ask {name}",
