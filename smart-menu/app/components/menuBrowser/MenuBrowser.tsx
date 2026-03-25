@@ -1091,7 +1091,7 @@ export default function MenuBrowser({
                 )}
 
                 {/* CARDS */}
-                <div className="relative mt-4" role="region" aria-label="Ставки од менито">
+                <div className="relative" role="region" aria-label="Ставки од менито">
                     <div
                         ref={cardsContainerRef}
                         onTouchStart={handleTouchStart}
@@ -1106,7 +1106,7 @@ export default function MenuBrowser({
                             "overflow-x-hidden",
                             "[-webkit-overflow-scrolling:touch]",
                             "[&::-webkit-scrollbar]:hidden",
-                            "py-4 scroll-pt-6",
+                            "py-4 scroll-pt-2",
                             "transition-opacity transition-transform duration-150 ease-out",
                             "transform",
                             restoringScroll ? "opacity-95 scale-[0.995]" : "opacity-100 scale-100",
