@@ -15,15 +15,15 @@ type Props = {
 export default function MealTypeToggle({ value, onChange, className = "" }: Props) {
   const t = useTranslations("mealTypeToggle");
   const base =
-    "cursor-pointer py-0.5 px-3 rounded-full flex items-center justify-center border transition " +
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20";
+    "cursor-pointer border-b-2 border-transparent px-3 py-1 text-sm font-semibold uppercase tracking-wide " +
+    "flex items-center gap-2 transition-colors duration-150 " +
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#074128]/20";
 
-  const active = "bg-[#074128] text-white";
-  const inactive = "bg-white";
+  const active = "text-[#074128] border-b-[#074128]";
+  const inactive = "text-[#6A736F] hover:text-[#44504A]";
 
   return (
-    <div className={`flex justify-center items-end gap-1 px-5 pb-4 ${className}`}>
-      {/* Food */}
+    <div className={`flex justify-center gap-6 px-5 pb-4 ${className}`}>
       <button
         type="button"
         aria-label="Food"
@@ -31,11 +31,10 @@ export default function MealTypeToggle({ value, onChange, className = "" }: Prop
         onClick={() => onChange("food")}
         className={[base, value === "food" ? active : inactive].join(" ")}
       >
-        {/* simple icon: meat/food */}
-        <span className="text-md flex gap-1 justify-center items-center"><Drumstick size={20}/>{t("food")}</span>
+        <Drumstick size={18} />
+        <span>{t("food")}</span>
       </button>
 
-      {/* Drink */}
       <button
         type="button"
         aria-label="Drink"
@@ -43,7 +42,8 @@ export default function MealTypeToggle({ value, onChange, className = "" }: Prop
         onClick={() => onChange("drink")}
         className={[base, value === "drink" ? active : inactive].join(" ")}
       >
-        <span className="text-md flex gap-1 justify-center items-center"><Wine size={20}/>{t("drink")}</span>
+        <Wine size={18} />
+        <span>{t("drink")}</span>
       </button>
     </div>
   );
