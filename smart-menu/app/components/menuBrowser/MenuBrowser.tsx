@@ -1126,7 +1126,7 @@ export default function MenuBrowser({
                             {(loadingItems || loadingCategories) ? (
                                 <div
                                     className={[
-                                        "snap-start snap-always flex flex-col gap-3 pt-4",
+                                        "snap-start snap-always flex flex-col pt-2",
                                         shouldForcePagedLayout ? "min-h-[330px]" : "",
                                     ]
                                         .filter(Boolean)
@@ -1134,7 +1134,10 @@ export default function MenuBrowser({
                                     role="listitem"
                                 >
                                     {Array.from({ length: ITEMS_PER_PAGE }).map((_, idx) => (
-                                        <div key={`skeleton-${idx}`} className="py-0">
+                                        <div
+                                            key={`skeleton-${idx}`}
+                                            className="w-full border-b border-[#E1E6E3] last:border-b-0"
+                                        >
                                             <SkeletonCard layout="list" />
                                         </div>
                                     ))}
@@ -1145,18 +1148,22 @@ export default function MenuBrowser({
                                         role="listitem"
                                         key={`menu-page-${pageIdx}`}
                                         className={[
-                                            "snap-start snap-always flex flex-col gap-3",
+                                            "snap-start snap-always flex flex-col",
                                             shouldForcePagedLayout ? "min-h-[330px]" : "",
                                         ]
                                             .filter(Boolean)
                                             .join(" ")}
                                     >
                                         {group.map((it, index) => (
-                                            <div key={it.id} className="w-full" data-menu-card>
+                                            <div
+                                                key={it.id}
+                                                className="w-full border-b border-[#E1E6E3] last:border-b-0"
+                                                data-menu-card
+                                            >
                                                     <Card
                                                         title={it.title}
                                                         imageUrl={it.imageUrl}
-                                                        priceLabel={`${it.price}ден`}
+                                                        priceLabel={`${it.price} ден`}
                                                         kind={it.kind ?? mealType}
                                                     description={it.description}
                                                     layout="list"

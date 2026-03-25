@@ -79,11 +79,10 @@ export default function Card({
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#355B4B]/50",
         isListLayout
           ? [
-              "block w-full rounded-2xl border border-[#E0E6E2]",
-              "bg-white/95 px-3 py-2.5",
-              "shadow-[0_4px_12px_rgba(47,58,55,0.06)]",
-              "transition duration-200 ease-out",
-              "hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(47,58,55,0.1)]",
+              "flex w-full items-center gap-4 px-1 py-3",
+              "rounded-none border-none bg-transparent",
+              "transition-colors duration-150",
+              "hover:bg-[#F6F8F7]",
             ].join(" ")
           : "",
         className,
@@ -92,45 +91,41 @@ export default function Card({
         .join(" ")}
     >
       {isListLayout ? (
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-4 flex-1 min-w-0">
-            <div className="relative h-[58px] w-[58px] flex-shrink-0">
-              <div
-                aria-hidden
-                className={[
-                  "absolute inset-0 rounded-full bg-[#F2F4F3]",
-                  "transition-opacity duration-300",
-                  imageLoaded ? "opacity-0" : "opacity-100",
-                ].join(" ")}
-              />
-              <Image
-                src={imageUrl}
-                alt={title}
-                width={96}
-                height={96}
-                priority={shouldPrioritizeImage}
-                loading={shouldPrioritizeImage ? "eager" : "lazy"}
-                fetchPriority={shouldPrioritizeImage ? "high" : "low"}
-                quality={70}
-                sizes="96px"
-                placeholder="blur"
-                blurDataURL={BLUR_PLACEHOLDER}
-                onLoad={() => setImageLoaded(true)}
-                className="rounded-full h-full w-full object-cover"
-              />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-base font-semibold leading-snug text-[#1E2B27] line-clamp-2">
-                {title}
-              </h3>
-              {/* {description && (
-                <p className="mt-1 text-sm text-[#64706A] line-clamp-2">
-                  {description}
-                </p>
-              )} */}
-            </div>
+        <div className="flex w-full items-center gap-4">
+          <div className="relative h-[64px] w-[64px] flex-shrink-0 overflow-hidden rounded-2xl border border-[#E1E6E3] bg-[#F8FBF9]">
+            <div
+              aria-hidden
+              className={[
+                "absolute inset-0 bg-[#E8EEE9]",
+                "transition-opacity duration-300",
+                imageLoaded ? "opacity-0" : "opacity-100",
+              ].join(" ")}
+            />
+            <Image
+              src={imageUrl}
+              alt={title}
+              width={96}
+              height={96}
+              priority={shouldPrioritizeImage}
+              loading={shouldPrioritizeImage ? "eager" : "lazy"}
+              fetchPriority={shouldPrioritizeImage ? "high" : "low"}
+              quality={75}
+              sizes="96px"
+              placeholder="blur"
+              blurDataURL={BLUR_PLACEHOLDER}
+              onLoad={() => setImageLoaded(true)}
+              className="h-full w-full object-cover"
+            />
           </div>
-          <div className="ml-2 flex items-center gap-2 text-[#355B4B]">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-base font-medium leading-snug text-[#0B1F17] line-clamp-2">
+              {title}
+            </h3>
+            {description && (
+              <p className="mt-1 text-sm text-[#6B726E] line-clamp-1">{description}</p>
+            )}
+          </div>
+          <div className="ml-2 flex items-center gap-2 text-[#0F241A]">
             {priceLabel && (
               <span className="text-base font-semibold whitespace-nowrap">
                 {priceLabel}
@@ -139,7 +134,7 @@ export default function Card({
             <ArrowUpRight
               size={18}
               aria-hidden
-              className="text-[#32463F] transition-transform duration-200 group-hover:translate-x-0.5"
+              className="text-[#6E7571] transition-transform duration-200 group-hover:translate-x-0.5"
             />
           </div>
         </div>
