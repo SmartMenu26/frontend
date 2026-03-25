@@ -122,7 +122,7 @@ export default function Card({
               {title}
             </h3>
             {description && (
-              <p className="mt-1 text-sm text-[#6B726E] line-clamp-1">{description}</p>
+              <p className="mt-1 text-[13px] text-[#6B726E] line-clamp-1">{description}</p>
             )}
           </div>
           <div className="ml-2 flex items-center gap-2 text-[#0F241A]">
