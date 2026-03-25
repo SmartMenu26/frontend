@@ -118,7 +118,7 @@ export default function Card({
             />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-base font-medium leading-snug text-[#0B1F17] line-clamp-2">
+            <h3 className="text-base font-[15px] leading-snug text-[#0B1F17] line-clamp-2">
               {title}
             </h3>
             {description && (
