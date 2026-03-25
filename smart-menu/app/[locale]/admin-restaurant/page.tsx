@@ -8,10 +8,12 @@ import { useLocale, useTranslations } from "next-intl";
 import assistantIllustration from "@/public/images/ai-assistant-cook.png";
 import { type Locale } from "@/i18n";
 
+type LocalizedValue = Partial<Record<Locale, string>> | string | null | undefined;
+
 type AdminUser = {
   id?: string;
   username: string;
-  name?: string | null;
+  name?: LocalizedValue;
   email?: string | null;
   restaurantId?: string;
   isActive?: boolean;
@@ -24,7 +26,7 @@ type AiCredits = {
 
 type Restaurant = {
   _id?: string;
-  name?: string | null;
+  name?: LocalizedValue;
   slug?: string | null;
   currency?: string | null;
   timezone?: string | null;
@@ -38,8 +40,6 @@ type Restaurant = {
   aiAssistantName?: Partial<Record<string, string>> | null;
   aiCredits?: AiCredits | null;
 };
-
-type LocalizedValue = Partial<Record<Locale, string>> | string | null | undefined;
 
 type AdminMenuItem = {
   _id: string;
@@ -441,6 +441,7 @@ type DashboardProps = {
 function Dashboard({ session, onSessionExpired }: DashboardProps) {
   const t = useTranslations("adminDashboard");
   const { admin, restaurant } = session;
+  const locale = useLocale() as Locale;
 
   const creditStats = useMemo(() => {
     const credits = restaurant.aiCredits ?? {};
@@ -461,10 +462,17 @@ function Dashboard({ session, onSessionExpired }: DashboardProps) {
       return list;
     }, []);
   }, [restaurant.aiAssistantName]);
+  const resolvedRestaurantName = resolveLocalizedText(restaurant.name, locale);
+
   const assistantPrimaryName =
     assistantNames[0]?.[1] ??
-    restaurant.name ??
+    resolvedRestaurantName ??
     t("assistantPhoto.fallbackName");
+
+  const restaurantDisplayName = resolvedRestaurantName ?? t("restaurantCard.unnamed");
+
+  const adminDisplayName =
+    resolveLocalizedText(admin.name, locale) ?? admin.username;
 
   return (
     <div className="space-y-6">
@@ -474,7 +482,7 @@ function Dashboard({ session, onSessionExpired }: DashboardProps) {
             {restaurant.imageUrl ? (
               <Image
                 src={restaurant.imageUrl}
-                alt={restaurant.name ?? t("restaurantCard.title")}
+                alt={restaurantDisplayName ?? t("restaurantCard.title")}
                 width={160}
                 height={160}
                 sizes="160px"
@@ -490,7 +498,7 @@ function Dashboard({ session, onSessionExpired }: DashboardProps) {
                 {t("restaurantCard.title")}
               </p>
               <h2 className="text-2xl font-semibold text-slate-900">
-                {restaurant.name ?? t("restaurantCard.unnamed")}
+                {restaurantDisplayName}
               </h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 <StatusBadge
@@ -549,7 +557,7 @@ function Dashboard({ session, onSessionExpired }: DashboardProps) {
               {t("adminCard.title")}
             </p>
             <h3 className="mt-2 text-xl font-semibold text-slate-900">
-              {admin.name ?? admin.username}
+              {adminDisplayName}
             </h3>
             <dl className="mt-4 space-y-2 text-sm text-slate-600">
               <div>
