@@ -37,6 +37,9 @@ type Restaurant = {
   createdAt?: string | null;
   updatedAt?: string | null;
   imageUrl?: string | null;
+  aiAssistantImageUrl?: string | null;
+  aiAssistantNoCreditsImageUrl?: string | null;
+  aiAssistantThinkingImageUrl?: string | null;
   aiAssistantName?: Partial<Record<string, string>> | null;
   aiCredits?: AiCredits | null;
 };
@@ -468,6 +471,7 @@ function Dashboard({ session, onSessionExpired }: DashboardProps) {
     assistantNames[0]?.[1] ??
     resolvedRestaurantName ??
     t("assistantPhoto.fallbackName");
+  const assistantPortraitSrc = restaurant.aiAssistantImageUrl ?? undefined;
 
   const restaurantDisplayName = resolvedRestaurantName ?? t("restaurantCard.unnamed");
 
@@ -592,7 +596,7 @@ function Dashboard({ session, onSessionExpired }: DashboardProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <AssistantNamesCard entries={assistantNames} />
-        <AssistantPortraitCard name={assistantPrimaryName} />
+        <AssistantPortraitCard name={assistantPrimaryName} imageUrl={assistantPortraitSrc} />
       </div>
 
       <TopViewedItemsPanel session={session} onSessionExpired={onSessionExpired} />
@@ -685,7 +689,7 @@ function AssistantNamesCard({ entries }: AssistantNamesCardProps) {
   );
 }
 
-function AssistantPortraitCard({ name }: { name: string }) {
+function AssistantPortraitCard({ name, imageUrl }: { name: string; imageUrl?: string }) {
   const t = useTranslations("adminDashboard.assistantPhoto");
   return (
     <section className="flex flex-col justify-between rounded-3xl bg-white p-6 shadow-lg shadow-slate-950/5 ring-1 ring-slate-100">
@@ -696,7 +700,7 @@ function AssistantPortraitCard({ name }: { name: string }) {
       </div>
       <div className="mt-6 flex justify-center">
         <Image
-          src={assistantIllustration}
+          src={imageUrl ?? assistantIllustration}
           alt={t("alt", { name })}
           width={200}
           height={200}
