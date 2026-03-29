@@ -61,7 +61,7 @@ type AdminMenuItem = {
   subcategoryId?: {
     name?: LocalizedValue;
   } | null;
-  tags?: string[] | null;
+  tags?: LocalizedValue[] | null;
   updatedAt?: string | null;
 };
 
@@ -1230,7 +1230,13 @@ function MenuItemsPanel({ session, onSessionExpired }: MenuItemsPanelProps) {
     return normalizedItems.filter((item) => {
       const name = resolveLocalizedText(item.name, locale)?.toLowerCase();
       const description = resolveLocalizedText(item.description, locale)?.toLowerCase();
-      const tags = Array.isArray(item.tags) ? item.tags.join(" ").toLowerCase() : "";
+      const tags = Array.isArray(item.tags)
+        ? item.tags
+            .map((tag) => resolveLocalizedText(tag, locale))
+            .filter((label): label is string => Boolean(label))
+            .join(" ")
+            .toLowerCase()
+        : "";
       return (
         (name && name.includes(query)) ||
         (description && description.includes(query)) ||
@@ -1725,14 +1731,18 @@ function MenuItemCard({
             </span>
           )}
           {Array.isArray(item.tags) &&
-            item.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500"
-              >
-                {tag}
-              </span>
-            ))}
+            item.tags
+              .map((tag) => resolveLocalizedText(tag, locale))
+              .filter((label): label is string => Boolean(label))
+              .slice(0, 3)
+              .map((label, index) => (
+                <span
+                  key={`${item._id}-tag-${index}-${label}`}
+                  className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500"
+                >
+                  {label}
+                </span>
+              ))}
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
           {updatedLabel && <p>{updatedLabel}</p>}
