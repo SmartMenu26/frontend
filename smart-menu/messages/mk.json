@@ -48,6 +48,16 @@
     }
   }
   ,
+  "notFound": {
+    "eyebrow": "Smart Menu",
+    "title": "Упс! Страницата не е пронајдена",
+    "description": "Страницата што ја бараш е преместена или веќе не постои.",
+    "primaryCta": "Назад кон почеток",
+    "secondaryCta": "Контактирај поддршка",
+    "hint": "Грешка 404",
+    "imageAlt": "Илустрација за страница што не е пронајдена"
+  }
+  ,
   "adminDashboard": {
     "header": {
       "eyebrow": "Smart Menu интерно",
