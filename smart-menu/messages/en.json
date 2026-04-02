@@ -48,6 +48,16 @@
     }
   }
   ,
+  "notFound": {
+    "eyebrow": "Smart Menu",
+    "title": "Oops! Page not found",
+    "description": "The page you're looking for might have moved or no longer exists.",
+    "primaryCta": "Back to homepage",
+    "secondaryCta": "Contact support",
+    "hint": "Error code 404",
+    "imageAlt": "Illustration showing the 404 page not found state"
+  }
+  ,
   "adminDashboard": {
     "header": {
       "eyebrow": "Smart Menu internal",

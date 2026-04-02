@@ -48,6 +48,16 @@
     }
   }
   ,
+  "notFound": {
+    "eyebrow": "Smart Menu",
+    "title": "Ups! Faqja nuk u gjet",
+    "description": "Faqja që kërkoni është zhvendosur ose nuk ekziston më.",
+    "primaryCta": "Kthehu te faqja kryesore",
+    "secondaryCta": "Kontakto mbështetjen",
+    "hint": "Gabimi 404",
+    "imageAlt": "Ilustrim që tregon se faqja nuk u gjet"
+  }
+  ,
   "adminDashboard": {
     "header": {
       "eyebrow": "Smart Menu interno",
