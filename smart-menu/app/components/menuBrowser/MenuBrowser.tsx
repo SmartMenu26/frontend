@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
-import type { PrefetchedMenuData } from "@/app/lib/menuPrefetch";
 import { incrementMenuItemView } from "@/app/lib/menuItemViews";
 
 const ITEMS_PER_PAGE = 4;
@@ -34,7 +33,8 @@ type Props = {
     restaurantSlug?: string;
     mealType: MealKind;
     onMealTypeChange: (next: MealKind) => void;
-    initialData?: PrefetchedMenuData | null;
+    initialCategoryId?: string;
+    initialSubcategoryId?: string;
 };
 
 const pickDefaultSubcategoryId = (categoryId?: string, source?: Category[]) => {
@@ -49,7 +49,8 @@ export default function MenuBrowser({
     restaurantSlug,
     mealType,
     onMealTypeChange,
-    initialData,
+    initialCategoryId,
+    initialSubcategoryId,
 }: Props) {
     const router = useRouter();
     const locale = useLocale() as Locale;
@@ -155,32 +156,14 @@ export default function MenuBrowser({
         [resolveLocalizedText]
     );
 
-    const prefetchedData = useMemo(() => {
-        if (!initialData) return null;
-        if (initialData.restaurantId !== restaurantId) return null;
-        if (initialData.mealType !== mealType) return null;
-        return initialData;
-    }, [initialData, restaurantId, mealType]);
-
-    const prefetchedCategories = useMemo(
-        () => (prefetchedData?.rawCategories?.length ? mapCategories(prefetchedData.rawCategories) : []),
-        [prefetchedData, mapCategories]
-    );
-
-    const prefetchedItems = useMemo(
-        () => (prefetchedData?.rawItems?.length ? mapMenuItems(prefetchedData.rawItems) : []),
-        [prefetchedData, mapMenuItems]
-    );
-
-    const [categories, setCategories] = useState<Category[]>(() => prefetchedCategories);
-    const [rawCategories, setRawCategories] = useState<any[]>(() => prefetchedData?.rawCategories ?? []);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
     const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>("all");
 
-    const [items, setItems] = useState<MenuItem[]>(() => prefetchedItems);
-    const [loadingCategories, setLoadingCategories] = useState(() => !prefetchedData);
-    const [loadingItems, setLoadingItems] = useState(() => !prefetchedData);
-    const [cardsVisible, setCardsVisible] = useState(() => Boolean(prefetchedData));
+    const [items, setItems] = useState<MenuItem[]>([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
+    const [loadingItems, setLoadingItems] = useState(true);
+    const [cardsVisible, setCardsVisible] = useState(false);
     const [pageIndicator, setPageIndicator] = useState<{ total: number; index: number }>(() => ({
         total: 1,
         index: 0,
@@ -267,19 +250,9 @@ export default function MenuBrowser({
     );
 
     useEffect(() => {
-        if (prefetchedData) {
-            setRawCategories(prefetchedData.rawCategories ?? []);
-            setCategories(prefetchedCategories);
-            setItems(prefetchedItems);
-            setLoadingCategories(false);
-            setLoadingItems(false);
-        }
-    }, [prefetchedData, prefetchedCategories, prefetchedItems]);
-
-    useEffect(() => {
         initialSelectionAppliedRef.current = false;
         hasCompletedInitialRestoreRef.current = false;
-    }, [restaurantId, mealType]);
+    }, [restaurantId, mealType, initialCategoryId, initialSubcategoryId]);
 
     useEffect(() => {
         if (!restaurantId) return;
@@ -287,16 +260,6 @@ export default function MenuBrowser({
         let cancelled = false;
 
         async function loadCategories() {
-            if (prefetchedData?.rawCategories?.length) {
-                const mapped = mapCategories(prefetchedData.rawCategories);
-                if (cancelled) return;
-                setRawCategories(prefetchedData.rawCategories);
-                setCategories(mapped);
-                setCategoriesError(null);
-                setLoadingCategories(false);
-                return;
-            }
-
             setLoadingCategories(true);
 
             try {
@@ -304,7 +267,6 @@ export default function MenuBrowser({
                     `/api/restaurants/${restaurantId}/categories?kind=${mealType}`,
                     { cache: "no-store" }
                 );
-
 
                 if (!res.ok) throw new Error("Failed to load categories");
 
@@ -315,8 +277,8 @@ export default function MenuBrowser({
 
                 // 👇 map backend → UI Category
                 const mapped = mapCategories(data);
-                setRawCategories(data);
                 setCategories(mapped);
+                setCategoriesError(null);
             } catch (err) {
                 console.error("Failed to load categories:", err);
 
@@ -336,7 +298,7 @@ export default function MenuBrowser({
         return () => {
             cancelled = true;
         };
-    }, [restaurantId, mealType, mapCategories, prefetchedData]);
+    }, [restaurantId, mealType, mapCategories]);
 
     useEffect(() => {
         if (!categories.length) return;
@@ -378,24 +340,45 @@ export default function MenuBrowser({
                 ? storedCategoryId
                 : null;
 
-        const validPrefetchedCategory =
-            prefetchedData?.categoryId &&
-            categories.some((cat) => cat.id === prefetchedData.categoryId)
-                ? prefetchedData.categoryId
+        const validInitialCategory =
+            initialCategoryId && categories.some((cat) => cat.id === initialCategoryId)
+                ? initialCategoryId
+                : null;
+
+        const categoryFromInitialSub =
+            !validInitialCategory &&
+            initialSubcategoryId &&
+            initialSubcategoryId !== "all"
+                ? categories.find((cat) =>
+                      cat.subcategories?.some((sub) => sub.id === initialSubcategoryId)
+                  )?.id ?? null
                 : null;
 
         const nextCategoryId =
-            validStoredCategory ?? validPrefetchedCategory ?? categories[0]?.id ?? "";
+            validStoredCategory ??
+            validInitialCategory ??
+            categoryFromInitialSub ??
+            categories[0]?.id ??
+            "";
 
         const category = categories.find((cat) => cat.id === nextCategoryId);
         const defaultSubId = pickDefaultSubcategoryId(nextCategoryId, categories);
 
         let nextSubcategoryId = defaultSubId;
 
-        const candidateSubId =
-            validStoredCategory === nextCategoryId
-                ? storedSubcategoryId
-                : prefetchedData?.subcategoryId ?? null;
+        let candidateSubId: string | null = null;
+        if (validStoredCategory === nextCategoryId) {
+            candidateSubId = storedSubcategoryId;
+        } else if (initialSubcategoryId === "all" && nextCategoryId) {
+            candidateSubId = "all";
+        } else if (
+            initialSubcategoryId &&
+            initialSubcategoryId !== "all" &&
+            (initialCategoryId === nextCategoryId ||
+                (!initialCategoryId && categoryFromInitialSub === nextCategoryId))
+        ) {
+            candidateSubId = initialSubcategoryId;
+        }
 
         if (candidateSubId === "all") {
             nextSubcategoryId = "all";
@@ -421,7 +404,7 @@ export default function MenuBrowser({
         setPendingPageIndex(initialPageIndex);
         userInteractedRef.current = false;
         initialSelectionAppliedRef.current = true;
-    }, [categories, selectionStorageKey, prefetchedData]);
+    }, [categories, selectionStorageKey, initialCategoryId, initialSubcategoryId]);
 
 
     const allChipLabel = useMemo(
@@ -619,14 +602,6 @@ export default function MenuBrowser({
         };
     }, [updateCardScrollState, items.length, loadingItems, loadingCategories]);
 
-    const prefetchedMatchesSelection = useMemo(() => {
-        if (!prefetchedData) return false;
-        return (
-            prefetchedData.categoryId === selectedCategoryId &&
-            (prefetchedData.subcategoryId ?? "all") === selectedSubcategoryId
-        );
-    }, [prefetchedData, selectedCategoryId, selectedSubcategoryId]);
-
     useEffect(() => {
         if (!selectedCategoryId) return;
 
@@ -636,14 +611,6 @@ export default function MenuBrowser({
             selectedCategoryId,
             selectedSubcategoryId,
         ].join(":");
-
-        if (prefetchedMatchesSelection && prefetchedData?.rawItems) {
-            setItems(mapMenuItems(prefetchedData.rawItems));
-            setLoadingItems(false);
-            fulfilledItemsKeyRef.current = itemsQueryKey;
-            requestedItemsKeyRef.current = null;
-            return;
-        }
 
         if (
             requestedItemsKeyRef.current === itemsQueryKey ||
@@ -716,8 +683,6 @@ export default function MenuBrowser({
         selectedSubcategoryId,
         mealType,
         mapMenuItems,
-        prefetchedData,
-        prefetchedMatchesSelection,
     ]);
 
     useEffect(() => {

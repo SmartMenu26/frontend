@@ -9,8 +9,6 @@ import RestaurantContactCard, {
 import Footer from "@/app/components/ui/Footer";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
 import LanguageSwitcher from "@/app/components/languageSwitcher/LanguageSwitcher";
-import type { MealKind } from "@/app/data/dummyMenuCategories";
-import { fetchInitialMenuData } from "@/app/lib/menuPrefetch";
 import {
   fetchRestaurantRecord,
   pickRestaurantDescription,
@@ -173,24 +171,6 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
     redirect(target);
   }
 
-  const initialMealType: MealKind =
-    resolvedSearch.kind === "drink" ? "drink" : "food";
-  const requestedCategoryId =
-    typeof resolvedSearch.categoryId === "string"
-      ? resolvedSearch.categoryId
-      : undefined;
-  const requestedSubcategoryId =
-    typeof resolvedSearch.subcategoryId === "string"
-      ? resolvedSearch.subcategoryId
-      : undefined;
-
-  const initialMenuData = await fetchInitialMenuData({
-    restaurantId: record.id,
-    mealType: initialMealType,
-    categoryId: requestedCategoryId,
-    subcategoryId: requestedSubcategoryId,
-  });
-
   const localePriority = getLocalePriority(resolvedLocale);
   const restaurantName =
     pickRestaurantName(record, localePriority) ?? record.plainName ?? undefined;
@@ -250,7 +230,6 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
         <RestaurantContent
           restaurantId={record.id}
           restaurantSlug={record.slug}
-          initialMenuData={initialMenuData}
         />
 
         {contactLabels ? (
