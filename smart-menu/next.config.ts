@@ -40,6 +40,11 @@ const nextConfig: NextConfig = {
         hostname: "smartmenu-media-prod.s3.eu-north-1.amazonaws.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "smartmenu-media-prod.s3.eu-central-1.amazonaws.com",
+        pathname: "/**",
+      },
     ],
     deviceSizes: IMAGE_DEVICE_SIZES,
     imageSizes: IMAGE_FIXED_SIZES,

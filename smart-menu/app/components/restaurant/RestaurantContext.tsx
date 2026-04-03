@@ -5,29 +5,31 @@ import MenuBrowser from "@/app/components/menuBrowser/MenuBrowser";
 import PopularSection from "@/app/components/popularSection/PopularSection";
 import type { MealKind } from "@/app/data/dummyMenuCategories";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { PrefetchedMenuData } from "@/app/lib/menuPrefetch";
 
 type Props = {
   restaurantId: string;
   restaurantSlug?: string;
-  initialMenuData?: PrefetchedMenuData | null;
 };
 
 export default function RestaurantContent({
   restaurantId,
   restaurantSlug,
-  initialMenuData,
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
 
-  const initialMealType = useMemo<MealKind>(() => {
+  const { kind: kindParam, categoryId: initialCategoryId, subcategoryId: initialSubcategoryId } = useMemo(() => {
     const params = new URLSearchParams(searchParamsString);
-    const param = params.get("kind");
-    return param === "drink" ? "drink" : "food";
+    return {
+      kind: params.get("kind"),
+      categoryId: params.get("categoryId") ?? undefined,
+      subcategoryId: params.get("subcategoryId") ?? undefined,
+    };
   }, [searchParamsString]);
+
+  const initialMealType: MealKind = kindParam === "drink" ? "drink" : "food";
 
   const [mealType, setMealType] = useState<MealKind>(initialMealType);
 
@@ -53,7 +55,8 @@ export default function RestaurantContent({
         restaurantSlug={restaurantSlug}
         mealType={mealType}
         onMealTypeChange={setMealType}
-        initialData={initialMenuData ?? undefined}
+        initialCategoryId={initialCategoryId}
+        initialSubcategoryId={initialSubcategoryId}
       />
       <PopularSection
         restaurantId={restaurantId}
