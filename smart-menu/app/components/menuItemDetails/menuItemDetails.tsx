@@ -13,7 +13,7 @@ import {
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
-import { ArrowLeft, Heart, Smile, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, Smile, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import {
   getAllergenIconEntry,
   resolveTooltipLabel,
@@ -363,10 +363,10 @@ export default function MenuItemDetails({
 
           <button
             type="button"
-            className="cursor-pointer mt-6 pb-6 w-full text-center text-xs text-[#2F3A37]/70 underline underline-offset-4"
+            className="cursor-pointer mt-6 pb-6 w-full text-center text-xs text-[#2F3A37]/70 underline underline-offset-4 flex items-center justify-center gap-2"
             onClick={handleShareClick}
           >
-            {shareLabel}
+            <MessageSquare className="h-4 w-5" /> {shareLabel}
           </button>
         </section>
       </div>
