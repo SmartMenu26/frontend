@@ -162,6 +162,48 @@
       "remainingLabel": "Remaining",
       "hint": "Total credits: {total}. Keep at least 100 available to avoid throttling AI conversations."
     },
+    "weeklyCombos": {
+      "title": "Weekly combos",
+      "subtitle": "Pick up to three menu items per day and publish them as curated combos.",
+      "helper": "Click update after setting each day.",
+      "loading": "Loading weekly combos...",
+      "emptyMenu": "Add menu items first to build weekly combos.",
+      "errors": {
+        "load": "Unable to load weekly combos right now.",
+        "menu": "Unable to load menu items."
+      },
+      "actions": {
+        "retry": "Retry",
+        "submit": "Update combos",
+        "submitting": "Updating...",
+        "reset": "Reset changes"
+      },
+      "status": {
+        "saved": "Weekly combos updated.",
+        "error": "We couldn't update the weekly combos."
+      },
+      "selection": {
+        "limit": "Max {max} items per day",
+        "selectedCount": "{count}/{max} selected",
+        "empty": "No items selected yet.",
+        "placeholder": "Choose a menu item",
+        "searchPlaceholder": "Search menu items...",
+        "noResults": "No menu items match your search.",
+        "full": "Selection full",
+        "add": "Add item",
+        "fallback": "Archived item",
+        "unknownItem": "Unnamed item"
+      },
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      }
+    },
     "assistantNames": {
       "title": "AI assistant names",
       "empty": "No language overrides configured. The assistant falls back to the restaurant name."

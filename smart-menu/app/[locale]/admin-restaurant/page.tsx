@@ -2,8 +2,8 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { PencilLine } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { ChevronDown, PencilLine } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import assistantIllustration from "@/public/images/ai-assistant-cook.png";
 import { type Locale } from "@/i18n";
@@ -127,6 +127,23 @@ const LANGUAGE_LABELS: Record<string, string> = {
   tr: "Türkçe",
   sr: "Српски",
 };
+
+const WEEKDAY_KEYS = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+] as const;
+
+type WeekdayKey = (typeof WEEKDAY_KEYS)[number];
+
+type WeeklyCombos = Record<WeekdayKey, string[]>;
+
+const MAX_WEEKLY_COMBO_ITEMS = 3;
+const WEEKDAY_LOOKUP = new Set<WeekdayKey>(WEEKDAY_KEYS);
 
 export default function AdminDashboardPage() {
   const t = useTranslations("adminDashboard");
@@ -593,6 +610,7 @@ function Dashboard({ session, onSessionExpired }: DashboardProps) {
       </section>
 
       <AiCreditsCard stats={creditStats} currency={restaurant.currency} />
+      <WeeklyCombosPanel session={session} onSessionExpired={onSessionExpired} />
 
       <div className="grid gap-6 md:grid-cols-2">
         <AssistantNamesCard entries={assistantNames} />
@@ -656,6 +674,488 @@ function AiCreditsCard({ stats, currency }: AiCreditsCardProps) {
           {t("creditsCard.hint", { total: stats.total })}
         </p>
       </div>
+    </section>
+  );
+}
+
+type WeeklyCombosPanelProps = {
+  session: AdminSession;
+  onSessionExpired: () => void;
+};
+
+type PickerSelections = Record<WeekdayKey, string>;
+
+type MenuOption = {
+  id: string;
+  label: string;
+};
+
+function WeeklyCombosPanel({ session, onSessionExpired }: WeeklyCombosPanelProps) {
+  const t = useTranslations("adminDashboard.weeklyCombos");
+  const locale = useLocale() as Locale;
+  const restaurantId = session.restaurant._id;
+  const currency = session.restaurant.currency ?? "MKD";
+  const sessionToken = session.token;
+
+  const [menuItems, setMenuItems] = useState<AdminMenuItem[]>([]);
+  const [menuStatus, setMenuStatus] = useState<"idle" | "loading" | "success" | "error">(
+    "idle"
+  );
+  const [menuError, setMenuError] = useState<string | null>(null);
+
+  const [combos, setCombos] = useState<WeeklyCombos>(() => createEmptyWeeklyCombos());
+  const [initialCombos, setInitialCombos] = useState<WeeklyCombos>(() => createEmptyWeeklyCombos());
+  const [comboStatus, setComboStatus] = useState<"idle" | "loading" | "success" | "error">(
+    "idle"
+  );
+  const [comboError, setComboError] = useState<string | null>(null);
+
+  const [pickerSelections, setPickerSelections] = useState<PickerSelections>(
+    () => createEmptyPickerSelections()
+  );
+
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const [combosReloadKey, setCombosReloadKey] = useState(0);
+  const [menuReloadKey, setMenuReloadKey] = useState(0);
+
+  const loadWeeklyCombos = useCallback(
+    async (options?: { signal?: AbortSignal }) => {
+      if (!restaurantId) {
+        throw new Error(t("errors.load"));
+      }
+      const response = await fetch(
+        `/api/restaurants/${restaurantId}/weekly-combos`,
+        {
+          cache: "no-store",
+          signal: options?.signal,
+        }
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        const message =
+          (isPlainObject<{ error?: string }>(payload) &&
+            typeof payload.error === "string" &&
+            payload.error) ||
+          t("errors.load");
+        throw new Error(message);
+      }
+      return sanitizeWeeklyCombos(payload);
+    },
+    [restaurantId, t]
+  );
+
+  useEffect(() => {
+    setMenuItems([]);
+    setMenuStatus("idle");
+    setMenuError(null);
+  }, [restaurantId, sessionToken]);
+
+  useEffect(() => {
+    setCombos(createEmptyWeeklyCombos());
+    setInitialCombos(createEmptyWeeklyCombos());
+    setComboStatus("idle");
+    setComboError(null);
+    setPickerSelections(createEmptyPickerSelections());
+  }, [restaurantId, sessionToken]);
+
+  useEffect(() => {
+    if (!restaurantId) return;
+    let cancelled = false;
+    const controller = new AbortController();
+    setComboStatus("loading");
+    setComboError(null);
+
+    loadWeeklyCombos({ signal: controller.signal })
+      .then((normalized) => {
+        if (cancelled) return;
+        setCombos(normalized);
+        setInitialCombos(cloneWeeklyCombos(normalized));
+        setComboStatus("success");
+        setPickerSelections(createEmptyPickerSelections());
+        setSaveState("idle");
+        setSaveError(null);
+      })
+      .catch((error) => {
+        if (controller.signal.aborted || cancelled) {
+          return;
+        }
+        setComboStatus("error");
+        setComboError(error instanceof Error ? error.message : t("errors.load"));
+      });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [restaurantId, combosReloadKey, loadWeeklyCombos, t]);
+
+  useEffect(() => {
+    if (!restaurantId) return;
+    let cancelled = false;
+    const controller = new AbortController();
+    setMenuStatus("loading");
+    setMenuError(null);
+
+    const fetchMenuItems = async () => {
+      try {
+        const response = await fetch(
+          `/api/restaurant-admin/restaurants/${restaurantId}/menu-items`,
+          {
+            headers: {
+              Authorization: `Bearer ${sessionToken}`,
+            },
+            cache: "no-store",
+            signal: controller.signal,
+          }
+        );
+        const payload = await response.json().catch(() => null);
+        if (response.status === 401) {
+          onSessionExpired();
+          throw new Error(SESSION_EXPIRED_ERROR);
+        }
+        if (!response.ok) {
+          const message =
+            (isPlainObject<{ error?: string }>(payload) &&
+              typeof payload.error === "string" &&
+              payload.error) ||
+            t("errors.menu");
+          throw new Error(message);
+        }
+        const records = (
+          Array.isArray(payload?.data)
+            ? payload.data
+            : Array.isArray(payload)
+            ? payload
+            : Array.isArray((payload as { items?: unknown })?.items)
+            ? (payload as { items?: AdminMenuItem[] }).items
+            : []
+        ) as AdminMenuItem[];
+        if (!cancelled) {
+          setMenuItems(records);
+          setMenuStatus("success");
+        }
+      } catch (error) {
+        if (controller.signal.aborted || cancelled || isSessionExpiredError(error)) {
+          return;
+        }
+        setMenuStatus("error");
+        setMenuError(error instanceof Error ? error.message : t("errors.menu"));
+      }
+    };
+
+    fetchMenuItems();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [restaurantId, sessionToken, onSessionExpired, menuReloadKey, t]);
+
+  const menuOptions = useMemo<MenuOption[]>(() => {
+    return menuItems
+      .filter((item) => typeof item._id === "string")
+      .map((item) => {
+        const baseLabel =
+          resolveLocalizedText(item.name, locale) ?? t("selection.unknownItem");
+        const priceLabel = typeof item.price === "number"
+          ? formatPrice(item.price, currency, locale)
+          : null;
+        return {
+          id: item._id,
+          label: priceLabel ? `${baseLabel} · ${priceLabel}` : baseLabel,
+        };
+      })
+      .sort((a, b) => a.label.localeCompare(b.label, locale));
+  }, [menuItems, locale, currency, t]);
+
+  const optionLabelById = useMemo<Record<string, string>>(() => {
+    return menuOptions.reduce<Record<string, string>>((map, option) => {
+      map[option.id] = option.label;
+      return map;
+    }, {});
+  }, [menuOptions]);
+
+  const hasMenuItems = menuOptions.length > 0;
+  const combosReady = comboStatus === "success";
+  const selectorsEnabled = combosReady && menuStatus === "success" && hasMenuItems;
+  const hasChanges = useMemo(
+    () => !areWeeklyCombosEqual(combos, initialCombos),
+    [combos, initialCombos]
+  );
+
+  const selectionDisabled = !selectorsEnabled || saveState === "saving";
+  const isLoading = comboStatus === "loading" || menuStatus === "loading";
+
+  useEffect(() => {
+    if (saveState !== "success") return;
+    const timer = setTimeout(() => setSaveState("idle"), 2500);
+    return () => clearTimeout(timer);
+  }, [saveState]);
+
+  const handlePickerChange = useCallback((day: WeekdayKey, value: string) => {
+    setPickerSelections((previous) => ({ ...previous, [day]: value }));
+  }, []);
+
+  const handleAddSelection = useCallback(
+    (day: WeekdayKey, value: string) => {
+      if (!value) return;
+      setCombos((previous) => {
+        const next = previous[day] ?? [];
+        if (next.includes(value) || next.length >= MAX_WEEKLY_COMBO_ITEMS) {
+          return previous;
+        }
+        return {
+          ...previous,
+          [day]: [...next, value],
+        };
+      });
+      setPickerSelections((previous) => ({ ...previous, [day]: "" }));
+    },
+    []
+  );
+
+  const handleRemoveSelection = useCallback((day: WeekdayKey, value: string) => {
+    setCombos((previous) => {
+      const current = previous[day] ?? [];
+      if (!current.includes(value)) {
+        return previous;
+      }
+      return {
+        ...previous,
+        [day]: current.filter((entry) => entry !== value),
+      };
+    });
+  }, []);
+
+  const handleReset = () => {
+    setCombos(cloneWeeklyCombos(initialCombos));
+    setPickerSelections(createEmptyPickerSelections());
+    setSaveState("idle");
+    setSaveError(null);
+  };
+
+  const handleSave = async () => {
+    if (!restaurantId || !selectorsEnabled) return;
+    setSaveState("saving");
+    setSaveError(null);
+    try {
+      const payload = createEmptyWeeklyCombos();
+      WEEKDAY_KEYS.forEach((day) => {
+        payload[day] = (combos[day] ?? []).slice(0, MAX_WEEKLY_COMBO_ITEMS);
+      });
+
+      const response = await fetch(
+        `/api/restaurant-admin/restaurants/${restaurantId}/weekly-combos`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+      const data = await response.json().catch(() => null);
+      if (response.status === 401) {
+        onSessionExpired();
+        throw new Error(SESSION_EXPIRED_ERROR);
+      }
+      if (!response.ok) {
+        const message =
+          (isPlainObject<{ error?: string }>(data) &&
+            typeof data.error === "string" &&
+            data.error) ||
+          t("status.error");
+        throw new Error(message);
+      }
+      const refreshed = await loadWeeklyCombos().catch((error) => {
+        throw error instanceof Error ? error : new Error(t("errors.load"));
+      });
+      setCombos(refreshed);
+      setInitialCombos(cloneWeeklyCombos(refreshed));
+      setPickerSelections(createEmptyPickerSelections());
+      setSaveState("success");
+      setSaveError(null);
+    } catch (error) {
+      if (isSessionExpiredError(error)) {
+        return;
+      }
+      setSaveState("error");
+      setSaveError(error instanceof Error ? error.message : t("status.error"));
+    }
+  };
+
+  const handleRetryCombos = () => setCombosReloadKey((value) => value + 1);
+  const handleRetryMenu = () => setMenuReloadKey((value) => value + 1);
+
+  return (
+    <section className="rounded-3xl bg-white p-6 shadow-lg shadow-slate-950/5 ring-1 ring-slate-100">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+            {t("title")}
+          </p>
+          <p className="mt-1 text-base text-slate-600">{t("subtitle")}</p>
+        </div>
+        <p className="text-xs uppercase tracking-widest text-slate-400">
+          {t("helper")}
+        </p>
+      </div>
+
+      {isLoading && (
+        <p className="mt-4 text-sm text-slate-500">{t("loading")}</p>
+      )}
+
+      {comboError && (
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <span>{comboError}</span>
+          <button
+            type="button"
+            onClick={handleRetryCombos}
+            className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-rose-700 transition hover:border-rose-300"
+          >
+            {t("actions.retry")}
+          </button>
+        </div>
+      )}
+
+      {menuError && (
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <span>{menuError}</span>
+          <button
+            type="button"
+            onClick={handleRetryMenu}
+            className="rounded-full border border-amber-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-800 transition hover:border-amber-300"
+          >
+            {t("actions.retry")}
+          </button>
+        </div>
+      )}
+
+      {!isLoading && !comboError && !menuError && !hasMenuItems && (
+        <p className="mt-4 text-sm text-slate-500">{t("emptyMenu")}</p>
+      )}
+
+      {selectorsEnabled && hasMenuItems && (
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {WEEKDAY_KEYS.map((day) => {
+            const selections = combos[day] ?? [];
+            const pickerValue = pickerSelections[day] ?? "";
+            const isFull = selections.length >= MAX_WEEKLY_COMBO_ITEMS;
+            return (
+              <div key={day} className="rounded-2xl border border-slate-200 p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-base font-semibold text-slate-900">
+                      {t(`days.${day}` as const)}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {t("selection.limit", { max: MAX_WEEKLY_COMBO_ITEMS })}
+                    </p>
+                  </div>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {t("selection.selectedCount", {
+                      count: selections.length,
+                      max: MAX_WEEKLY_COMBO_ITEMS,
+                    })}
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {selections.length === 0 ? (
+                    <p className="text-sm text-slate-500">{t("selection.empty")}</p>
+                  ) : (
+                    selections.map((itemId) => {
+                      const label = optionLabelById[itemId] ?? t("selection.fallback");
+                      return (
+                        <button
+                          key={`${day}-${itemId}`}
+                          type="button"
+                          onClick={() => handleRemoveSelection(day, itemId)}
+                          disabled={selectionDisabled}
+                          className={clsx(
+                            "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold transition",
+                            selectionDisabled
+                              ? "cursor-not-allowed border-slate-100 text-slate-400"
+                              : "cursor-pointer border-slate-200 text-slate-700 hover:border-slate-300"
+                          )}
+                        >
+                          <span className="line-clamp-1 max-w-[11rem]">{label}</span>
+                          <span aria-hidden="true">×</span>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                  <WeeklyComboSelect
+                    value={pickerValue}
+                    options={menuOptions}
+                    disabled={selectionDisabled || isFull}
+                    placeholder={isFull ? t("selection.full") : t("selection.placeholder")}
+                    searchPlaceholder={t("selection.searchPlaceholder")}
+                    noResultsLabel={t("selection.noResults")}
+                    blockedIds={selections}
+                    onChange={(next) => handlePickerChange(day, next)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAddSelection(day, pickerValue)}
+                    disabled={
+                      selectionDisabled || isFull || !pickerValue
+                    }
+                    className={clsx(
+                      "flex-shrink-0 rounded-2xl px-4 py-2 text-sm font-semibold transition w-full sm:w-auto",
+                      selectionDisabled || isFull || !pickerValue
+                        ? "cursor-not-allowed bg-slate-100 text-slate-400"
+                        : "cursor-pointer bg-slate-900 text-white hover:bg-slate-800"
+                    )}
+                  >
+                    {t("selection.add")}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {selectorsEnabled && hasMenuItems && (
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saveState === "saving" || !hasChanges}
+            className={clsx(
+              "inline-flex items-center rounded-full px-6 py-2 text-sm font-semibold text-white transition",
+              saveState === "saving" || !hasChanges
+                ? "cursor-not-allowed bg-slate-400"
+                : "cursor-pointer bg-slate-900 hover:bg-slate-800"
+            )}
+          >
+            {saveState === "saving" ? t("actions.submitting") : t("actions.submit")}
+          </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            disabled={saveState === "saving" || !hasChanges}
+            className={clsx(
+              "inline-flex items-center rounded-full border px-5 py-2 text-sm font-semibold transition",
+              saveState === "saving" || !hasChanges
+                ? "cursor-not-allowed border-slate-100 text-slate-400"
+                : "cursor-pointer border-slate-200 text-slate-700 hover:border-slate-300"
+            )}
+          >
+            {t("actions.reset")}
+          </button>
+          {saveState === "success" && (
+            <p className="text-sm text-emerald-600">{t("status.saved")}</p>
+          )}
+          {saveState === "error" && (
+            <p className="text-sm text-rose-600">{saveError ?? t("status.error")}</p>
+          )}
+        </div>
+      )}
     </section>
   );
 }
@@ -1826,6 +2326,263 @@ function MenuItemCard({
       </div>
     </article>
   );
+}
+
+type WeeklyComboSelectProps = {
+  value: string;
+  options: MenuOption[];
+  disabled?: boolean;
+  placeholder: string;
+  searchPlaceholder: string;
+  noResultsLabel: string;
+  blockedIds: string[];
+  onChange: (value: string) => void;
+};
+
+function WeeklyComboSelect({
+  value,
+  options,
+  disabled = false,
+  placeholder,
+  searchPlaceholder,
+  noResultsLabel,
+  blockedIds,
+  onChange,
+}: WeeklyComboSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const selectedLabel = useMemo(() => {
+    return options.find((option) => option.id === value)?.label ?? "";
+  }, [options, value]);
+
+  const filteredOptions = useMemo(() => {
+    const input = query.trim().toLowerCase();
+    if (!input) return options;
+    return options.filter((option) => option.label.toLowerCase().includes(input));
+  }, [options, query]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setQuery("");
+      return;
+    }
+    const handlePointerDown = (event: PointerEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      searchInputRef.current.focus({ preventScroll: true });
+    }
+  }, [isOpen]);
+
+  const handleSelect = (optionId: string) => {
+    onChange(optionId);
+    setIsOpen(false);
+    setQuery("");
+  };
+
+  const blockedSet = useMemo(() => new Set(blockedIds), [blockedIds]);
+  const buttonLabel = value ? selectedLabel || placeholder : placeholder;
+
+  return (
+    <div className="relative w-full" ref={containerRef}>
+      <button
+        type="button"
+        disabled={disabled}
+        aria-expanded={isOpen}
+        onClick={() => {
+          if (disabled) return;
+          setIsOpen((prev) => !prev);
+        }}
+        className={clsx(
+          "flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-base font-medium transition",
+          disabled
+            ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+            : "border-slate-200 bg-white text-slate-900 hover:border-slate-300"
+        )}
+      >
+        <span className="line-clamp-1 pr-3">{buttonLabel}</span>
+        <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden="true" />
+      </button>
+      {isOpen && !disabled && (
+        <div className="absolute left-0 right-0 z-30 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+          <div className="border-b border-slate-100 p-2">
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={searchPlaceholder}
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+            />
+          </div>
+          <div className="max-h-64 overflow-y-auto py-2">
+            {filteredOptions.length === 0 ? (
+              <p className="px-4 py-2 text-sm text-slate-500">{noResultsLabel}</p>
+            ) : (
+              filteredOptions.map((option) => {
+                const isBlocked = blockedSet.has(option.id) && option.id !== value;
+                return (
+                  <button
+                    type="button"
+                    key={`combo-option-${option.id}`}
+                    onClick={() => handleSelect(option.id)}
+                    disabled={isBlocked}
+                    className={clsx(
+                      "flex w-full items-center justify-between px-4 py-2 text-sm",
+                      isBlocked
+                        ? "cursor-not-allowed text-slate-400"
+                        : "text-slate-900 hover:bg-slate-50"
+                    )}
+                  >
+                    <span className="pr-3 text-left">{option.label}</span>
+                    {option.id === value && (
+                      <span className="text-xs font-semibold uppercase text-emerald-600">✓</span>
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function createEmptyWeeklyCombos(): WeeklyCombos {
+  const combos = {} as WeeklyCombos;
+  WEEKDAY_KEYS.forEach((day) => {
+    combos[day] = [];
+  });
+  return combos;
+}
+
+function cloneWeeklyCombos(source: WeeklyCombos): WeeklyCombos {
+  const combos = {} as WeeklyCombos;
+  WEEKDAY_KEYS.forEach((day) => {
+    combos[day] = (source[day] ?? []).slice();
+  });
+  return combos;
+}
+
+type WeeklyCombosSource =
+  | { kind: "record"; value: Record<string, unknown> }
+  | { kind: "list"; value: unknown[] };
+
+function sanitizeWeeklyCombos(payload: unknown): WeeklyCombos {
+  const base = createEmptyWeeklyCombos();
+  const source = resolveWeeklyCombosSource(payload);
+  if (!source) {
+    return base;
+  }
+
+  if (source.kind === "record") {
+    WEEKDAY_KEYS.forEach((day) => {
+      base[day] = normalizeComboItemIds(source.value[day]);
+    });
+    return base;
+  }
+
+  source.value.forEach((entry) => {
+    if (!entry || typeof entry !== "object") return;
+    const rawDay = (entry as { day?: string }).day;
+    if (typeof rawDay !== "string") return;
+    const normalizedDay = rawDay.trim().toLowerCase();
+    if (!isWeekdayKey(normalizedDay)) return;
+    const key = normalizedDay as WeekdayKey;
+    const items = normalizeComboItemIds((entry as { items?: unknown }).items);
+    base[key] = items;
+  });
+
+  return base;
+}
+
+function resolveWeeklyCombosSource(payload: unknown): WeeklyCombosSource | null {
+  if (Array.isArray(payload)) {
+    return { kind: "list", value: payload };
+  }
+
+  if (isPlainObject<Record<string, unknown>>(payload)) {
+    if (WEEKDAY_KEYS.some((day) => Array.isArray(payload[day]))) {
+      return { kind: "record", value: payload };
+    }
+    const nestedKeys: string[] = ["data", "weeklyCombos", "combos"];
+    for (const key of nestedKeys) {
+      if (key in payload) {
+        const nested = resolveWeeklyCombosSource(payload[key]);
+        if (nested) return nested;
+      }
+    }
+  }
+
+  return null;
+}
+
+function normalizeComboItemIds(raw: unknown): string[] {
+  const items = Array.isArray(raw) ? raw : [];
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+  for (const entry of items) {
+    const id = extractMenuItemId(entry);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    normalized.push(id);
+    if (normalized.length >= MAX_WEEKLY_COMBO_ITEMS) break;
+  }
+  return normalized;
+}
+
+function extractMenuItemId(candidate: unknown): string | null {
+  if (typeof candidate === "string" && candidate.trim().length > 0) {
+    return candidate.trim();
+  }
+  if (isPlainObject<Record<string, unknown>>(candidate)) {
+    const potential = candidate.menuItemId ?? candidate._id ?? candidate.id;
+    if (typeof potential === "string" && potential.trim().length > 0) {
+      return potential.trim();
+    }
+  }
+  return null;
+}
+
+function isWeekdayKey(value: string): value is WeekdayKey {
+  return WEEKDAY_LOOKUP.has(value as WeekdayKey);
+}
+
+function areWeeklyCombosEqual(a: WeeklyCombos, b: WeeklyCombos) {
+  return WEEKDAY_KEYS.every((day) => {
+    const left = a[day] ?? [];
+    const right = b[day] ?? [];
+    if (left.length !== right.length) return false;
+    return left.every((value, index) => value === right[index]);
+  });
+}
+
+function createEmptyPickerSelections(): PickerSelections {
+  const selections = {} as PickerSelections;
+  WEEKDAY_KEYS.forEach((day) => {
+    selections[day] = "";
+  });
+  return selections;
 }
 
 function resolveLocalizedText(value: LocalizedValue, locale: Locale) {
