@@ -12,6 +12,45 @@
     }
   }
   ,
+  "dailyComboPrompt": {
+    "message": "Check out today's recommendation",
+    "acceptButtonAria": "Accept today's combo suggestion",
+    "dismissButtonAria": "Dismiss the combo suggestion",
+    "chefImageAlt": "Chef presenting today's combo"
+  }
+  ,
+  "dailyComboModal": {
+    "title": "Today's recommendation",
+    "subtitle": "Chef's pick includes",
+    "totalLabel": "Combo price",
+    "close": "Close",
+    "empty": "Combo details are not available right now.",
+    "types": {
+      "drink": "Drink",
+      "main": "Main course",
+      "salad": "Salad",
+      "default": "Combo item"
+    },
+    "fallback": {
+      "totalPrice": "MKD 660",
+      "drink": {
+        "title": "Herbal lemonade",
+        "description": "Fresh mint with citrus zest",
+        "price": "MKD 120"
+      },
+      "main": {
+        "title": "Chef's special pasta",
+        "description": "Creamy pesto with grilled chicken",
+        "price": "MKD 380"
+      },
+      "salad": {
+        "title": "Seasonal garden salad",
+        "description": "Crunchy greens with olive oil",
+        "price": "MKD 160"
+      }
+    }
+  }
+  ,
   "aiAssistantPromptPanel": {
     "input": {
       "placeholder": "Tell the chef what you're craving...",

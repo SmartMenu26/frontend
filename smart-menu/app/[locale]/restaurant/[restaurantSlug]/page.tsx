@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import InstallAppButton from "@/app/_components/InstallAppButton";
 import AiSuggestion from "@/app/components/aiSuggestion/aiSuggestion";
 import RestaurantContent from "@/app/components/restaurant/RestaurantContext";
+import RestaurantDailyComboPrompt from "@/app/components/restaurant/RestaurantDailyComboPrompt";
 import RestaurantContactCard, {
   type RestaurantContactLabels,
 } from "@/app/components/restaurant/RestaurantContactCard";
@@ -11,9 +12,12 @@ import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
 import LanguageSwitcher from "@/app/components/languageSwitcher/LanguageSwitcher";
 import {
   fetchRestaurantRecord,
+  fetchWeeklyCombos,
   pickRestaurantDescription,
   pickRestaurantName,
   resolveLocalizedText,
+  type DailyComboOffer,
+  type WeeklyComboEntry,
 } from "@/app/lib/restaurants";
 import { defaultLocale, locales, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
@@ -121,6 +125,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   const resolvedLocale: Locale =
     locales.find((candidate) => candidate === routeLocale) ?? defaultLocale;
   const record = await fetchRestaurantRecord(restaurantSlug);
+  const weeklyCombos = record?.id ? await fetchWeeklyCombos(record.id) : null;
   const siteUrl = getSiteUrl();
 
   if (!record?.id) {
@@ -215,6 +220,8 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
 
   const structuredData = JSON.stringify(schemaPayload);
 
+  const dailyCombo = buildTodaysComboOffer(weeklyCombos, localePriority);
+
   return (
     <>
       <div className="pt-8 md:pt-0 flex flex-col gap-6">
@@ -245,13 +252,103 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
 
         <Footer />
       </div>
+      {dailyCombo ? (
+        <RestaurantDailyComboPrompt
+          restaurantSlug={record.slug}
+          locale={resolvedLocale}
+          combo={dailyCombo}
+        />
+      ) : null}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: structuredData }}
       />
       <div className="fixed bottom-4 right-4 z-50">
-        <LanguageSwitcher />
-      </div>
-    </>
+      <LanguageSwitcher />
+    </div>
+  </>
+);
+}
+
+const COMBO_TIMEZONE = "Europe/Skopje";
+
+function formatMkdPrice(value?: number): string | undefined {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return undefined;
+  }
+  return `${Math.round(value)} ден`;
+}
+
+function buildTodaysComboOffer(
+  weeklyCombos: WeeklyComboEntry[] | null,
+  localePriority: Locale[]
+): DailyComboOffer | null {
+  if (!weeklyCombos?.length) {
+    return null;
+  }
+
+  const todayKey = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    timeZone: COMBO_TIMEZONE,
+  })
+    .format(new Date())
+    .toLowerCase();
+
+  const todayEntry = weeklyCombos.find(
+    (entry) => entry.day?.toLowerCase() === todayKey && Array.isArray(entry.items) && entry.items.length > 0
   );
+
+  if (!todayEntry?.items) {
+    return null;
+  }
+
+  const items = todayEntry.items
+    .map((item, index) => {
+      const localizedTitle =
+        resolveLocalizedText(
+          typeof item.name === "string" ? item.name : (item.name as Record<string, string | null | undefined>),
+          localePriority
+        ) ?? (typeof item.name === "string" ? item.name : undefined);
+
+      if (!localizedTitle) {
+        return null;
+      }
+
+      const priceLabel = formatMkdPrice(item.price);
+      const imageUrl = typeof item.image?.url === "string" ? item.image.url : null;
+      const imageAlt = resolveLocalizedText(
+        {
+          mk: item.image?.altMk ?? item.image?.alt,
+          sq: item.image?.altSq ?? item.image?.alt,
+          en: item.image?.altEn ?? item.image?.alt,
+        },
+        localePriority
+      );
+
+      return {
+        id: item.menuItemId ?? `combo-${index}`,
+        menuItemId: item.menuItemId ?? undefined,
+        title: localizedTitle,
+        price: priceLabel,
+        imageUrl,
+        imageAlt: imageAlt ?? undefined,
+      };
+    })
+    .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry));
+
+  if (!items.length) {
+    return null;
+  }
+
+  const totalPriceValue = todayEntry.items.reduce(
+    (sum, item) => sum + (typeof item.price === "number" ? item.price : 0),
+    0
+  );
+
+  return {
+    title: undefined,
+    subtitle: undefined,
+    totalPrice: totalPriceValue > 0 ? formatMkdPrice(totalPriceValue) : undefined,
+    items,
+  };
 }
