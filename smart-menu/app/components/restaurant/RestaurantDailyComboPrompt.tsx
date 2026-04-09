@@ -18,6 +18,7 @@ const HIDE_DELAY_MS = 350;
 const OPEN_DELAY_MS = 250;
 const INITIAL_DELAY_MS = 4000;
 const AUTO_DISMISS_MS = 10000;
+const DISMISS_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 export default function RestaurantDailyComboPrompt({
   restaurantSlug,
@@ -73,10 +74,37 @@ export default function RestaurantDailyComboPrompt({
   const markDismissed = useCallback(() => {
     if (typeof window === "undefined") return;
     try {
-      window.localStorage.setItem(storageKey, "1");
+      const now = Date.now();
+      const payload = {
+        dismissedAt: now,
+        expiresAt: now + DISMISS_TTL_MS,
+      };
+      window.localStorage.setItem(storageKey, JSON.stringify(payload));
     } catch {
       // ignore storage failures
     }
+  }, [storageKey]);
+
+  const isDismissed = useCallback(() => {
+    if (typeof window === "undefined") return false;
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) return false;
+    try {
+      const parsed = JSON.parse(raw) as { expiresAt?: number } | null;
+      if (parsed && typeof parsed.expiresAt === "number") {
+        if (parsed.expiresAt > Date.now()) {
+          return true;
+        }
+      }
+    } catch {
+      // fall through to cleanup
+    }
+    try {
+      window.localStorage.removeItem(storageKey);
+    } catch {
+      // ignore cleanup errors
+    }
+    return false;
   }, [storageKey]);
 
   useEffect(() => {
@@ -84,8 +112,7 @@ export default function RestaurantDailyComboPrompt({
       return;
     }
 
-    const dismissed = window.localStorage.getItem(storageKey) === "1";
-    if (dismissed) {
+    if (isDismissed()) {
       return;
     }
 
@@ -107,7 +134,7 @@ export default function RestaurantDailyComboPrompt({
         openDelayTimeoutRef.current = null;
       }
     };
-  }, [storageKey]);
+  }, [isDismissed, storageKey]);
 
   const hidePrompt = useCallback(() => {
     setIsOpen(false);
