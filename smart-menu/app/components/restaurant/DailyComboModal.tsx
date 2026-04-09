@@ -102,26 +102,26 @@ export default function DailyComboModal({
       />
       <div
         className={clsx(
-          "relative z-10 w-full max-w-3xl transform rounded-[40px] bg-[#111] p-6 text-white shadow-[0_35px_70px_rgba(0,0,0,0.5)] transition-all duration-200 sm:p-10",
+          "relative z-10 w-full max-w-3xl transform rounded-[40px] bg-white p-6 text-slate-900 shadow-[0_35px_70px_rgba(15,23,42,0.2)] transition-all duration-200 sm:p-10",
           open ? "scale-100 opacity-100" : "scale-95 opacity-0"
         )}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="text-center">
-          <h2 className="mt-2 text-2xl font-semibold text-white">{combo.title}</h2>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900">{combo.title}</h2>
         </div>
 
         <div className="mt-10 flex flex-col items-center">
           {hasItems ? (
-            <div className="flex w-full items-center justify-center gap-5 text-white">
+            <div className="flex w-full items-center justify-center gap-5 text-slate-900">
               {items.map((item, index) => (
                 <button
                   type="button"
                   key={item.id ?? `combo-${index}`}
                   onClick={() => handleItemClick(item.menuItemId)}
-                  className="flex flex-col items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  className="flex flex-col items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30"
                 >
-                  <div className="relative h-20 w-20 overflow-hidden rounded-full border-4 border-white/80 shadow-[0_12px_28px_rgba(0,0,0,0.35)]">
+                  <div className="relative h-20 w-20 overflow-hidden rounded-full border-4 border-slate-200 shadow-[0_12px_28px_rgba(15,23,42,0.2)]">
                     <Image
                       src={item.imageUrl ?? "/icons/cook-daily-meal.webp"}
                       alt={item.imageAlt ?? item.title}
@@ -130,12 +130,12 @@ export default function DailyComboModal({
                       className="object-cover"
                     />
                   </div>
-                  <p className="flex items-center justify-center text-center text-sm font-semibold text-white min-h-10">
+                  <p className="flex min-h-10 items-center justify-center text-center text-sm font-semibold text-slate-900">
                     {item.title}
                   </p>
 
                   {item.price ? (
-                    <span className="rounded-full border border-white/30 px-3 py-0.5 text-xs text-white/80">
+                    <span className="rounded-full border border-slate-200 px-3 py-0.5 text-xs text-slate-600">
                       {item.price}
                     </span>
                   ) : null}
@@ -143,7 +143,7 @@ export default function DailyComboModal({
               ))}
             </div>
           ) : (
-            <p className="rounded-3xl bg-white/10 px-4 py-3 text-center text-sm text-white/70">
+            <p className="rounded-3xl bg-slate-100 px-4 py-3 text-center text-sm text-slate-600">
               {emptyLabel}
             </p>
           )}
@@ -152,7 +152,7 @@ export default function DailyComboModal({
         <button
           type="button"
           onClick={onClose}
-          className="mt-8 w-full rounded-full bg-white/10 px-6 py-3 text-center text-base font-semibold text-white transition hover:bg-white/20"
+          className="mt-8 w-full rounded-full bg-slate-100 px-6 py-3 text-center text-base font-semibold text-slate-900 transition hover:bg-slate-200"
         >
           {closeLabel}
         </button>
