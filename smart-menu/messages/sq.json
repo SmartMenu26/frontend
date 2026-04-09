@@ -12,6 +12,45 @@
     }
   }
   ,
+  "dailyComboPrompt": {
+    "message": "Shiko rekomandimin e sotëm",
+    "acceptButtonAria": "Prano ofertën e sotme",
+    "dismissButtonAria": "Refuzo ofertën e sotme",
+    "chefImageAlt": "Shefi po paraqet ofertën e sotme"
+  }
+  ,
+  "dailyComboModal": {
+    "title": "Rekomandimi i sotëm",
+    "subtitle": "Përfshin kombinimin",
+    "totalLabel": "Çmimi i kombos",
+    "close": "Mbyll",
+    "empty": "Për momentin nuk ka detaje për kombin e sotëm.",
+    "types": {
+      "drink": "Pije",
+      "main": "Pjatë kryesore",
+      "salad": "Sallatë",
+      "default": "Artikull kombo"
+    },
+    "fallback": {
+      "totalPrice": "660 den",
+      "drink": {
+        "title": "Limonadë bimore",
+        "description": "Nenexhik i freskët me limon",
+        "price": "120 den"
+      },
+      "main": {
+        "title": "Specialiteti i shefit",
+        "description": "Pulë me pesto dhe pasta",
+        "price": "380 den"
+      },
+      "salad": {
+        "title": "Sallatë sezonale",
+        "description": "Perime të freskëta me vaj ulliri",
+        "price": "160 den"
+      }
+    }
+  }
+  ,
   "aiAssistantPromptPanel": {
     "input": {
       "placeholder": "Shkruaj çfarë dëshiron të hash...",

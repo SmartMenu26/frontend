@@ -18,7 +18,6 @@ import {
   getAllergenIconEntry,
   resolveTooltipLabel,
 } from "./allergens/iconMap";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
@@ -408,9 +407,32 @@ const MenuItemHero = memo(function MenuItemHero({
   backLabel,
 }: MenuItemHeroProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const heroImageRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
+    const imgEl = heroImageRef.current;
     setImageLoaded(false);
+    if (!imgEl) return;
+
+    if (imgEl.complete && imgEl.naturalWidth > 0) {
+      setImageLoaded(true);
+      return;
+    }
+
+    const handleLoad = () => {
+      setImageLoaded(true);
+    };
+    const handleError = () => {
+      setImageLoaded(false);
+    };
+
+    imgEl.addEventListener("load", handleLoad);
+    imgEl.addEventListener("error", handleError);
+
+    return () => {
+      imgEl.removeEventListener("load", handleLoad);
+      imgEl.removeEventListener("error", handleError);
+    };
   }, [imageUrl]);
 
   return (
@@ -445,8 +467,7 @@ const MenuItemHero = memo(function MenuItemHero({
           src={imageUrl}
           alt={imageAlt ?? name}
           sizes={HERO_IMAGE_SIZES}
-          onLoad={() => setImageLoaded(true)}
-          onError={() => setImageLoaded(true)}
+          ref={heroImageRef}
           className={clsx(
             "h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px] max-w-[300px]",
             imageLoaded ? "opacity-100" : "opacity-0"

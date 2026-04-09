@@ -2,6 +2,42 @@ import type { Locale } from "@/i18n";
 
 type LocalizedRecord = Record<string, string | null | undefined>;
 
+export type DailyComboItem = {
+  id: string;
+  menuItemId?: string;
+  type?: string;
+  title: string;
+  description?: string;
+  price?: string;
+  imageUrl?: string | null;
+  imageAlt?: string;
+};
+
+export type DailyComboOffer = {
+  title?: string;
+  subtitle?: string;
+  totalPrice?: string;
+  items: DailyComboItem[];
+};
+
+type WeeklyComboItemPayload = {
+  menuItemId?: string;
+  name?: string | LocalizedRecord;
+  price?: number;
+  image?: {
+    url?: string;
+    alt?: string;
+    altMk?: string;
+    altSq?: string;
+    altEn?: string;
+  };
+};
+
+export type WeeklyComboEntry = {
+  day?: string;
+  items?: WeeklyComboItemPayload[];
+};
+
 export type RestaurantRecord = {
   id: string;
   slug: string;
@@ -17,9 +53,19 @@ export type RestaurantRecord = {
   instagramUrl?: string;
   location?: string;
   mobilePhone?: string;
+  dailyCombo?: DailyComboOffer;
 };
 
 const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i;
+const WEEKDAY_KEYS = new Set([
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+]);
 
 const IMAGE_KEYS = [
   "heroImage",
@@ -82,6 +128,139 @@ const resolveImageUrl = (value: unknown): string | null => {
   }
 
   return null;
+};
+
+const readString = (value: unknown): string | undefined => {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value.toString() : undefined;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed ? trimmed : undefined;
+  }
+  return undefined;
+};
+
+const parseDailyComboItem = (
+  value: unknown,
+  fallbackId: string
+): DailyComboItem | null => {
+  if (!isRecord(value)) return null;
+
+  const title =
+    readString(value.title) ??
+    readString(value.name) ??
+    readString(value.item) ??
+    readString(value.label);
+
+  if (!title) return null;
+
+  const id =
+    readString(value.id) ??
+    readString(value.key) ??
+    readString(value.slug) ??
+    fallbackId;
+
+  const type =
+    readString(value.type) ??
+    readString(value.kind) ??
+    readString(value.category);
+
+  const description = readString(value.description) ?? readString(value.note);
+
+  const rawPrice =
+    readString(value.price) ??
+    readString(value.cost) ??
+    readString(value.amount) ??
+    readString(value.value);
+
+  const imageUrl =
+    resolveImageUrl(value.image) ??
+    resolveImageUrl(value.imageUrl) ??
+    resolveImageUrl(value.photo);
+
+  const menuItemId =
+    readString(value.menuItemId) ??
+    readString(value.menuItemID) ??
+    readString(value.menuItem);
+
+  return {
+    id,
+    menuItemId: menuItemId ?? undefined,
+    type: type ?? undefined,
+    title,
+    description: description ?? undefined,
+    price: rawPrice ?? undefined,
+    imageUrl,
+  };
+};
+
+const parseDailyComboPayload = (input: unknown): DailyComboOffer | undefined => {
+  if (!isRecord(input)) return undefined;
+
+  const rawItems =
+    (Array.isArray(input.items) && input.items) ||
+    (Array.isArray((input as { comboItems?: unknown[] }).comboItems) &&
+      (input as { comboItems?: unknown[] }).comboItems) ||
+    (Array.isArray((input as { entries?: unknown[] }).entries) &&
+      (input as { entries?: unknown[] }).entries) ||
+    (Array.isArray((input as { combo?: unknown[] }).combo) &&
+      (input as { combo?: unknown[] }).combo) ||
+    [];
+
+  const items = rawItems
+    .map((entry, index) => parseDailyComboItem(entry, `combo-item-${index}`))
+    .filter(Boolean) as DailyComboItem[];
+
+  const title = readString(input.title) ?? readString(input.name);
+  const subtitle =
+    readString((input as { subtitle?: unknown }).subtitle) ??
+    readString(input.description);
+  const totalPrice =
+    readString((input as { totalPrice?: unknown }).totalPrice) ??
+    readString(input.price) ??
+    readString((input as { cost?: unknown }).cost);
+
+  if (!items.length && !totalPrice && !title) {
+    return undefined;
+  }
+
+  return {
+    title: title ?? undefined,
+    subtitle: subtitle ?? undefined,
+    totalPrice: totalPrice ?? undefined,
+    items,
+  };
+};
+
+const extractDailyCombo = (
+  payload: Record<string, unknown>
+): DailyComboOffer | undefined => {
+  const candidateKeys = [
+    "dailyCombo",
+    "comboOffer",
+    "combo",
+    "dailySpecialCombo",
+    "todaysCombo",
+  ];
+
+  for (const key of candidateKeys) {
+    const source = payload[key];
+    const parsed = parseDailyComboPayload(source);
+    if (parsed) {
+      return parsed;
+    }
+  }
+
+  const specials = payload["specials"];
+  if (isRecord(specials)) {
+    const parsed = parseDailyComboPayload(specials["dailyCombo"]);
+    if (parsed) {
+      return parsed;
+    }
+  }
+
+  return undefined;
 };
 
 const pickFirstImage = (payload: Record<string, unknown>): string | null => {
@@ -221,6 +400,7 @@ const mapRestaurantPayload = (
     instagramUrl: normalizeString(payload.instagramUrl),
     location: normalizeString(payload.location),
     mobilePhone: normalizeString(payload.mobilePhone),
+    dailyCombo: extractDailyCombo(payload) ?? undefined,
   };
 };
 
@@ -266,6 +446,81 @@ const tryMapPayload = (
   return null;
 };
 
+const normalizeWeeklyComboArray = (
+  source: unknown[],
+): WeeklyComboEntry[] => {
+  return source
+    .map((entry) => {
+      if (!isRecord(entry)) return null;
+      const rawDay = readString((entry as { day?: unknown }).day);
+      const day = rawDay?.toLowerCase();
+      if (!day || !WEEKDAY_KEYS.has(day)) {
+        return null;
+      }
+      const rawItems = (entry as { items?: unknown }).items;
+      const items = Array.isArray(rawItems)
+        ? (rawItems as WeeklyComboItemPayload[])
+        : [];
+      return { day, items };
+    })
+    .filter((entry): entry is WeeklyComboEntry => Boolean(entry));
+};
+
+const normalizeWeeklyComboMap = (
+  source: Record<string, unknown>,
+): WeeklyComboEntry[] => {
+  return Object.entries(source)
+    .map(([key, value]) => {
+      const day = key.toLowerCase();
+      if (!WEEKDAY_KEYS.has(day) || !Array.isArray(value)) {
+        return null;
+      }
+      return {
+        day,
+        items: value as WeeklyComboItemPayload[],
+      };
+    })
+    .filter((entry): entry is WeeklyComboEntry => Boolean(entry));
+};
+
+const normalizeWeeklyComboPayload = (
+  payload: unknown,
+): WeeklyComboEntry[] | null => {
+  const unwrapped = unwrapPayload(payload);
+  if (!unwrapped) return null;
+
+  if (Array.isArray(unwrapped)) {
+    const normalized = normalizeWeeklyComboArray(unwrapped);
+    if (normalized.length > 0) {
+      return normalized;
+    }
+  }
+
+  if (isRecord(unwrapped)) {
+    const dataField = (unwrapped as { data?: unknown }).data;
+    if (Array.isArray(dataField)) {
+      const normalized = normalizeWeeklyComboArray(dataField);
+      if (normalized.length > 0) {
+        return normalized;
+      }
+    }
+
+    if (isRecord(dataField)) {
+      const normalized = normalizeWeeklyComboMap(dataField);
+      if (normalized.length > 0) {
+        return normalized;
+      }
+    }
+
+    const normalized = normalizeWeeklyComboMap(unwrapped);
+    if (normalized.length > 0) {
+      return normalized;
+    }
+  }
+
+  return null;
+};
+
 export async function fetchRestaurantRecord(
   identifier: string
 ): Promise<RestaurantRecord | null> {
@@ -305,6 +560,19 @@ export async function fetchRestaurantRecord(
   }
 
   return null;
+}
+
+export async function fetchWeeklyCombos(
+  restaurantId: string
+): Promise<WeeklyComboEntry[] | null> {
+  const backendBase = getBackendBase();
+  if (!backendBase || !restaurantId) return null;
+  const trimmed = restaurantId.trim();
+  if (!trimmed) return null;
+  const url = `${backendBase}/api/restaurants/${encodeURIComponent(trimmed)}/weekly-combos`;
+  const payload = await fetchJson(url);
+  if (!payload) return null;
+  return normalizeWeeklyComboPayload(payload);
 }
 
 export const resolveLocalizedText = (
