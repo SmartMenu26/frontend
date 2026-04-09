@@ -162,6 +162,48 @@
       "remainingLabel": "Të mbetura",
       "hint": "Kredite gjithsej: {total}. Mbani të paktën 100 për të shmangur kufizimet në bisedat me AI."
     },
+    "weeklyCombos": {
+      "title": "Kombinimet javore",
+      "subtitle": "Zgjidh deri në tre artikuj për çdo ditë dhe publikoji si kombinime.",
+      "helper": "Kliko përditëso kur të përfundosh me ditët.",
+      "loading": "Duke ngarkuar kombinimet javore...",
+      "emptyMenu": "Shto artikuj në menu për të krijuar kombinime.",
+      "errors": {
+        "load": "Nuk i ngarkuam kombinimet javore.",
+        "menu": "Nuk i ngarkuam artikujt e menusë."
+      },
+      "actions": {
+        "retry": "Provo përsëri",
+        "submit": "Përditëso kombinimet",
+        "submitting": "Duke përditësuar...",
+        "reset": "Rivendos"
+      },
+      "status": {
+        "saved": "Kombinimet javore u përditësuan.",
+        "error": "Përditësimi i kombinimeve dështoi."
+      },
+      "selection": {
+        "limit": "Maksimum {max} artikuj në ditë",
+        "selectedCount": "{count}/{max} të zgjedhur",
+        "empty": "Asnjë artikull i zgjedhur.",
+        "placeholder": "Zgjidh një artikull",
+        "searchPlaceholder": "Kërko artikuj...",
+        "noResults": "Asnjë artikull nuk përputhet me kërkimin.",
+        "full": "U mbush",
+        "add": "Shto",
+        "fallback": "Artikull i fshirë",
+        "unknownItem": "Artikull pa emër"
+      },
+      "days": {
+        "monday": "E hënë",
+        "tuesday": "E martë",
+        "wednesday": "E mërkurë",
+        "thursday": "E enjte",
+        "friday": "E premte",
+        "saturday": "E shtunë",
+        "sunday": "E diel"
+      }
+    },
     "assistantNames": {
       "title": "Emrat e asistentit AI",
       "empty": "Nuk ka përkthime të personalizuara. Asistenti përdor emrin e restorantit."
