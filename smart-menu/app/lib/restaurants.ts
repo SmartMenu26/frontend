@@ -449,38 +449,39 @@ const tryMapPayload = (
 const normalizeWeeklyComboArray = (
   source: unknown[],
 ): WeeklyComboEntry[] => {
-  return source
-    .map((entry) => {
-      if (!isRecord(entry)) return null;
-      const rawDay = readString((entry as { day?: unknown }).day);
-      const day = rawDay?.toLowerCase();
-      if (!day || !WEEKDAY_KEYS.has(day)) {
-        return null;
-      }
-      const rawItems = (entry as { items?: unknown }).items;
-      const items = Array.isArray(rawItems)
-        ? (rawItems as WeeklyComboItemPayload[])
-        : [];
-      return { day, items };
-    })
-    .filter((entry): entry is WeeklyComboEntry => Boolean(entry));
+  return source.reduce<WeeklyComboEntry[]>((acc, entry) => {
+    if (!isRecord(entry)) return acc;
+    const rawDay = readString((entry as { day?: unknown }).day);
+    const day = rawDay?.toLowerCase();
+    if (!day || !WEEKDAY_KEYS.has(day)) {
+      return acc;
+    }
+    const rawItems = (entry as { items?: unknown }).items;
+    const items = Array.isArray(rawItems)
+      ? (rawItems as WeeklyComboItemPayload[])
+      : [];
+    acc.push({ day, items });
+    return acc;
+  }, []);
 };
 
 const normalizeWeeklyComboMap = (
   source: Record<string, unknown>,
 ): WeeklyComboEntry[] => {
-  return Object.entries(source)
-    .map(([key, value]) => {
+  return Object.entries(source).reduce<WeeklyComboEntry[]>(
+    (acc, [key, value]) => {
       const day = key.toLowerCase();
       if (!WEEKDAY_KEYS.has(day) || !Array.isArray(value)) {
-        return null;
+        return acc;
       }
-      return {
+      acc.push({
         day,
         items: value as WeeklyComboItemPayload[],
-      };
-    })
-    .filter((entry): entry is WeeklyComboEntry => Boolean(entry));
+      });
+      return acc;
+    },
+    [],
+  );
 };
 
 const normalizeWeeklyComboPayload = (
