@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import type { SuggestedBlog } from "@/app/lib/blogs";
 import type { Locale } from "@/i18n";
@@ -32,16 +33,18 @@ export default function BlogSuggestions({ items, locale, copy }: BlogSuggestions
               href={buildLocalizedPath(`/blog/${item.slug}`, locale)}
               className="group flex h-full flex-col rounded-3xl border border-black/5 bg-[#F9F9F9] p-4 shadow-[0_16px_30px_rgba(0,0,0,0.05)] transition hover:shadow-[0_18px_32px_rgba(0,0,0,0.08)]"
             >
-              <div className="relative overflow-hidden rounded-2xl bg-white">
+              <div className="relative h-48 overflow-hidden rounded-2xl bg-white">
                 {item.coverImage ? (
-                  <img
+                  <Image
                     src={item.coverImage}
                     alt={item.title}
-                    className="h-48 w-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover"
                     loading="lazy"
                   />
                 ) : (
-                  <div className="flex h-48 items-center justify-center bg-gradient-to-br from-[#F0E3D0] to-[#F6F1EA] text-sm font-medium text-[#A16B00]">
+                  <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#F0E3D0] to-[#F6F1EA] text-sm font-medium text-[#A16B00]">
                     Smart Menu
                   </div>
                 )}

@@ -1,10 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Newspaper } from "lucide-react";
 import type { SuggestedBlog } from "@/app/lib/blogs";
 import type { Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { formatPublishedDate } from "./utils";
-import Image from "next/image";
 
 type BlogGridProps = {
   items: SuggestedBlog[];
@@ -34,15 +34,15 @@ export default function BlogGrid({ items, locale, copy }: BlogGridProps) {
           className="group block h-full rounded-[28px] border border-black/5 bg-white shadow-[0_20px_40px_rgba(0,0,0,0.04)] transition hover:shadow-[0_30px_60px_rgba(0,0,0,0.08)]"
         >
           <article>
-            <div className="relative overflow-hidden rounded-[28px] rounded-b-none">
+            <div className="relative h-56 overflow-hidden rounded-[28px] rounded-b-none">
               {item.coverImage ? (
                 <Image
                   src={item.coverImage}
                   alt={item.title}
-                  className="h-56 w-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover"
                   loading="lazy"
-                  width={200}
-                  height={200}
                 />
               ) : (
                 <div className="flex h-56 items-center justify-center bg-gradient-to-br from-[#F0E3D0] to-[#F6F1EA] text-sm font-semibold uppercase tracking-wide text-[#A16B00]">
