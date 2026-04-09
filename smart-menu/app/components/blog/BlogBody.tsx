@@ -5,6 +5,7 @@ type BlogBodyProps = {
 };
 
 const paragraphSplitRegex = /\n{2,}/;
+const urlPattern = /(https?:\/\/[^\s)]+)/gi;
 
 const buildParagraphs = (text?: string) => {
   if (!text) return [];
@@ -12,6 +13,39 @@ const buildParagraphs = (text?: string) => {
     .split(paragraphSplitRegex)
     .map((entry) => entry.trim())
     .filter(Boolean);
+};
+
+const renderWithLinks = (paragraph: string) => {
+  const nodes: (string | JSX.Element)[] = [];
+  let lastIndex = 0;
+  const regex = new RegExp(urlPattern); // clone to reset state
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(paragraph)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(paragraph.slice(lastIndex, match.index));
+    }
+
+    const url = match[0];
+    nodes.push(
+      <a
+        key={`link-${match.index}-${url}`}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="break-all text-[#355B4B] underline underline-offset-4"
+      >
+        {url}
+      </a>,
+    );
+    lastIndex = match.index + url.length;
+  }
+
+  if (lastIndex < paragraph.length) {
+    nodes.push(paragraph.slice(lastIndex));
+  }
+
+  return nodes.length ? nodes : [paragraph];
 };
 
 export default function BlogBody({ blocks }: BlogBodyProps) {
@@ -36,9 +70,12 @@ export default function BlogBody({ blocks }: BlogBodyProps) {
             const paragraphs = buildParagraphs(block.text);
             if (paragraphs.length === 0) return null;
             return (
-              <div key={`text-${index}`} className="mt-6 space-y-4 text-lg leading-relaxed text-[#3B3F45]">
+              <div
+                key={`text-${index}`}
+                className="mt-6 space-y-4 text-lg leading-relaxed text-[#3B3F45] break-all md:break-words"
+              >
                 {paragraphs.map((paragraph, idx) => (
-                  <p key={idx}>{paragraph}</p>
+                  <p key={idx}>{renderWithLinks(paragraph)}</p>
                 ))}
               </div>
             );
