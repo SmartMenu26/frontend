@@ -782,7 +782,7 @@ function ShareFeedbackModal({
   return (
     <div
       className={clsx(
-        "fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-6 pt-10 transition-opacity duration-300 ease-out sm:items-center sm:pb-0",
+        "fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 pb-6 pt-10 transition-opacity duration-300 ease-out",
         isVisible ? "opacity-100" : "pointer-events-none opacity-0"
       )}
       onClick={handleOverlayClick}
