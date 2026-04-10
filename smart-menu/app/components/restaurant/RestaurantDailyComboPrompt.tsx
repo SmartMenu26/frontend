@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import DailyComboPrompt from "../ui/DailyComboPrompt";
 import DailyComboModal from "./DailyComboModal";
+import { trackEvent } from "@/app/lib/analytics";
 import type { DailyComboOffer } from "@/app/lib/restaurants";
 import type { Locale } from "@/i18n";
 
@@ -148,9 +149,13 @@ export default function RestaurantDailyComboPrompt({
   }, [markDismissed]);
 
   const handleAccept = useCallback(() => {
+    trackEvent("weekly_combo_prompt_clicked", {
+      restaurantSlug,
+      locale,
+    });
     hidePrompt();
     setIsComboModalOpen(true);
-  }, [hidePrompt]);
+  }, [hidePrompt, locale, restaurantSlug]);
 
   const handleModalClose = useCallback(() => {
     setIsComboModalOpen(false);
