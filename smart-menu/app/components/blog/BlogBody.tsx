@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { BlogBlock } from "@/app/lib/blogs";
 
 type BlogBodyProps = {
@@ -16,7 +17,7 @@ const buildParagraphs = (text?: string) => {
 };
 
 const renderWithLinks = (paragraph: string) => {
-  const nodes: (string | JSX.Element)[] = [];
+  const nodes: ReactNode[] = [];
   let lastIndex = 0;
   const regex = new RegExp(urlPattern); // clone to reset state
   let match: RegExpExecArray | null;
