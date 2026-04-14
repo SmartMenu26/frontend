@@ -86,7 +86,7 @@ type Props = {
   prompt: string;
   restaurantName?: string;
   assistantName?: LocalizedField;
-  aiCreditsRemaining?: number;
+  aiCreditsAvailable?: boolean;
   aiAssistantImageUrl?: string | null;
   aiAssistantThinkingImageUrl?: string | null;
   aiAssistantNoCreditsImageUrl?: string | null;
@@ -99,7 +99,7 @@ export default function AiAssistantContent({
   prompt,
   restaurantName,
   assistantName,
-  aiCreditsRemaining,
+  aiCreditsAvailable,
   aiAssistantImageUrl,
   aiAssistantThinkingImageUrl,
   aiAssistantNoCreditsImageUrl,
@@ -153,7 +153,7 @@ export default function AiAssistantContent({
     NO_CREDITS_FALLBACK
   );
   const hasCredits =
-    typeof aiCreditsRemaining === "number" ? aiCreditsRemaining > 0 : true;
+    typeof aiCreditsAvailable === "boolean" ? aiCreditsAvailable : true;
   const displayLocale = resultLocale ?? locale;
   const assistantDisplayName =
     resolveLocalizedField(assistantName, displayLocale) || "Асистентот";

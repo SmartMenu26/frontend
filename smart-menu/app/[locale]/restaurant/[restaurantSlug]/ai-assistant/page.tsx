@@ -75,7 +75,7 @@ export default async function AiAssistantPage({ params, searchParams }: Props) {
   }
 
   const endpoint = base
-    ? `${base}/api/admin/restaurants/${restaurantId}`
+    ? `${base}/api/restaurants/${restaurantId}`
     : undefined;
 
   const res = endpoint
@@ -84,10 +84,12 @@ export default async function AiAssistantPage({ params, searchParams }: Props) {
 
   const payload = await res?.json().catch(() => null);
   const restaurant = payload?.data ?? payload ?? null;
-  const aiCreditsRemaining =
-    typeof restaurant?.aiCredits?.remaining === "number"
-      ? restaurant.aiCredits.remaining
-      : 0;
+  const aiCreditsAvailable =
+    typeof restaurant?.aiCreditsAvailable === "boolean"
+      ? restaurant.aiCreditsAvailable
+      : typeof restaurant?.aiCredits?.remaining === "number"
+        ? restaurant.aiCredits.remaining > 0
+        : undefined;
 
   const fallbackRestaurantName =
     pickRestaurantName(record, [resolvedLocale]) ?? record.plainName;
@@ -111,7 +113,7 @@ export default async function AiAssistantPage({ params, searchParams }: Props) {
           ? restaurant.aiAssistantName
           : restaurant?.aiAssistantName ?? record.assistantName ?? undefined
       }
-      aiCreditsRemaining={aiCreditsRemaining}
+      aiCreditsAvailable={aiCreditsAvailable}
       aiAssistantImageUrl={restaurant?.aiAssistantImageUrl}
       aiAssistantThinkingImageUrl={restaurant?.aiAssistantThinkingImageUrl}
       aiAssistantNoCreditsImageUrl={restaurant?.aiAssistantNoCreditsImageUrl}
