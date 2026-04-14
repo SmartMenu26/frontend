@@ -454,7 +454,7 @@ const MenuItemHero = memo(function MenuItemHero({
           aria-hidden="true"
           width={HERO_IMAGE_SIZE}
           height={HERO_IMAGE_SIZE}
-          src="/images/menu-item-placeholder.png"
+          src="/images/menu-item-placeholder.webp"
           alt=""
           className={clsx(
             "absolute inset-0 h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px] max-w-[300px]",
