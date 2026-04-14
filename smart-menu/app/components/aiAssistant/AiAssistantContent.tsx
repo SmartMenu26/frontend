@@ -212,7 +212,7 @@ export default function AiAssistantContent({
         </header>
 
         {hasCredits ? (
-          <div className="pb-4 h-[95vh] text-center flex flex-col justify-around">
+          <div className="pb-4 h-[90vh] text-center flex flex-col justify-around">
             {status === "idle" && (
               <p className="text-left text-[22px] leading-snug text-[#4B4F54]">
                 {t("intro.prefix")}{" "}
