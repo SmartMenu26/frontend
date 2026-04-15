@@ -169,9 +169,7 @@ export default function MenuItemDetailsPageClient({
   ]);
 
   if (state.status === "loading") {
-    return (
-      <MenuItemLoading animationPath="/loader/loading-animation.json" />
-    );
+    return <MenuItemLoading />;
   }
 
   if (state.status === "error") {
