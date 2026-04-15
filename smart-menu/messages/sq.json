@@ -444,6 +444,7 @@
       "add": "Shto tek të preferuarat",
       "remove": "Hiq nga të preferuarat"
     },
+    "loadingLabel": "Po e përgatisim pjatën...",
     "back": "Kthehu",
     "allergens": {
       "fallback": "Alergjen",

@@ -444,6 +444,7 @@
       "add": "Add to favorites",
       "remove": "Remove from favorites"
     },
+    "loadingLabel": "Preparing your dish...",
     "back": "Back",
     "allergens": {
       "fallback": "Allergen",
