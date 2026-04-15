@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
@@ -52,7 +52,7 @@ const CANDIDATE_IMAGE_SIZES = "56px";
 const HERO_IMAGE_FALLBACK = "/images/ai-assistant-cook.png";
 const HERO_THINKING_FALLBACK = "/images/ai-assistant-cook-thinking.png";
 const NO_CREDITS_FALLBACK = "/images/no-credits.png";
-const MENU_ITEM_PLACEHOLDER = "/images/menu-item-placeholder.png";
+const MENU_ITEM_PLACEHOLDER = "/images/menu-item-placeholder.webp";
 
 function resolveImageSource(
   primary?: string | null,
@@ -77,6 +77,10 @@ function resolveLocalizedField(
     if (candidate) return candidate;
   }
   return undefined;
+}
+
+function heroBackgroundImage(src: string) {
+  return { backgroundImage: `url(${JSON.stringify(src)})` };
 }
 
 type Props = {
@@ -113,6 +117,9 @@ export default function AiAssistantContent({
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const [resultLocale, setResultLocale] = useState<Locale | null>(null);
+  const [loadedHeroSources, setLoadedHeroSources] = useState<
+    Record<string, boolean>
+  >({});
   const slugOrId = restaurantSlug ?? restaurantId;
   const restaurantHomeHref = useMemo(
     () => buildLocalizedPath(`/restaurant/${slugOrId}`, locale),
@@ -143,10 +150,17 @@ export default function AiAssistantContent({
   }, []);
 
   const restaurantDisplayName = restaurantName?.trim();
-  const heroImageSrc =
-    status === "loading"
-      ? resolveImageSource(aiAssistantThinkingImageUrl, HERO_THINKING_FALLBACK)
-      : resolveImageSource(aiAssistantImageUrl, HERO_IMAGE_FALLBACK);
+  const regularHeroImageSrc = resolveImageSource(
+    aiAssistantImageUrl,
+    HERO_IMAGE_FALLBACK
+  );
+  const thinkingHeroImageSrc = resolveImageSource(
+    aiAssistantThinkingImageUrl,
+    HERO_THINKING_FALLBACK
+  );
+  const isThinking = status === "loading";
+  const showThinkingHero =
+    isThinking && loadedHeroSources[thinkingHeroImageSrc] === true;
   const noCreditsImageSrc = resolveImageSource(
     aiAssistantNoCreditsImageUrl,
     NO_CREDITS_FALLBACK,
@@ -184,6 +198,32 @@ export default function AiAssistantContent({
         return "ден";
     }
   }, [displayLocale]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const markLoaded = (src: string) => {
+      if (cancelled) return;
+      setLoadedHeroSources((current) =>
+        current[src] ? current : { ...current, [src]: true }
+      );
+    };
+
+    [regularHeroImageSrc, thinkingHeroImageSrc].forEach((src) => {
+      const image = new window.Image();
+
+      image.onload = () => markLoaded(src);
+      image.src = src;
+
+      if (image.complete && image.naturalWidth > 0) {
+        queueMicrotask(() => markLoaded(src));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [regularHeroImageSrc, thinkingHeroImageSrc]);
 
   return (
     <div className="min-h-dvh bg-[#F5F5F5] text-[#1E1F24]">
@@ -223,12 +263,26 @@ export default function AiAssistantContent({
             )}
 
             <div className="flex justify-center">
-              <img
-                key={status === "loading" ? "thinking" : "regular"}
-                src={heroImageSrc}
-                alt={`AI Асистент ${assistantDisplayName}`}
-                className="h-auto w-60 max-w-full select-none transition-opacity duration-300"
-              />
+              <div
+                role="img"
+                aria-label={`AI Асистент ${assistantDisplayName}`}
+                className="relative aspect-square w-60 max-w-full shrink-0"
+              >
+                <div
+                  aria-hidden="true"
+                  style={heroBackgroundImage(regularHeroImageSrc)}
+                  className={`absolute inset-0 bg-contain bg-center bg-no-repeat transition-opacity duration-200 ${
+                    showThinkingHero ? "opacity-0" : "opacity-100"
+                  }`}
+                />
+                <div
+                  aria-hidden="true"
+                  style={heroBackgroundImage(thinkingHeroImageSrc)}
+                  className={`absolute inset-0 bg-contain bg-center bg-no-repeat transition-opacity duration-200 ${
+                    showThinkingHero ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              </div>
             </div>
 
             {status === "loading" && (
@@ -385,7 +439,7 @@ export default function AiAssistantContent({
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-6 py-10 text-center">
             <img
-              src={aiAssistantNoCreditsImageUrl ?? "/images/no-credits.png"}
+              src={noCreditsImageSrc}
               alt="No credits illustration"
               sizes={NO_CREDITS_IMAGE_SIZES}
               className="h-[50vh] max-w-full select-none object-cover"
