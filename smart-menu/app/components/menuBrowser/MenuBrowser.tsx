@@ -84,6 +84,7 @@ export default function MenuBrowser({
         if (locale) order.push(locale);
         if (!order.includes(defaultLocale)) order.push(defaultLocale);
         if (!order.includes("en")) order.push("en");
+        if (!order.includes("tr")) order.push("tr");
         return order;
     }, [locale]);
 

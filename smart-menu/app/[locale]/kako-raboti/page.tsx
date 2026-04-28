@@ -11,6 +11,7 @@ const PAGE_LABEL: Record<Locale, string> = {
   mk: "Како работи",
   sq: "Si funksionon",
   en: "How It Works",
+  tr: "Nasil Calisir",
 };
 
 type Props = {

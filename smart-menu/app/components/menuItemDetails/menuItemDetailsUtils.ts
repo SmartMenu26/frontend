@@ -19,7 +19,17 @@ export type MenuItemPayload = {
   imageUrl?: string | null;
   price?: unknown;
   priceValue?: unknown;
+  nutritionBreakdown?: unknown;
+  ingredientBreakdown?: unknown;
+  ingredientsBreakdown?: unknown;
+  ingredientComposition?: unknown;
   [key: string]: unknown;
+};
+
+export type HealthCornerIngredientViewModel = {
+  id?: string;
+  label: string;
+  value: number;
 };
 
 export type MenuItemViewModel = {
@@ -29,12 +39,15 @@ export type MenuItemViewModel = {
   imageUrl: string;
   imageAlt: string;
   price?: number;
+  healthCornerIngredients?: HealthCornerIngredientViewModel[];
 };
 
 const FALLBACK_IMAGE = "/placeholder.jpg";
 
 export const buildLocalePriority = (locale: Locale): Locale[] =>
-  Array.from(new Set<Locale>([locale, defaultLocale, "en" as Locale, "sq" as Locale]));
+  Array.from(
+    new Set<Locale>([locale, defaultLocale, "en" as Locale, "sq" as Locale, "tr" as Locale])
+  );
 
 export const pickLocalizedValue = (
   value?: LocalizedValue | string,
@@ -100,6 +113,105 @@ const resolveImageUrl = (payload: unknown): string | undefined => {
   return undefined;
 };
 
+const parseIngredientPercent = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = Number.parseFloat(value.replace("%", ""));
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+  return undefined;
+};
+
+const readIngredientBreakdownSource = (
+  payload: MenuItemPayload
+): unknown[] | undefined => {
+  const candidates = [
+    payload.nutritionBreakdown,
+    payload.ingredientBreakdown,
+    payload.ingredientsBreakdown,
+    payload.ingredientComposition,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      return candidate;
+    }
+    if (typeof candidate === "string" && candidate.trim()) {
+      try {
+        const parsed = JSON.parse(candidate) as unknown;
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch {
+        // Ignore invalid JSON strings from older API payloads.
+      }
+    }
+  }
+
+  return undefined;
+};
+
+export const hasNutritionBreakdown = (payload: MenuItemPayload): boolean =>
+  Boolean(readIngredientBreakdownSource(payload)?.length);
+
+export const buildHealthCornerIngredients = (
+  payload: MenuItemPayload,
+  localePriority: Locale[]
+): HealthCornerIngredientViewModel[] | undefined => {
+  const source = readIngredientBreakdownSource(payload);
+
+  console.log("ingredient source:", source);
+
+  if (!source) return undefined;
+
+  const ingredients = source.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const record = item as Record<string, unknown>;
+
+    console.log("ingredient record:", record);
+
+    const label = pickLocalizedValue(
+      (record.label ?? record.name ?? record.ingredient ?? record.title) as
+        | LocalizedValue
+        | string
+        | undefined,
+      localePriority,
+      ""
+    );
+
+    const value = parseIngredientPercent(
+      record.percent ?? record.percentage ?? record.value ?? record.ratio
+    );
+
+    console.log("mapped label/value:", { label, value });
+
+    if (!label || value === undefined || value <= 0) return [];
+
+    const id =
+      typeof record.id === "string"
+        ? record.id
+        : typeof record.key === "string"
+          ? record.key
+          : undefined;
+
+    return [
+      {
+        id: id ?? undefined,
+        label,
+        value: Math.min(100, value),
+      },
+    ];
+  });
+
+  console.log("final ingredients:", ingredients);
+
+  return ingredients.length > 0 ? ingredients.slice(0, 6) : undefined;
+};
+
 export const buildMenuItemViewModel = (
   payload: MenuItemPayload,
   menuItemId: string,
@@ -113,6 +225,7 @@ export const buildMenuItemViewModel = (
           mk: (payload.image as { altMk?: string })?.altMk,
           sq: (payload.image as { altSq?: string })?.altSq,
           en: (payload.image as { altEn?: string })?.altEn,
+          tr: (payload.image as { alt?: string })?.alt,
         }
       : undefined;
 
@@ -123,5 +236,6 @@ export const buildMenuItemViewModel = (
     imageUrl: resolveImageUrl(payload) ?? FALLBACK_IMAGE,
     imageAlt: pickLocalizedValue(imageMeta, localePriority, name),
     price: parsePrice(payload?.price ?? payload?.priceValue),
+    healthCornerIngredients: buildHealthCornerIngredients(payload, localePriority),
   };
 };

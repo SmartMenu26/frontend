@@ -23,6 +23,9 @@ import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { trackEvent } from "@/app/lib/analytics";
 import { greatVibes } from "@/app/fonts";
+import HealthCornerRadialInfographic, {
+  type HealthCornerIngredient,
+} from "./HealthCornerRadialInfographic";
 
 type Allergen = {
   key: string;
@@ -41,6 +44,7 @@ type Props = {
   restaurantId?: string;
   restaurantSlug?: string;
   price?: number;
+  healthCornerIngredients?: HealthCornerIngredient[];
 };
 
 export default function MenuItemDetails({
@@ -53,6 +57,7 @@ export default function MenuItemDetails({
   restaurantId,
   restaurantSlug,
   price,
+  healthCornerIngredients,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -65,6 +70,7 @@ export default function MenuItemDetails({
   const returnCategoryId = searchParams?.get("categoryId") ?? undefined;
   const returnSubcategoryId = searchParams?.get("subcategoryId") ?? undefined;
   const slugOrId = restaurantSlug ?? restaurantId ?? null;
+  const showHealthCornerInfographic = !!healthCornerIngredients?.length;
 
   const backUrl = useMemo(() => {
     if (!slugOrId) return null;
@@ -102,9 +108,11 @@ export default function MenuItemDetails({
     [allergens]
   );
 
-  useEffect(() => {
-    setActiveTooltip(null);
-  }, [visibleAllergens]);
+  const visibleActiveTooltip = visibleAllergens.some(
+    (allergen) => allergen.key === activeTooltip
+  )
+    ? activeTooltip
+    : null;
 
   useEffect(() => {
     trackEvent("page_label", {
@@ -119,6 +127,8 @@ export default function MenuItemDetails({
         return "mk-MK";
       case "sq":
         return "sq-AL";
+      case "tr":
+        return "tr-TR";
       case "en":
       default:
         return "en-US";
@@ -234,6 +244,8 @@ export default function MenuItemDetails({
         imageAlt={imageAlt}
         onBack={handleBack}
         backLabel={backLabel}
+        showHealthCornerInfographic={showHealthCornerInfographic}
+        healthCornerIngredients={healthCornerIngredients}
       />
 
       {/* BOTTOM SHEET */}
@@ -271,7 +283,7 @@ export default function MenuItemDetails({
                     (key) => tAllergens(key)
                   );
                   const tooltipId = `allergen-tooltip-${a.key}`;
-                  const isActive = activeTooltip === a.key;
+                  const isActive = visibleActiveTooltip === a.key;
 
                   if (iconEntry) {
                     const Icon = iconEntry.icon;
@@ -353,6 +365,7 @@ export default function MenuItemDetails({
             </button>
 
             <FavoriteButton
+              key={`${favoritesKey}:${id}`}
               itemId={id}
               storageKey={favoritesKey}
               addLabel={favoriteLabels.add}
@@ -370,13 +383,15 @@ export default function MenuItemDetails({
         </section>
       </div>
     </div>
-      <ShareFeedbackModal
-        open={isShareModalOpen}
-        onClose={handleShareClose}
-        onSubmit={handleShareSubmit}
-        labels={shareModalLabels}
-        ratingLabels={shareRatingLabels}
-      />
+      {isShareModalOpen && (
+        <ShareFeedbackModal
+          open={isShareModalOpen}
+          onClose={handleShareClose}
+          onSubmit={handleShareSubmit}
+          labels={shareModalLabels}
+          ratingLabels={shareRatingLabels}
+        />
+      )}
     </>
   );
 }
@@ -388,12 +403,26 @@ type FavoriteButtonProps = {
   removeLabel: string;
 };
 
+const readStoredFavorite = (storageKey: string, itemId: string) => {
+  if (typeof window === "undefined" || !itemId) return false;
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return false;
+    const parsed: string[] = JSON.parse(raw);
+    return parsed.includes(itemId);
+  } catch {
+    return false;
+  }
+};
+
 type MenuItemHeroProps = {
   name: string;
   imageUrl: string;
   imageAlt?: string;
   onBack: () => void;
   backLabel: string;
+  showHealthCornerInfographic?: boolean;
+  healthCornerIngredients?: HealthCornerIngredient[];
 };
 
 const HERO_IMAGE_SIZE = 300;
@@ -405,35 +434,11 @@ const MenuItemHero = memo(function MenuItemHero({
   imageAlt,
   onBack,
   backLabel,
+  showHealthCornerInfographic = false,
+  healthCornerIngredients,
 }: MenuItemHeroProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const heroImageRef = useRef<HTMLImageElement | null>(null);
-
-  useEffect(() => {
-    const imgEl = heroImageRef.current;
-    setImageLoaded(false);
-    if (!imgEl) return;
-
-    if (imgEl.complete && imgEl.naturalWidth > 0) {
-      setImageLoaded(true);
-      return;
-    }
-
-    const handleLoad = () => {
-      setImageLoaded(true);
-    };
-    const handleError = () => {
-      setImageLoaded(false);
-    };
-
-    imgEl.addEventListener("load", handleLoad);
-    imgEl.addEventListener("error", handleError);
-
-    return () => {
-      imgEl.removeEventListener("load", handleLoad);
-      imgEl.removeEventListener("error", handleError);
-    };
-  }, [imageUrl]);
+  const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
+  const imageLoaded = loadedImageUrl === imageUrl;
 
   return (
     <div className="flex justify-center items-center relative min-h-[45dvh] w-full px-4 sm:min-h-[50dvh]">
@@ -446,57 +451,60 @@ const MenuItemHero = memo(function MenuItemHero({
         <ArrowLeft className="h-5 w-5 text-white" />
       </button>
 
-      <div
-        className="py-2 relative grid place-items-center"
-        style={{ width: HERO_IMAGE_SIZE, height: HERO_IMAGE_SIZE }}
-      >
-        <img
-          aria-hidden="true"
-          width={HERO_IMAGE_SIZE}
-          height={HERO_IMAGE_SIZE}
-          src="/images/menu-item-placeholder.webp"
-          alt=""
-          className={clsx(
-            "absolute inset-0 h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px] max-w-[300px]",
-            imageLoaded ? "opacity-0" : "opacity-100"
-          )}
-        />
-        <img
-          width={HERO_IMAGE_SIZE}
-          height={HERO_IMAGE_SIZE}
-          src={imageUrl}
-          alt={imageAlt ?? name}
-          sizes={HERO_IMAGE_SIZES}
-          ref={heroImageRef}
-          className={clsx(
-            "h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px] max-w-[300px]",
-            imageLoaded ? "opacity-100" : "opacity-0"
-          )}
-        />
-      </div>
+      {showHealthCornerInfographic ? (
+        <div className="w-[min(94vw,390px)] py-2">
+          <HealthCornerRadialInfographic
+            imageUrl={imageUrl}
+            imageAlt={imageAlt ?? name}
+            className="w-full"
+            ingredients={healthCornerIngredients}
+          />
+        </div>
+      ) : (
+        <div
+          className="py-2 relative grid place-items-center"
+          style={{ width: HERO_IMAGE_SIZE, height: HERO_IMAGE_SIZE }}
+        >
+          <img
+            aria-hidden="true"
+            width={HERO_IMAGE_SIZE}
+            height={HERO_IMAGE_SIZE}
+            src="/images/menu-item-placeholder.webp"
+            alt=""
+            className={clsx(
+              "absolute inset-0 h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px] max-w-[300px]",
+              imageLoaded ? "opacity-0" : "opacity-100"
+            )}
+          />
+          <img
+            width={HERO_IMAGE_SIZE}
+            height={HERO_IMAGE_SIZE}
+            src={imageUrl}
+            alt={imageAlt ?? name}
+            sizes={HERO_IMAGE_SIZES}
+            onLoad={() => setLoadedImageUrl(imageUrl)}
+            onError={() =>
+              setLoadedImageUrl((current) =>
+                current === imageUrl ? null : current
+              )
+            }
+            className={clsx(
+              "h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px] max-w-[300px]",
+              imageLoaded ? "opacity-100" : "opacity-0"
+            )}
+          />
+        </div>
+      )}
     </div>
   );
 });
 
 function FavoriteButton({ itemId, storageKey, addLabel, removeLabel }: FavoriteButtonProps) {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(() =>
+    readStoredFavorite(storageKey, itemId)
+  );
   const [favoriteBurst, setFavoriteBurst] = useState(false);
   const burstTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !itemId) return;
-    try {
-      const raw = localStorage.getItem(storageKey);
-      if (!raw) {
-        setIsFavorite(false);
-        return;
-      }
-      const parsed: string[] = JSON.parse(raw);
-      setIsFavorite(parsed.includes(itemId));
-    } catch {
-      setIsFavorite(false);
-    }
-  }, [storageKey, itemId]);
 
   useEffect(
     () => () => {
@@ -615,43 +623,8 @@ function ShareFeedbackModal({
     "idle"
   );
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [isMounted, setIsMounted] = useState(open);
-  const [isVisible, setIsVisible] = useState(open);
   const titleId = useId();
   const messageInputId = useId();
-  const TRANSITION_MS = 300;
-
-  useEffect(() => {
-    if (!open) {
-      setFoodRating(null);
-      setServiceRating(null);
-      setComment("");
-      setSubmitState("idle");
-      setSubmitError(null);
-    }
-  }, [open]);
-
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    let rafId: number | null = null;
-
-    if (open) {
-      setIsMounted(true);
-      rafId = requestAnimationFrame(() => {
-        setIsVisible(true);
-      });
-    } else {
-      setIsVisible(false);
-      timeoutId = setTimeout(() => {
-        setIsMounted(false);
-      }, TRANSITION_MS);
-    }
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -675,7 +648,7 @@ function ShareFeedbackModal({
     };
   }, [open, onClose]);
 
-  if (!isMounted) return null;
+  if (!open) return null;
 
   const ratingOptions: Array<{
     value: RatingValue;
@@ -783,7 +756,7 @@ function ShareFeedbackModal({
     <div
       className={clsx(
         "fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 pb-6 pt-10 transition-opacity duration-300 ease-out",
-        isVisible ? "opacity-100" : "pointer-events-none opacity-0"
+        open ? "opacity-100" : "pointer-events-none opacity-0"
       )}
       onClick={handleOverlayClick}
     >
@@ -793,7 +766,7 @@ function ShareFeedbackModal({
         aria-labelledby={titleId}
         className={clsx(
           "w-full max-w-md rounded-[32px] bg-white p-6 text-left shadow-[0_30px_120px_rgba(0,0,0,0.35)] transition-all duration-300 ease-out will-change-transform will-change-opacity",
-          isVisible
+          open
             ? "translate-y-0 scale-100 opacity-100"
             : "translate-y-6 scale-95 opacity-0 sm:-translate-y-2 sm:scale-100"
         )}

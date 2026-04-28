@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   ctx: { params: Promise<{ restaurantId: string; menuItemId: string }> }
 ) {
   const { restaurantId, menuItemId } = await ctx.params;
@@ -16,7 +16,8 @@ export async function GET(
     );
   }
 
-  const url = `${backendBase}/api/menuItems/${restaurantId}/menu-items/${menuItemId}`;
+  const search = req.nextUrl.search;
+  const url = `${backendBase}/api/menuItems/${restaurantId}/menu-items/${menuItemId}${search}`;
 
   const res = await fetch(url, { cache: "no-store" });
   const data = await res.json().catch(() => null);

@@ -43,6 +43,7 @@ export default function PopularSection({
     if (locale) order.push(locale);
     if (!order.includes(defaultLocale)) order.push(defaultLocale);
     if (!order.includes("en" as Locale)) order.push("en" as Locale);
+    if (!order.includes("tr" as Locale)) order.push("tr" as Locale);
     return order;
   }, [locale]);
 

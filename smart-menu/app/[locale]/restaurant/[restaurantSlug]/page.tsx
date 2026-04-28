@@ -30,6 +30,7 @@ const TITLE_COPY: Record<Locale, (name: string) => string> = {
   mk: (name) => `Мени | ${name} | Smart Menu`,
   sq: (name) => `Menu | ${name} | Smart Menu`,
   en: (name) => `Menu | ${name} | Smart Menu`,
+  tr: (name) => `Menu | ${name} | Smart Menu`,
 };
 
 const DESCRIPTION_COPY: Record<Locale, (name: string, city?: string) => string> = {
@@ -39,6 +40,8 @@ const DESCRIPTION_COPY: Record<Locale, (name: string, city?: string) => string> 
     `Menuja zyrtare digjitale e ${name}${city ? ` në ${city}` : ""}. Menü QR me çmime, alergjenë dhe specialitete ditore.`,
   en: (name, city) =>
     `Official digital menu of ${name}${city ? ` in ${city}` : ""}. QR menu with live prices, allergens, and daily specials.`,
+  tr: (name, city) =>
+    `${name}${city ? ` ${city}` : ""} icin resmi dijital menu. Canli fiyatlar, alerjenler ve gunluk spesiyaller iceren QR menu.`,
 };
 
 type PageParams = {
@@ -60,7 +63,9 @@ type PageProps = {
 const OBJECT_ID_REGEX = /^[a-f\\d]{24}$/i;
 
 const getLocalePriority = (locale: Locale): Locale[] =>
-  Array.from(new Set<Locale>([locale, defaultLocale, "en" as Locale, "sq" as Locale]));
+  Array.from(
+    new Set<Locale>([locale, defaultLocale, "en" as Locale, "sq" as Locale, "tr" as Locale])
+  );
 
 const formatTitle = (locale: Locale, name: string) =>
   (TITLE_COPY[locale] ?? TITLE_COPY.mk)(name);
@@ -264,8 +269,8 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
         dangerouslySetInnerHTML={{ __html: structuredData }}
       />
       <div className="fixed bottom-4 right-4 z-50">
-      <LanguageSwitcher />
-    </div>
+        <LanguageSwitcher allowedLocales={record.supportedLanguages} />
+      </div>
   </>
 );
 }
@@ -321,6 +326,7 @@ function buildTodaysComboOffer(
           mk: item.image?.altMk ?? item.image?.alt,
           sq: item.image?.altSq ?? item.image?.alt,
           en: item.image?.altEn ?? item.image?.alt,
+          tr: item.image?.alt ?? undefined,
         },
         localePriority
       );

@@ -1,4 +1,4 @@
-import type { Locale } from "@/i18n";
+import { locales, type Locale } from "@/i18n";
 
 type LocalizedRecord = Record<string, string | null | undefined>;
 
@@ -54,6 +54,7 @@ export type RestaurantRecord = {
   location?: string;
   mobilePhone?: string;
   dailyCombo?: DailyComboOffer;
+  supportedLanguages?: Locale[];
 };
 
 const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i;
@@ -80,6 +81,7 @@ const IMAGE_KEYS = [
 const COLLECTION_KEYS = ["images", "gallery", "photos"] as const;
 
 const LOCALIZED_KEYS = ["name", "aiAssistantName", "description"] as const;
+const SUPPORTED_LOCALE_SET = new Set<Locale>(locales);
 
 const CITY_KEYS = [
   "city",
@@ -139,6 +141,23 @@ const readString = (value: unknown): string | undefined => {
     return trimmed ? trimmed : undefined;
   }
   return undefined;
+};
+
+const normalizeSupportedLanguages = (value: unknown): Locale[] | undefined => {
+  if (!Array.isArray(value)) return undefined;
+
+  const normalized = value.reduce<Locale[]>((acc, entry) => {
+    if (typeof entry !== "string") return acc;
+    const locale = entry.trim().toLowerCase();
+    if (!SUPPORTED_LOCALE_SET.has(locale as Locale)) return acc;
+    const supportedLocale = locale as Locale;
+    if (!acc.includes(supportedLocale)) {
+      acc.push(supportedLocale);
+    }
+    return acc;
+  }, []);
+
+  return normalized.length > 0 ? normalized : undefined;
 };
 
 const parseDailyComboItem = (
@@ -401,6 +420,7 @@ const mapRestaurantPayload = (
     location: normalizeString(payload.location),
     mobilePhone: normalizeString(payload.mobilePhone),
     dailyCombo: extractDailyCombo(payload) ?? undefined,
+    supportedLanguages: normalizeSupportedLanguages(payload.supportedLanguages),
   };
 };
 
@@ -606,7 +626,7 @@ export const pickRestaurantName = (
   localePriority: Locale[]
 ): string | undefined => {
   const priority = Array.from(
-    new Set<string>([...localePriority, "mk", "en", "sq"])
+    new Set<string>([...localePriority, "mk", "en", "sq", "tr"])
   );
 
   return (
@@ -621,7 +641,7 @@ export const pickRestaurantDescription = (
   localePriority: Locale[]
 ): string | undefined => {
   const priority = Array.from(
-    new Set<string>([...localePriority, "mk", "en", "sq"])
+    new Set<string>([...localePriority, "mk", "en", "sq", "tr"])
   );
 
   return resolveLocalizedText(

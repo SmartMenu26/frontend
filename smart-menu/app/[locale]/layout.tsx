@@ -12,7 +12,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const { locale } = await params;
+  await params;
 
   return {};
 }
@@ -26,7 +26,7 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
 
-  if (!locales.includes(locale as any)) notFound();
+  if (!locales.some((candidate) => candidate === locale)) notFound();
 
   const messages = (await import(`../../messages/${locale}.json`)).default;
 

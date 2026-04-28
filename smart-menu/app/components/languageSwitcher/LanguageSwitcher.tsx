@@ -3,7 +3,7 @@
 import { useLocale } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
-import { locales, type Locale } from "@/i18n";
+import { defaultLocale, locales, type Locale } from "@/i18n";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const FLAG_BUTTON_SIZE = 24;
@@ -15,19 +15,33 @@ const FLAG_ICON: Record<Locale, string> = {
   mk: "/icons/flags/mk.svg",
   sq: "/icons/flags/al.svg",
   en: "/icons/flags/gb.svg",
+  tr: "/icons/flags/tr.svg",
 };
 
 type LanguageSwitcherProps = {
   className?: string;
+  allowedLocales?: string[] | null;
 };
 
-export default function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
+export default function LanguageSwitcher({
+  className = "",
+  allowedLocales,
+}: LanguageSwitcherProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentLocale = useLocale() as Locale;
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const supportedLocaleSet = useMemo(() => new Set<Locale>(locales), []);
+
+  const availableLocales = useMemo(() => {
+    const normalized = (allowedLocales ?? []).filter(
+      (locale): locale is Locale => supportedLocaleSet.has(locale as Locale)
+    );
+    const uniqueLocales = Array.from(new Set<Locale>(normalized));
+    return uniqueLocales.length > 0 ? uniqueLocales : [...locales];
+  }, [allowedLocales, supportedLocaleSet]);
 
   const buildHref = useCallback(
     (targetLocale: Locale) => {
@@ -82,12 +96,12 @@ export default function LanguageSwitcher({ className = "" }: LanguageSwitcherPro
     };
   }, []);
 
-  const currentFlagSrc = FLAG_ICON[currentLocale];
+  const currentFlagSrc = FLAG_ICON[currentLocale] ?? FLAG_ICON[defaultLocale];
   const currentLabel = currentLocale.toUpperCase();
 
   const remainingLocales = useMemo(
-    () => locales.filter((locale) => locale !== currentLocale),
-    [currentLocale]
+    () => availableLocales.filter((locale) => locale !== currentLocale),
+    [availableLocales, currentLocale]
   );
 
   return (

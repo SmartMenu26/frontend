@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import { ChevronLeft } from "lucide-react";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
 import AiAssistantPromptPanel, {
   type AiAssistantRouterResponse,
@@ -34,17 +35,19 @@ type Candidate = {
   };
 };
 
-const localeFallbackOrder: Locale[] = ["mk", "sq", "en"];
+const localeFallbackOrder: Locale[] = ["mk", "sq", "en", "tr"];
 type AiAssistantResponse = AiAssistantRouterResponse<Candidate>;
 const fallbackCandidateTitle: Record<Locale, string> = {
   mk: "Предлог",
   sq: "Sugjerim",
   en: "Suggestion",
+  tr: "Oneri",
 };
 const fallbackCandidateDescription: Record<Locale, string> = {
   mk: "Пробај го овој специјалитет.",
   sq: "Provo këtë specialitet.",
   en: "Give this special a try.",
+  tr: "Bu spesiyali deneyin.",
 };
 const NO_CREDITS_IMAGE_SIZES = "(max-width: 768px) 80vw, 400px";
 const CANDIDATE_IMAGE_SIZE = 56;
@@ -53,6 +56,8 @@ const HERO_IMAGE_FALLBACK = "/images/ai-assistant-cook.png";
 const HERO_THINKING_FALLBACK = "/images/ai-assistant-cook-thinking.png";
 const NO_CREDITS_FALLBACK = "/images/no-credits.png";
 const MENU_ITEM_PLACEHOLDER = "/images/menu-item-placeholder.webp";
+const BACK_BUTTON_CLASSNAME =
+  "inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-medium text-[#1E1F24] shadow-sm transition hover:border-black/15 hover:bg-white/90";
 
 function resolveImageSource(
   primary?: string | null,
@@ -229,26 +234,15 @@ export default function AiAssistantContent({
     <div className="min-h-dvh bg-[#F5F5F5] text-[#1E1F24]">
       <RestaurantHeader showName={false} />
       <div className="mx-auto flex w-full max-w-md flex-col px-6">
-        <header className="h-[10vh] flex items-center justify-between">
+        <header className="flex h-[10vh] items-center">
           <Link
             href={restaurantHomeHref}
             aria-label={backToMenuLabel}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1E1F24] shadow-md transition hover:bg-[#f1f1f1]"
+            className={BACK_BUTTON_CLASSNAME}
           >
-            <svg
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <ChevronLeft aria-hidden="true" className="mr-1 h-4 w-4" />
+            <span>{backToMenuLabel}</span>
           </Link>
-
-          <div className="h-10 w-10 rounded-full bg-transparent" />
         </header>
 
         {hasCredits ? (
@@ -266,7 +260,7 @@ export default function AiAssistantContent({
               <div
                 role="img"
                 aria-label={`AI Асистент ${assistantDisplayName}`}
-                className="relative aspect-square w-60 max-w-full shrink-0"
+                className="relative aspect-square w-72 max-w-full shrink-0 sm:w-80"
               >
                 <div
                   aria-hidden="true"
@@ -317,7 +311,11 @@ export default function AiAssistantContent({
                     const description =
                       resolveLocalizedField(item?.description, displayLocale) ??
                       fallbackCandidateDescription[displayLocale];
-                    const img = item?.image?.url ?? MENU_ITEM_PLACEHOLDER;
+                    const resolvedImg = resolveImageSource(
+                      item?.image?.url,
+                      MENU_ITEM_PLACEHOLDER,
+                      MENU_ITEM_PLACEHOLDER
+                    );
                     const imageAlt =
                       resolveLocalizedField(item?.image?.alt, displayLocale) ??
                       resolveLocalizedField(
@@ -325,6 +323,7 @@ export default function AiAssistantContent({
                           mk: item?.image?.altMk,
                           sq: item?.image?.altSq,
                           en: item?.image?.altEn,
+                          tr: resolveLocalizedField(item?.image?.alt, "tr"),
                         },
                         displayLocale
                       ) ??
@@ -369,7 +368,7 @@ export default function AiAssistantContent({
                         className="flex items-center gap-3 rounded-[22px] border border-[#ECEFF5] bg-white px-3 py-3 text-[#1E1F24] shadow-sm transition hover:border-[#C2CADB]"
                       >
                         <img
-                          src={img}
+                          src={resolvedImg}
                           alt={imageAlt}
                           width={CANDIDATE_IMAGE_SIZE}
                           height={CANDIDATE_IMAGE_SIZE}
@@ -451,20 +450,10 @@ export default function AiAssistantContent({
             <Link
               href={restaurantHomeHref}
               aria-label={backToMenuLabel}
-              className="inline-flex items-center justify-center text-[#1E1F24] underline"
+              className={BACK_BUTTON_CLASSNAME}
             >
-              <svg
-                className="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-              {backToMenuLabel}
+              <ChevronLeft aria-hidden="true" className="mr-1 h-4 w-4" />
+              <span>{backToMenuLabel}</span>
             </Link>
           </div>
         )}

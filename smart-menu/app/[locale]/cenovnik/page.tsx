@@ -13,6 +13,7 @@ const PAGE_LABEL: Record<Locale, string> = {
   mk: "Ценовник",
   sq: "Çmime",
   en: "Pricing",
+  tr: "Fiyatlandirma",
 };
 
 type Props = {

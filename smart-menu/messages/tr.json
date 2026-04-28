@@ -1,0 +1,645 @@
+{
+  "aiSuggestion": {
+    "subtitle": "SIZIN ICIN HIZLI YAPAY ZEKA ONERILERI",
+    "title": "Size ozel oneriler",
+    "chips": {
+      "askAssistant": "Asistana sor",
+      "askNamed": "{name} asistanina sor",
+      "protein": "Protein agirlikli",
+      "healthy": "Saglikli secimler",
+      "surprise": "Beni sasirt",
+      "spicy": "Acili"
+    }
+  },
+  "dailyComboPrompt": {
+    "message": "Bugunun onerisine goz atin",
+    "acceptButtonAria": "Bugunun kombo onerini kabul et",
+    "dismissButtonAria": "Kombo onerini kapat",
+    "chefImageAlt": "Bugunun kombosunu sunan sef"
+  },
+  "dailyComboModal": {
+    "title": "Bugunun onerisi",
+    "subtitle": "Sefin secimi sunlari icerir",
+    "totalLabel": "Kombo fiyati",
+    "close": "Kapat",
+    "empty": "Kombo detaylari su anda mevcut degil.",
+    "types": {
+      "drink": "Icecek",
+      "main": "Ana yemek",
+      "salad": "Salata",
+      "default": "Kombo urunu"
+    },
+    "fallback": {
+      "totalPrice": "MKD 660",
+      "drink": {
+        "title": "Bitkili limonata",
+        "description": "Taze nane ve narenciye kabugu ile",
+        "price": "MKD 120"
+      },
+      "main": {
+        "title": "Sefin ozel makarnasi",
+        "description": "Izgara tavuklu kremali pesto",
+        "price": "MKD 380"
+      },
+      "salad": {
+        "title": "Mevsim bahce salatasi",
+        "description": "Zeytinyagli cıtır yesillikler",
+        "price": "MKD 160"
+      }
+    }
+  },
+  "aiAssistantPromptPanel": {
+    "input": {
+      "placeholder": "Sefe ne arzuladiginizi soyleyin...",
+      "sendAriaLabel": "Istek gonder"
+    },
+    "info": {
+      "withRestaurant": "Oneriler {restaurantName} menusu uzerinden hazirlaniyor.",
+      "generic": "Oneriler dijital menuye gore hazirlaniyor."
+    },
+    "errors": {
+      "generic": "Su anda yanit veremiyorum."
+    }
+  },
+  "aiAssistantContent": {
+    "intro": {
+      "prefix": "Ben",
+      "suffix": "Size en uygun yemegi bulmaniza yardim edecegim."
+    },
+    "loading": {
+      "caption": "Sef dusunuyor"
+    },
+    "noCreditsTitle": "Yapay zeka asistani su anda kullanilamiyor",
+    "backToMenu": "Menuye don",
+    "noRecommendations": "Bu istek icin onerimiz yok. Belirli bir yemek veya icecek isteyerek tekrar deneyin."
+  },
+  "aiAssistantSuggestions": {
+    "prompts": {
+      "noLactose": "Laktozsuz yemek istiyorum",
+      "light": "Hafif bir sey",
+      "sweet": "Tatli bir sey",
+      "surprise": "Beni sasirt"
+    }
+  },
+  "notFound": {
+    "eyebrow": "Smart Menu",
+    "title": "Ups! Sayfa bulunamadi",
+    "description": "Aradiginiz sayfa tasinmis olabilir veya artik mevcut degildir.",
+    "primaryCta": "Ana sayfaya don",
+    "secondaryCta": "Destek iletisime gec",
+    "hint": "Hata kodu 404",
+    "imageAlt": "404 sayfa bulunamadi durumunu gosteren ilustrasyon"
+  },
+  "adminDashboard": {
+    "header": {
+      "eyebrow": "Smart Menu dahili",
+      "title": "Restoran yonetimi",
+      "subtitle": "Menu urunlerini, AI kredilerini, asistan adlarini ve desteklenen dilleri guncellemek icin yonetim panelini kullanin.",
+      "logout": "Cikis yap"
+    },
+    "login": {
+      "labels": {
+        "username": "Kullanici adi",
+        "password": "Sifre",
+        "remember": "Beni hatirla"
+      },
+      "buttons": {
+        "submit": "Giris yap",
+        "submitting": "Giris yapiliyor..."
+      },
+      "messages": {
+        "success": "Giris basarili. Panel yukleniyor...",
+        "missingCredentials": "Devam etmek icin kullanici adi ve sifreyi girin.",
+        "genericError": "Giris basarisiz oldu. Lutfen tekrar deneyin.",
+        "sessionExpired": "Oturumunuz sona erdi. Devam etmek icin tekrar giris yapin.",
+        "proxyNote": "Istekler <code>{endpoint}</code> uzerinden proxylenir. Smart Menu bilgilerinizle giris yapin (ornek: {example})."
+      }
+    },
+    "restaurantCard": {
+      "title": "Restoran",
+      "unnamed": "Adsiz restoran",
+      "noImage": "Gorsel yok",
+      "planLabel": "Plan · {plan}",
+      "fields": {
+        "slug": "Slug",
+        "timezone": "Saat dilimi",
+        "created": "Olusturulma",
+        "updated": "Guncellenme"
+      },
+      "badges": {
+        "active": "Aktif",
+        "disabled": "Devre disi",
+        "aiEnabled": "AI acik",
+        "aiDisabled": "AI kapali"
+      }
+    },
+    "adminCard": {
+      "title": "Yonetici iletisim",
+      "fields": {
+        "username": "Kullanici adi",
+        "email": "E-posta",
+        "status": "Durum",
+        "missingEmail": "Belirtilmemis",
+        "sessionStarted": "Oturum basladi"
+      },
+      "badges": {
+        "active": "Aktif",
+        "suspended": "Askida"
+      }
+    },
+    "creditsCard": {
+      "title": "AI kredileri",
+      "remainingSuffix": "kalan",
+      "currencyChip": "Para birimi · {currency}",
+      "usedLabel": "Kullanilan",
+      "remainingLabel": "Kalan",
+      "hint": "Toplam kredi: {total}. AI sohbetlerinin yavaslamamasi icin en az 100 kredi bulundurun."
+    },
+    "weeklyCombos": {
+      "title": "Haftalik kombolar",
+      "subtitle": "Gun basina en fazla uc menu urunu secip ozel kombolar olarak yayinlayin.",
+      "helper": "Her gunu ayarladiktan sonra guncelleye tiklayin.",
+      "loading": "Haftalik kombolar yukleniyor...",
+      "emptyMenu": "Haftalik kombo olusturmak icin once menu urunleri ekleyin.",
+      "errors": {
+        "load": "Haftalik kombolar su anda yuklenemiyor.",
+        "menu": "Menu urunleri yuklenemiyor."
+      },
+      "actions": {
+        "retry": "Tekrar dene",
+        "submit": "Kombolari guncelle",
+        "submitting": "Guncelleniyor...",
+        "reset": "Degisiklikleri sifirla"
+      },
+      "status": {
+        "saved": "Haftalik kombolar guncellendi.",
+        "error": "Haftalik kombolari guncelleyemedik."
+      },
+      "selection": {
+        "limit": "Gun basina en fazla {max} urun",
+        "selectedCount": "{count}/{max} secildi",
+        "empty": "Henuz urun secilmedi.",
+        "placeholder": "Menu urunu secin",
+        "searchPlaceholder": "Menu urunlerinde ara...",
+        "noResults": "Aramaniza uyan menu urunu yok.",
+        "full": "Secim dolu",
+        "add": "Urun ekle",
+        "fallback": "Arsivlenmis urun",
+        "unknownItem": "Adsiz urun"
+      },
+      "days": {
+        "monday": "Pazartesi",
+        "tuesday": "Sali",
+        "wednesday": "Carsamba",
+        "thursday": "Persembe",
+        "friday": "Cuma",
+        "saturday": "Cumartesi",
+        "sunday": "Pazar"
+      }
+    },
+    "assistantNames": {
+      "title": "AI asistan adlari",
+      "empty": "Dil bazli ad tanimlanmamis. Asistan restoran adini kullanir."
+    },
+    "assistantPhoto": {
+      "title": "Asistan ilustrasyonu",
+      "alt": "AI asistani {name} ilustrasyonu",
+      "fallbackName": "Smart Assistant"
+    },
+    "feedback": {
+      "title": "Musteri geri bildirimi",
+      "subtitle": "QR deneyiminden paylasilan son yanitlar.",
+      "loading": "Geri bildirimler yukleniyor...",
+      "error": "Geri bildirimleri su anda yukleyemedik.",
+      "empty": "Henuz geri bildirim gonderilmedi.",
+      "loadMore": "Daha fazla yukle",
+      "avgFood": "Ortalama yemek",
+      "avgService": "Ortalama servis",
+      "total": "{count, plural, one {# yanit} other {# yanit}}",
+      "submittedAt": "Gonderim {value}",
+      "origin": "IP {value}",
+      "suggestionLabel": "Oneri",
+      "suggestionEmpty": "Herhangi bir onerı paylasilmadi.",
+      "ratingLabel": "{type}: {value}/5",
+      "ratingTypes": {
+        "food": "Yemek",
+        "service": "Servis"
+      }
+    },
+    "topViewed": {
+      "title": "En cok goruntulenen menu urunleri",
+      "subtitle": "Uygulama ici urun goruntulemelerine gore.",
+      "loading": "En populer urunler yukleniyor...",
+      "error": "En cok goruntulenen urunler yuklenemiyor.",
+      "empty": "Henuz goruntuleme verisi yok.",
+      "unknown": "Adsiz urun",
+      "viewsLabel": "Goruntuleme",
+      "priceUnknown": "Fiyat mevcut degil"
+    },
+    "menuItems": {
+      "title": "Menu urunleri",
+      "subtitle": "En guncel urunleri arayin, filtreleyin ve inceleyin.",
+      "searchLabel": "Urun ara",
+      "searchPlaceholder": "Ada, etikete veya kategoriye gore ara...",
+      "filters": {
+        "all": "Tum",
+        "food": "Yemek",
+        "drink": "Icecek"
+      },
+      "loading": "Menu urunleri yukleniyor...",
+      "errors": {
+        "generic": "Menu urunleri su anda yuklenemiyor."
+      },
+      "meta": {
+        "total": "{count, plural, one {# urun} other {# urun}}",
+        "lastSynced": "Son guncelleme {value}"
+      },
+      "empty": {
+        "title": "Filtrelerinize uygun urun bulunamadi",
+        "description": "Aramayi temizlemeyi veya yemek turunu degistirmeyi deneyin.",
+        "reset": "Filtreleri sifirla"
+      },
+      "groups": {
+        "food": {
+          "title": "Yemek"
+        },
+        "drink": {
+          "title": "Icecekler"
+        },
+        "showMore": "Tumunu goster {count}",
+        "showLess": "Daha az goster",
+        "empty": "Bu bolumde urun yok."
+      },
+      "card": {
+        "unknownName": "Adsiz urun",
+        "priceUnavailable": "Fiyat belirlenecek",
+        "updated": "Guncellendi {value}",
+        "displayed": "Gosteriliyor",
+        "hidden": "Gizli",
+        "edit": "Duzenle",
+        "save": "Degisiklikleri kaydet",
+        "saving": "Kaydediliyor...",
+        "cancel": "Iptal",
+        "priceLabel": "Fiyat",
+        "invalidPrice": "Gecerli bir sayi girin.",
+        "updateError": "Degisiklikler kaydedilemedi."
+      },
+      "pagination": {
+        "prev": "Onceki",
+        "next": "Sonraki",
+        "pageLabel": "Sayfa {page} / {total}"
+      }
+    }
+  },
+  "mealTypeToggle": {
+    "food": "Yemek",
+    "drink": "Icecek"
+  },
+  "popularSection": {
+    "title": {
+      "food": "Populer yemekler",
+      "drink": "Populer icecekler"
+    },
+    "empty": "Henuz populer urun yok."
+  },
+  "footer": {
+    "home": "Ana sayfa",
+    "contact": "Iletisim"
+  },
+  "header": {
+    "toggleLabel": "Gezinme menusunu ac veya kapat",
+    "fallbackName": "Restoran",
+    "menuLabel": "Menu",
+    "nav": {
+      "home": "Ana sayfa",
+      "whyUs": "Neden biz",
+      "aboutUs": "Hakkimizda",
+      "blog": "Blog",
+      "contact": "Iletisim"
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Misafirperverlik, yeniden tasarlandi",
+      "heading": "Ciddi restoranlar icin akilli teknoloji.",
+      "subheading": "Akilli menu. Akilli oneriler. Misafirlerinizin damak tadini anlayip onlari dogrudan en uygun yemeye yonlendiren yapay zeka.",
+      "primaryCta": "Canli demoyu incele",
+      "secondaryCta": "Bizimle konusun"
+    },
+    "highlights": {
+      "eyebrow": "Restoranlar neden bizi seciyor",
+      "title": "Her misafire unutulmaz bir deneyim sunun.",
+      "items": {
+        "instantMenu": {
+          "title": "Aninda menu guncellemeleri",
+          "body": "Mevsimlik yemekleri, tukenmis urunleri veya dinamik fiyatlari saniyeler icinde yayinlayin; kagit menu bastirmaya gerek kalmaz."
+        },
+        "aiConcierge": {
+          "title": "AI konsiyerj",
+          "body": "Misafirlerin dogal dil sorulari ve diyet filtreleriyle yemekleri kesfetmesini AI asistanimizla kolaylastirin."
+        },
+        "insights": {
+          "title": "Kisisellestirilmis AI asistani",
+          "body": "Marka tonunuzla konusan, her soruyu yanitlayan ve yeni tekliflere donusturebileceginiz icgoruler saglayan ozel bir AI ajanini devreye alin."
+        }
+      }
+    },
+    "blog": {
+      "eyebrow": "Buyume icgoruleri",
+      "title": "Akilli restoran menulerinin gelecegi",
+      "tag": "Icgorü",
+      "posts": {
+        "aiVsQr": {
+          "title": "Yapay zeka destekli menuler neden statik QR menulerden daha iyi performans gosterir",
+          "excerpt": "Statik QR menuler sadece yemekleri listeler. Smart Menu ise misafirlere kisisellestirilmis onerilerle aktif olarak rehberlik eder; daha hizli karar vermelerini ve daha fazla siparis vermelerini saglar."
+        },
+        "upsell": {
+          "title": "Kararsizligi daha yuksek ortalama siparise donusturun",
+          "excerpt": "AI asistani; ruh haline, diyet ihtiyaclarina ve tercihlere gore yemek onerir. Boylece tereddut azalir, ek satislar dogal sekilde artar."
+        }
+      }
+    },
+    "deployments": {
+      "eyebrow": "Canli kurulumlar",
+      "title": "Smart Menu kullanan restoranlar.",
+      "fallbackRestaurant": "Restoran"
+    },
+    "contact": {
+      "eyebrow": "Konusalim",
+      "title": "Misafirlerinize hizmet vermeye hazir misiniz?",
+      "body": "Konseptinizi, hedef kitlenizi ve zorluklarinizi bize anlatin. Markanizin dogal bir uzantisi gibi hissettiren bir Smart Menu kurulumu tasarlayalim.",
+      "items": {
+        "email": { "label": "E-posta" },
+        "phone": { "label": "Telefon / WhatsApp" },
+        "instagram": { "label": "Instagram profilimizi ziyaret edin" }
+      }
+    }
+  },
+  "blogPage": {
+    "hero": {
+      "eyebrow": "Smart Menu Blog",
+      "typeLabel": "Makale"
+    },
+    "meta": {
+      "readingTime": "{minutes} dk okuma"
+    },
+    "suggested": {
+      "eyebrow": "Kesfetmeye devam edin",
+      "title": "Onerilen makaleler",
+      "cta": "Makale oku"
+    }
+  },
+  "blogIndex": {
+    "meta": {
+      "title": "Smart Menu Blog",
+      "description": "Misafirperverlik ekipleri icin urun lansmanlari, musteri hikayeleri ve yapay zeka icgoruleri."
+    },
+    "hero": {
+      "eyebrow": "Smart Menu Blog",
+      "title": "Modern misafirperverlik ekipleri icin fikirler",
+      "description": "Smart Menu ortaklarindan dijital deneyimler, AI konsiyerjleri ve misafir etkilesimi uzerine hikayeler.",
+      "count": "{count, plural, one {# yayinlanmis makale} other {# yayinlanmis makale}}"
+    },
+    "grid": {
+      "tag": "Makale",
+      "readMore": "Devamini oku",
+      "empty": "Bizi takip edin, yakinda yeni hikayeler geliyor."
+    },
+    "pagination": {
+      "previous": "Onceki",
+      "next": "Sonraki"
+    }
+  },
+  "menuItemDetails": {
+    "assistantButton": "AI onerisi",
+    "assistantPrompt": "{dish} ile ne iyi gider?",
+    "shareCta": "Dusuncelerinizi paylasin",
+    "shareModal": {
+      "title": "Gorusunuz bizim icin onemli",
+      "foodLabel": "Yemegimizi degerlendirin",
+      "serviceLabel": "Servisimizi degerlendirin",
+      "feedbackLabel": "Oneriniz",
+      "feedbackPlaceholder": "Bir fikir veya gelistirme onerisi paylasin...",
+      "submit": "Geri bildirim gonder",
+      "closeAriaLabel": "Geri bildirim penceresini kapat",
+      "ratings": {
+        "negative": "Begenmedim",
+        "neutral": "Idare ederdi",
+        "positive": "Bayildim"
+      },
+      "successTitle": "Tesekkurler!",
+      "successDescription": "Geri bildiriminizi aldik.",
+      "errorMessage": "Geri bildiriminizi gonderemedik. Lutfen tekrar deneyin."
+    },
+    "priceLabel": "{price} den",
+    "favorite": {
+      "add": "Favorilere ekle",
+      "remove": "Favorilerden cikar"
+    },
+    "loadingLabel": "Yemeginiz hazirlaniyor...",
+    "back": "Geri",
+    "allergens": {
+      "fallback": "Alerjen",
+      "gluten": {
+        "contains": "Gluten icerir",
+        "free": "Glutensiz"
+      },
+      "dairy": {
+        "contains": "Sut urunleri icerir",
+        "free": "Sut urunsuz"
+      },
+      "egg": {
+        "free": "Yumurtasiz",
+        "contains": "Yumurta icerir"
+      },
+      "fish": {
+        "free": "Baliksiz",
+        "contains": "Balik icerir"
+      },
+      "peanut": {
+        "free": "Yer fistigsiz",
+        "contains": "Yer fistigi icerir"
+      },
+      "milk": {
+        "contains": "Sut icerir"
+      },
+      "mushroom": {
+        "contains": "Mantar icerir"
+      },
+      "soy": {
+        "contains": "Soya icerir"
+      },
+      "sesame": {
+        "contains": "Susam icerir"
+      },
+      "shellfish": {
+        "contains": "Kabuklu deniz urunu icerir"
+      },
+      "mollusc": {
+        "contains": "Yumusakca icerir"
+      },
+      "nuts": {
+        "contains": "Sert kabuklu yemis icerir"
+      },
+      "mustard": {
+        "contains": "Hardal icerir"
+      },
+      "sulfites": {
+        "contains": "Sulfit icerir"
+      }
+    }
+  },
+  "restaurantContact": {
+    "title": "Iletisim ve konum",
+    "location": "Konum",
+    "phone": "Telefon",
+    "call": "Ara",
+    "facebook": "Facebook",
+    "instagram": "Instagram"
+  },
+  "howItWorks": {
+    "hero": {
+      "eyebrow": "Nasil calisir",
+      "title": "Sizin icin calisan dijital menu",
+      "description": "Smart Menu; QR menu, AI asistani ve gelir analizlerini tek bir otomatik platformda birlestirir."
+    },
+    "steps": {
+      "upload": {
+        "title": "1. Menuyu ve markanizi yukleyin",
+        "body": "PDF, Excel veya CMS aktarın; her yemegi, alerjeni ve gorseli otomatik olarak yapilandiralim."
+      },
+      "qr": {
+        "title": "2. Misafirler QR kodu tarar",
+        "body": "Her QR yerellestirilir (MK, SQ, EN, TR) ve PWA onbellek sayesinde cevrimdisi de kullanilabilir."
+      },
+      "assistant": {
+        "title": "3. AI asistani satar",
+        "body": "Misafirler; populerlik ve kar marjina gore kisisellestirilmis eslestirmeler, upsell ve cross-sell onerileri alir."
+      },
+      "insights": {
+        "title": "4. Icgoruleri siz alirsiniz",
+        "body": "En cok satanlari, ortalama hesabi ve stok bitislerini gosteren sabah e-postasi tum ekibi hizalar."
+      }
+    },
+    "cta": {
+      "primary": "Demo ayarla",
+      "secondary": "Ornek QR menu indir"
+    },
+    "comparison": {
+      "title": "Klasik QR menuden neden daha iyi?",
+      "items": [
+        "QR icindeki siradan bir PDF degil",
+        "Etkilesimli ve dinamik deneyim",
+        "Garson yerine satis yapan yapay zeka",
+        "Her karari yonlendiren analizler"
+      ]
+    },
+    "localSeo": "Smart Menu, Makedonya icin gelistirilmis; restoran, kafe ve otellerin modern ve akilli bir sistem kullanmasi icin tasarlanmis dijital menu cozumudur."
+  },
+  "pricing": {
+    "hero": {
+      "eyebrow": "Fiyatlandirma",
+      "title": "Her misafirperverlik konsepti icin profesyonel planlar",
+      "description": "Mekan basina odeme yapin; sinirsiz dil, medya ve push kampanyalarini etkinlestirin."
+    },
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "price": "22 €",
+        "period": "/ay",
+        "description": "Modern bir QR menu isteyen kucuk kafeler ve barlar icin.",
+        "features": [
+          "1 mekana kadar",
+          "120 menu urunune kadar",
+          "AI onerileri",
+          "Cok dilli destek",
+          "Temel analizler"
+        ]
+      },
+      "pro": {
+        "name": "Pro (En populer)",
+        "price": "50 €",
+        "period": "/ay",
+        "description": "Ortalama hesap tutarini artirmaya odaklanan restoranlar icin.",
+        "features": [
+          "3 mekana kadar",
+          "400 menu urunune kadar",
+          "Gelismis AI onerileri",
+          "AI yemek soru-cevabi",
+          "Detayli analizler",
+          "Oncelikli destek"
+        ]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Bizimle iletisime gecin",
+        "period": "",
+        "description": "Gruplar, oteller ve zincirler icin.",
+        "features": [
+          "Sinirsiz mekan",
+          "Ozel islevler",
+          "API entegrasyonu",
+          "SLA anlasmasi",
+          "7/24 premium destek"
+        ]
+      }
+    },
+    "roi": {
+      "title": "Kendini neden amorti eder",
+      "items": [
+        "AI upsell sayesinde ortalama hesap %18 artar.",
+        "Tum menu baski ve tasarim maliyetlerini ortadan kaldirin.",
+        "Misafirlerin %60+ onerilen yemegi secer."
+      ]
+    },
+    "faq": [
+      {
+        "question": "Kurulum ucreti var mi?",
+        "answer": "Hayir. Kurulum su an ucretsizdir ve en fazla 3 is gunu surer."
+      },
+      {
+        "question": "Aboneligi duraklatabilir miyim?",
+        "answer": "Evet, aylik bir anlasmadir. Istediginiz zaman duraklatabilir veya iptal edebilirsiniz."
+      },
+      {
+        "question": "Birden fazla dili destekliyor musunuz?",
+        "answer": "Smart Menu, menu icerigini otomatik olarak Makedonca, Arnavutca, Ingilizce ve Turkceye cevirir."
+      }
+    ],
+    "cta": "Teklif isteyin",
+    "aiCredits": {
+      "title": "AI Kredileri",
+      "price": "16 €",
+      "period": "/1.000 etkilesim",
+      "description": "Misafirler asistanla sohbet ettiginde odersiniz. Krediler asla sona ermez; tukettiginizde yeni paket yukleyin.",
+      "cta": "Yukleme icin satis ekibiyle iletisime gecin"
+    }
+  },
+  "about": {
+    "hero": {
+      "eyebrow": "Hakkimizda",
+      "title": "Makedonya'da gelistirilen, AI asistanli dijital QR menu",
+      "description": "Smart Menu, teknolojiyi kullanarak misafirperverligi sadeleştirmeye tutkuyla bagli bir ekip tarafindan olusturuldu. Hedefimiz, misafirlerin yemek kesfini kolaylastirmak ve restoranlarin operasyonunu daha verimli hale getirmektir."
+    },
+    "mission": {
+      "title": "Misyon",
+      "body": "Misyonumuz, yerel restoranlarin satislarini artirmasina ve misafirlerine daha iyi bir dijital deneyim sunmasina yardimci olmaktir."
+    },
+    "stats": [
+      "Ayda 5.000+ tarama",
+      "MK / SQ / EN / TR destegi",
+      "Surekli gelisen AI onerileri"
+    ],
+    "founder": {
+      "title": "Kurucudan not",
+      "body": "Smart Menu, Stefan Gjorgjevski tarafindan baslatildi ve gelistirildi. Fikir; misafirlerin yemek secimini kolaylastirma ve restoran yoneticilerine modern, sade bir is akisi sunma ihtiyacindan dogdu."
+    },
+    "contact": {
+      "title": "Iletisim",
+      "email": "restaurantsmart26@gmail.com",
+      "phone": "+389 71 863 999",
+      "address": "Bul. Partizanski Odredi 14, Skopje",
+      "mapLabel": "Google Maps'te ac"
+    }
+  }
+}

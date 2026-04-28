@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 
 const CARD_IMAGE_SIZE = 155;
 const CARD_IMAGE_SIZES = "155px";
+const CARD_IMAGE_PLACEHOLDER = "/images/menu-item-placeholder.webp";
 const BLUR_PLACEHOLDER =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTU1IiBoZWlnaHQ9IjE1NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTU1IiBoZWlnaHQ9IjE1NSIgZmlsbD0iI0U4RTdFOSIvPjwvc3ZnPg==";
 const PRIORITY_CARD_COUNT = 2;
@@ -38,6 +39,7 @@ export default function Card({
   kind,
   layout = "stacked",
 }: CardProps) {
+  const resolvedImageUrl = imageUrl?.trim() || CARD_IMAGE_PLACEHOLDER;
   const normalizedKind = kind?.toLowerCase();
   const isDrink = variant !== "popular" && normalizedKind === "drink";
   const shouldPrioritizeImage = typeof index === "number" && index < PRIORITY_CARD_COUNT;
@@ -64,7 +66,7 @@ export default function Card({
 
   useEffect(() => {
     setImageLoaded(false);
-  }, [imageUrl]);
+  }, [resolvedImageUrl]);
 
   const tileSizeClasses = "h-[200px] w-[200px]";
   const tileImageClasses = "-top-4 h-[155px] w-[155px]";
@@ -102,7 +104,7 @@ export default function Card({
               ].join(" ")}
             />
             <Image
-              src={imageUrl}
+              src={resolvedImageUrl}
               alt={title}
               width={96}
               height={96}
@@ -167,7 +169,7 @@ export default function Card({
                 ].join(" ")}
               />
               <Image
-                src={imageUrl}
+                src={resolvedImageUrl}
                 alt={title}
                 width={CARD_IMAGE_SIZE}
                 height={CARD_IMAGE_SIZE}

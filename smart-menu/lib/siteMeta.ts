@@ -1,4 +1,4 @@
-const FALLBACK_SITE_URL = "https://smartmenumk.com";
+const FALLBACK_SITE_URL = "https://www.smartmenumk.com";
 
 function normalizeSiteUrl(value?: string | null) {
   if (!value) return FALLBACK_SITE_URL;

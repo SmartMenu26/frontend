@@ -15,6 +15,7 @@ const OG_LOCALES: Record<Locale, string> = {
   mk: "mk_MK",
   sq: "sq_AL",
   en: "en_US",
+  tr: "tr_TR",
 };
 
 function resolveAboutPath(locale: Locale) {
@@ -33,6 +34,7 @@ const PAGE_LABEL: Record<Locale, string> = {
   mk: "За нас",
   sq: "Rreth nesh",
   en: "About Us",
+  tr: "Hakkimizda",
 };
 
 type Props = {

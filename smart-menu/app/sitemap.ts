@@ -4,7 +4,7 @@ import { getSiteUrl } from "@/lib/siteMeta";
 
 const baseUrl = getSiteUrl();
 const localeRoutes = ["", "/kako-raboti", "/cenovnik", "/za-nas"] as const;
-const restaurantSubRoutes = ["", "/menu", "/contact", "/ai-assistant"] as const;
+const restaurantSubRoutes = ["", "/ai-assistant"] as const;
 
 type RestaurantRecord = {
   id: string;

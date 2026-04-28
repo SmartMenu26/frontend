@@ -25,13 +25,58 @@ const mapApiPayload = (payload: unknown): Record<string, unknown> | null => {
   return null;
 };
 
-const getMenuItemPayload = (payload: unknown): MenuItemPayload | null => {
-  if (payload && typeof payload === "object") {
-    if ("data" in payload && payload.data && typeof payload.data === "object") {
-      return payload.data as MenuItemPayload;
-    }
-    return payload as MenuItemPayload;
+const getPayloadId = (record: Record<string, unknown>): string | undefined =>
+  typeof record._id === "string"
+    ? record._id
+    : typeof record.id === "string"
+      ? record.id
+      : undefined;
+
+const getMenuItemPayload = (
+  payload: unknown,
+  menuItemId: string,
+  depth = 0
+): MenuItemPayload | null => {
+  if (!payload || typeof payload !== "object" || depth > 8) {
+    return null;
   }
+
+  if (Array.isArray(payload)) {
+    for (const item of payload) {
+      const match = getMenuItemPayload(item, menuItemId, depth + 1);
+      if (match) return match;
+    }
+    return null;
+  }
+
+  const record = payload as Record<string, unknown>;
+  const candidateId = getPayloadId(record);
+  if (candidateId === menuItemId) {
+    return record as MenuItemPayload;
+  }
+
+  const nestedKeys = [
+    "data",
+    "item",
+    "menuItem",
+    "menuItems",
+    "items",
+    "results",
+    "docs",
+    "attributes",
+  ];
+
+  for (const key of nestedKeys) {
+    const nested = record[key];
+    if (!nested || nested === payload) continue;
+    const match = getMenuItemPayload(nested, menuItemId, depth + 1);
+    if (match) return match;
+  }
+
+  if (Array.isArray(record.nutritionBreakdown) || record.name || record.image) {
+    return record as MenuItemPayload;
+  }
+
   return null;
 };
 
@@ -125,7 +170,18 @@ export default function MenuItemDetailsPageClient({
           );
         }
 
-        const payload = getMenuItemPayload(await detailRes.json().catch(() => null));
+const rawDetailResponse = await detailRes.json().catch(() => null);
+console.log("RAW DETAIL RESPONSE:", rawDetailResponse);
+console.log(
+  "RAW DETAIL RESPONSE nutritionBreakdown:",
+  rawDetailResponse?.nutritionBreakdown
+);
+
+const payload = getMenuItemPayload(rawDetailResponse, menuItemId);
+console.log("EXTRACTED PAYLOAD:", payload);
+console.log("EXTRACTED PAYLOAD nutritionBreakdown:", payload?.nutritionBreakdown);
+console.log("EXTRACTED PAYLOAD JSON:", JSON.stringify(payload, null, 2));
+
         if (!payload) {
           throw new Error("Menu item not found");
         }
