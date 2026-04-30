@@ -43,6 +43,7 @@ type Props = {
   allergens?: Allergen[];
   restaurantId?: string;
   restaurantSlug?: string;
+  brandColor?: string;
   price?: number;
   healthCornerIngredients?: HealthCornerIngredient[];
 };
@@ -56,6 +57,7 @@ export default function MenuItemDetails({
   allergens = [],
   restaurantId,
   restaurantSlug,
+  brandColor,
   price,
   healthCornerIngredients,
 }: Props) {
@@ -71,6 +73,7 @@ export default function MenuItemDetails({
   const returnSubcategoryId = searchParams?.get("subcategoryId") ?? undefined;
   const slugOrId = restaurantSlug ?? restaurantId ?? null;
   const showHealthCornerInfographic = !!healthCornerIngredients?.length;
+  const pageBackgroundColor = brandColor?.trim() || "#3F5D50";
 
   const backUrl = useMemo(() => {
     if (!slugOrId) return null;
@@ -237,7 +240,10 @@ export default function MenuItemDetails({
 
   return (
     <>
-      <div className="min-h-dvh bg-[#3F5D50] flex flex-col justify-between gap-5">
+      <div
+        className="min-h-dvh bg-[#3F5D50] flex flex-col justify-between gap-5"
+        style={{ backgroundColor: pageBackgroundColor }}
+      >
       <MenuItemHero
         name={name}
         imageUrl={imageUrl}

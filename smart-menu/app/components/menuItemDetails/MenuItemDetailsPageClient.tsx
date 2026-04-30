@@ -32,6 +32,15 @@ const getPayloadId = (record: Record<string, unknown>): string | undefined =>
       ? record.id
       : undefined;
 
+const getBrandColor = (payload: Record<string, unknown> | null): string | undefined => {
+  if (typeof payload?.brandColor !== "string") {
+    return undefined;
+  }
+
+  const brandColor = payload.brandColor.trim();
+  return brandColor || undefined;
+};
+
 const getMenuItemPayload = (
   payload: unknown,
   menuItemId: string,
@@ -94,6 +103,7 @@ type LoadState =
       viewModel: MenuItemViewModel;
       restaurantId: string;
       canonicalSlug: string;
+      brandColor?: string;
     };
 
 export default function MenuItemDetailsPageClient({
@@ -134,6 +144,7 @@ export default function MenuItemDetailsPageClient({
           typeof restaurantPayload?.slug === "string"
             ? restaurantPayload.slug
             : restaurantSlug;
+        const brandColor = getBrandColor(restaurantPayload);
 
         if (!restaurantId) {
           throw new Error("Restaurant not found");
@@ -198,6 +209,7 @@ console.log("EXTRACTED PAYLOAD JSON:", JSON.stringify(payload, null, 2));
           viewModel,
           restaurantId,
           canonicalSlug,
+          brandColor,
         });
       } catch (error) {
         if (cancelled) {
@@ -241,6 +253,7 @@ console.log("EXTRACTED PAYLOAD JSON:", JSON.stringify(payload, null, 2));
       {...state.viewModel}
       restaurantId={state.restaurantId}
       restaurantSlug={state.canonicalSlug}
+      brandColor={state.brandColor}
     />
   );
 }

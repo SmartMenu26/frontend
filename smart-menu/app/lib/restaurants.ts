@@ -2,6 +2,11 @@ import { locales, type Locale } from "@/i18n";
 
 type LocalizedRecord = Record<string, string | null | undefined>;
 
+export type RestaurantAiSuggestion = {
+  label?: string | LocalizedRecord;
+  icon?: string;
+};
+
 export type DailyComboItem = {
   id: string;
   menuItemId?: string;
@@ -51,8 +56,10 @@ export type RestaurantRecord = {
   fullRestaurantName?: string;
   facebookUrl?: string;
   instagramUrl?: string;
+  brandColor?: string;
   location?: string;
   mobilePhone?: string;
+  aiSuggestions?: RestaurantAiSuggestion[];
   dailyCombo?: DailyComboOffer;
   supportedLanguages?: Locale[];
 };
@@ -154,6 +161,34 @@ const normalizeSupportedLanguages = (value: unknown): Locale[] | undefined => {
     if (!acc.includes(supportedLocale)) {
       acc.push(supportedLocale);
     }
+    return acc;
+  }, []);
+
+  return normalized.length > 0 ? normalized : undefined;
+};
+
+const normalizeAiSuggestions = (
+  value: unknown
+): RestaurantAiSuggestion[] | undefined => {
+  if (!Array.isArray(value)) return undefined;
+
+  const normalized = value.reduce<RestaurantAiSuggestion[]>((acc, entry) => {
+    if (!isRecord(entry)) return acc;
+
+    const label =
+      typeof entry.label === "string"
+        ? entry.label.trim() || undefined
+        : toLocalizedRecord(entry.label);
+
+    const icon = readString(entry.icon);
+
+    if (!label) return acc;
+
+    acc.push({
+      label,
+      icon,
+    });
+
     return acc;
   }, []);
 
@@ -417,8 +452,10 @@ const mapRestaurantPayload = (
     fullRestaurantName: normalizeString(payload.fullRestaurantName),
     facebookUrl: normalizeString(payload.facebookUrl),
     instagramUrl: normalizeString(payload.instagramUrl),
+    brandColor: normalizeString(payload.brandColor),
     location: normalizeString(payload.location),
     mobilePhone: normalizeString(payload.mobilePhone),
+    aiSuggestions: normalizeAiSuggestions(payload.aiSuggestions),
     dailyCombo: extractDailyCombo(payload) ?? undefined,
     supportedLanguages: normalizeSupportedLanguages(payload.supportedLanguages),
   };

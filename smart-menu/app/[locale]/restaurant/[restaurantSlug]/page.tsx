@@ -14,8 +14,8 @@ import {
   fetchRestaurantRecord,
   fetchWeeklyCombos,
   pickRestaurantDescription,
-  pickRestaurantName,
   resolveLocalizedText,
+  pickRestaurantName,
   type DailyComboOffer,
   type WeeklyComboEntry,
 } from "@/app/lib/restaurants";
@@ -190,6 +190,17 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
       : record.assistantName,
     localePriority
   );
+  const resolvedAiSuggestions = record.aiSuggestions?.reduce<
+    { label: string; icon?: string }[]
+  >((acc, suggestion) => {
+    const label = resolveLocalizedText(suggestion.label, localePriority);
+    if (!label) return acc;
+    acc.push({
+      label,
+      icon: suggestion.icon,
+    });
+    return acc;
+  }, []);
   const contactDisplayName = record.fullRestaurantName ?? restaurantName;
   const schemaPayload: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -237,6 +248,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
           restaurantId={record.id}
           restaurantSlug={record.slug}
           assistantName={assistantDisplayName}
+          aiSuggestions={resolvedAiSuggestions}
         />
 
         <RestaurantContent
