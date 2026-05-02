@@ -446,6 +446,15 @@
     },
     "loadingLabel": "Po e përgatisim pjatën...",
     "back": "Kthehu",
+    "nutrition": {
+      "title": "Vlerat ushqyese për porcion",
+      "calories": "Kalori",
+      "protein": "Proteina",
+      "carbs": "Karbohidrate",
+      "fat": "Yndyrna",
+      "gramsSuffix": " g",
+      "kcalSuffix": "kcal"
+    },
     "allergens": {
       "fallback": "Alergjen",
       "gluten": {

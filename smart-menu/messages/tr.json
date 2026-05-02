@@ -438,6 +438,15 @@
     },
     "loadingLabel": "Yemeginiz hazirlaniyor...",
     "back": "Geri",
+    "nutrition": {
+      "title": "Porsiyon basina besin degerleri",
+      "calories": "Kalori",
+      "protein": "Protein",
+      "carbs": "Karbonhidrat",
+      "fat": "Yag",
+      "gramsSuffix": " g",
+      "kcalSuffix": "kcal"
+    },
     "allergens": {
       "fallback": "Alerjen",
       "gluten": {

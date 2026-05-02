@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CSSProperties,
   FormEvent,
   MouseEvent,
   memo,
@@ -13,7 +14,18 @@ import {
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
-import { ArrowLeft, Heart, MessageSquare, Smile, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Droplets,
+  Dumbbell,
+  Heart,
+  MessageSquare,
+  Smile,
+  ThumbsDown,
+  ThumbsUp,
+  Wheat,
+  X,
+} from "lucide-react";
 import {
   getAllergenIconEntry,
   resolveTooltipLabel,
@@ -26,6 +38,7 @@ import { greatVibes } from "@/app/fonts";
 import HealthCornerRadialInfographic, {
   type HealthCornerIngredient,
 } from "./HealthCornerRadialInfographic";
+import type { NutritionSummary } from "./menuItemDetailsUtils";
 
 type Allergen = {
   key: string;
@@ -46,6 +59,7 @@ type Props = {
   brandColor?: string;
   price?: number;
   healthCornerIngredients?: HealthCornerIngredient[];
+  nutritionSummary?: NutritionSummary;
 };
 
 export default function MenuItemDetails({
@@ -60,6 +74,7 @@ export default function MenuItemDetails({
   brandColor,
   price,
   healthCornerIngredients,
+  nutritionSummary,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -72,8 +87,21 @@ export default function MenuItemDetails({
   const returnCategoryId = searchParams?.get("categoryId") ?? undefined;
   const returnSubcategoryId = searchParams?.get("subcategoryId") ?? undefined;
   const slugOrId = restaurantSlug ?? restaurantId ?? null;
-  const showHealthCornerInfographic = !!healthCornerIngredients?.length;
+  const showNutritionSpotlight = Boolean(
+    nutritionSummary &&
+      (nutritionSummary.proteinGrams !== undefined ||
+        nutritionSummary.carbsGrams !== undefined ||
+        nutritionSummary.fatGrams !== undefined)
+  );
+  const showHealthCornerInfographic =
+    !showNutritionSpotlight && !!healthCornerIngredients?.length;
   const pageBackgroundColor = brandColor?.trim() || "#3F5D50";
+  const scanAnimationToken = `${id}:${imageUrl}`;
+  const [readyScanToken, setReadyScanToken] = useState<string | null>(null);
+  const [nutritionScanProgress, setNutritionScanProgress] = useState(
+    showNutritionSpotlight ? 0 : 1
+  );
+  const isNutritionScanReady = readyScanToken === scanAnimationToken;
 
   const backUrl = useMemo(() => {
     if (!slugOrId) return null;
@@ -124,6 +152,38 @@ export default function MenuItemDetails({
     });
   }, [locale, name]);
 
+  const handleNutritionScanReady = useCallback((token: string) => {
+    setReadyScanToken((current) => (current === token ? current : token));
+  }, []);
+
+  useEffect(() => {
+    if (!showNutritionSpotlight || !isNutritionScanReady) return;
+
+    let startTime: number | null = null;
+    let frameId = 0;
+
+    const tick = (time: number) => {
+      if (startTime === null) {
+        startTime = time;
+        setNutritionScanProgress(0);
+      }
+
+      const elapsed = time - startTime;
+      const progress = Math.min(elapsed / NUTRITION_SCAN_DURATION_MS, 1);
+      setNutritionScanProgress(easeOutCubic(progress));
+
+      if (progress < 1) {
+        frameId = requestAnimationFrame(tick);
+      }
+    };
+
+    frameId = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
+  }, [showNutritionSpotlight, id, isNutritionScanReady]);
+
   const intlLocale = useMemo(() => {
     switch (locale) {
       case "mk":
@@ -144,6 +204,13 @@ export default function MenuItemDetails({
       maximumFractionDigits: 2,
     }).format(price);
   }, [price, intlLocale]);
+  const nutritionValueFormat = useMemo(
+    () =>
+      new Intl.NumberFormat(intlLocale, {
+        maximumFractionDigits: 1,
+      }),
+    [intlLocale]
+  );
 
   const assistantPrompt = useMemo(
     () => t("assistantPrompt", { dish: name }),
@@ -175,6 +242,14 @@ export default function MenuItemDetails({
     [t]
   );
   const priceText = priceLabel ? t("priceLabel", { price: priceLabel }) : null;
+  const macroLabels = useMemo(
+    () => ({
+      protein: t("nutrition.protein"),
+      carbs: t("nutrition.carbs"),
+      fat: t("nutrition.fat"),
+    }),
+    [t]
+  );
   const favoriteLabels = {
     add: t("favorite.add"),
     remove: t("favorite.remove"),
@@ -252,7 +327,22 @@ export default function MenuItemDetails({
         backLabel={backLabel}
         showHealthCornerInfographic={showHealthCornerInfographic}
         healthCornerIngredients={healthCornerIngredients}
+        showNutritionScan={showNutritionSpotlight}
+        scanProgress={isNutritionScanReady ? nutritionScanProgress : 0}
+        scanToken={scanAnimationToken}
+        onNutritionScanReady={handleNutritionScanReady}
       />
+
+      {showNutritionSpotlight && nutritionSummary && (
+        <div className="relative z-10 px-2">
+          <MacroStatsRow
+            summary={nutritionSummary}
+            labels={macroLabels}
+            valueFormat={nutritionValueFormat}
+            progress={isNutritionScanReady ? nutritionScanProgress : 0}
+          />
+        </div>
+      )}
 
       {/* BOTTOM SHEET */}
       <div className="flex flex-col justify-between gap-3 md:container md:mx-auto min-h-[55dvh] md:max-w-125 rounded-t-[40px] bg-[#F7F7F7] px-6 pb-4 pt-8 shadow-[0_-20px_60px_rgba(0,0,0,0.25)] md:min-h-[45dvh]">
@@ -429,10 +519,17 @@ type MenuItemHeroProps = {
   backLabel: string;
   showHealthCornerInfographic?: boolean;
   healthCornerIngredients?: HealthCornerIngredient[];
+  showNutritionScan?: boolean;
+  scanProgress?: number;
+  scanToken?: string;
+  onNutritionScanReady?: (token: string) => void;
 };
 
 const HERO_IMAGE_SIZE = 300;
 const HERO_IMAGE_SIZES = "300px";
+const NUTRITION_SCAN_DURATION_MS = 3600;
+const FIRST_SCAN_SHARE = 0.65;
+const easeOutCubic = (value: number) => 1 - Math.pow(1 - value, 3);
 
 const MenuItemHero = memo(function MenuItemHero({
   name,
@@ -442,9 +539,18 @@ const MenuItemHero = memo(function MenuItemHero({
   backLabel,
   showHealthCornerInfographic = false,
   healthCornerIngredients,
+  showNutritionScan = false,
+  scanProgress = 1,
+  scanToken,
+  onNutritionScanReady,
 }: MenuItemHeroProps) {
   const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
   const imageLoaded = loadedImageUrl === imageUrl;
+  const notifyNutritionScanReady = useCallback(() => {
+    if (scanToken && onNutritionScanReady) {
+      onNutritionScanReady(scanToken);
+    }
+  }, [onNutritionScanReady, scanToken]);
 
   return (
     <div className="flex justify-center items-center relative min-h-[45dvh] w-full px-4 sm:min-h-[50dvh]">
@@ -468,9 +574,10 @@ const MenuItemHero = memo(function MenuItemHero({
         </div>
       ) : (
         <div
-          className="py-2 relative grid place-items-center"
+          className="relative grid place-items-center py-2"
           style={{ width: HERO_IMAGE_SIZE, height: HERO_IMAGE_SIZE }}
         >
+          {showNutritionScan && <NutritionScanOverlay progress={scanProgress} />}
           <img
             aria-hidden="true"
             width={HERO_IMAGE_SIZE}
@@ -488,12 +595,16 @@ const MenuItemHero = memo(function MenuItemHero({
             src={imageUrl}
             alt={imageAlt ?? name}
             sizes={HERO_IMAGE_SIZES}
-            onLoad={() => setLoadedImageUrl(imageUrl)}
-            onError={() =>
+            onLoad={() => {
+              setLoadedImageUrl(imageUrl);
+              notifyNutritionScanReady();
+            }}
+            onError={() => {
               setLoadedImageUrl((current) =>
                 current === imageUrl ? null : current
-              )
-            }
+              );
+              notifyNutritionScanReady();
+            }}
             className={clsx(
               "h-full w-full rounded-full object-cover transition-opacity duration-300 max-h-[300px] max-w-[300px]",
               imageLoaded ? "opacity-100" : "opacity-0"
@@ -504,6 +615,157 @@ const MenuItemHero = memo(function MenuItemHero({
     </div>
   );
 });
+
+type MacroStatsRowProps = {
+  summary: NutritionSummary;
+  labels: {
+    protein: string;
+    carbs: string;
+    fat: string;
+  };
+  valueFormat: Intl.NumberFormat;
+  progress: number;
+};
+
+function MacroStatsRow({
+  summary,
+  labels,
+  valueFormat,
+  progress,
+}: MacroStatsRowProps) {
+  const metrics = [
+    {
+      key: "protein",
+      Icon: Dumbbell,
+      label: labels.protein,
+      value: summary.proteinGrams ?? 0,
+      accentClass: "text-[#4EA65B]",
+    },
+    {
+      key: "carbs",
+      Icon: Wheat,
+      label: labels.carbs,
+      value: summary.carbsGrams ?? 0,
+      accentClass: "text-[#E0A212]",
+    },
+    {
+      key: "fat",
+      Icon: Droplets,
+      label: labels.fat,
+      value: summary.fatGrams ?? 0,
+      accentClass: "text-[#E35D5D]",
+    },
+  ];
+
+  if (
+    summary.proteinGrams === undefined &&
+    summary.carbsGrams === undefined &&
+    summary.fatGrams === undefined
+  ) {
+    return null;
+  }
+
+  return (
+    <div className="mt-2 grid grid-cols-3 gap-1.5">
+      {metrics.map((metric) => (
+        <article
+          key={metric.key}
+          className="rounded-[26px] bg-white px-1 py-2 text-center shadow-[0_18px_40px_rgba(20,26,23,0.12)] ring-1 ring-[#EEE8DD]"
+        >
+          <div
+            className={clsx(
+              "mx-auto flex h-7 w-7 items-center justify-center",
+              metric.accentClass
+            )}
+          >
+            <metric.Icon className="h-6 w-6" strokeWidth={2.1} />
+          </div>
+          <p className="mt-3 text-[21px] font-semibold leading-none text-[#1B1F1E] sm:text-[1.55rem]">
+            {valueFormat.format(metric.value * progress)}g
+          </p>
+          <p className="mt-2 text-sm font-medium text-[#2F3A37]/72">
+            {metric.label}
+          </p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+type NutritionScanOverlayProps = {
+  progress: number;
+};
+
+function NutritionScanOverlay({ progress }: NutritionScanOverlayProps) {
+  const clampedProgress = Math.max(0, Math.min(1, progress));
+  const isReturnScan = clampedProgress >= FIRST_SCAN_SHARE;
+  const passProgress = isReturnScan
+    ? (clampedProgress - FIRST_SCAN_SHARE) / (1 - FIRST_SCAN_SHARE)
+    : clampedProgress / FIRST_SCAN_SHARE;
+  const linePosition = isReturnScan
+    ? (1 - passProgress) * 100
+    : passProgress * 100;
+  const fadeStart = 0.9;
+  const overlayOpacity =
+    clampedProgress <= fadeStart
+      ? 1
+      : Math.max(0, 1 - (clampedProgress - fadeStart) / (1 - fadeStart));
+  const scanStyle = {
+    top: `calc(${linePosition}% - 1px)`,
+    opacity: overlayOpacity,
+  } satisfies CSSProperties;
+  const scannedRegionStyle = {
+    top: isReturnScan ? `${linePosition}%` : "0%",
+    height: isReturnScan ? `${100 - linePosition}%` : `${linePosition}%`,
+    opacity: overlayOpacity,
+  } satisfies CSSProperties;
+
+  return (
+    <>
+      <span
+        className="pointer-events-none absolute left-1 top-1 h-18 w-18 rounded-tl-[28px] border-l-[6px] border-t-[6px] border-[#B8FF41] transition-opacity duration-300"
+        style={{ opacity: overlayOpacity }}
+      />
+      <span
+        className="pointer-events-none absolute right-1 top-1 h-18 w-18 rounded-tr-[28px] border-r-[6px] border-t-[6px] border-[#B8FF41] transition-opacity duration-300"
+        style={{ opacity: overlayOpacity }}
+      />
+      <span
+        className="pointer-events-none absolute bottom-1 left-1 h-18 w-18 rounded-bl-[28px] border-b-[6px] border-l-[6px] border-[#B8FF41] transition-opacity duration-300"
+        style={{ opacity: overlayOpacity }}
+      />
+      <span
+        className="pointer-events-none absolute bottom-1 right-1 h-18 w-18 rounded-br-[28px] border-b-[6px] border-r-[6px] border-[#B8FF41] transition-opacity duration-300"
+        style={{ opacity: overlayOpacity }}
+      />
+      <span
+        className="pointer-events-none absolute inset-x-4 top-0 overflow-hidden rounded-t-[24px]"
+        style={scannedRegionStyle}
+      >
+        <span
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(184,255,65,0.18) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(184,255,65,0.18) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(184,255,65,0.18), rgba(184,255,65,0.05) 58%, rgba(184,255,65,0))
+            `,
+            backgroundSize: "22px 22px, 22px 22px, 100% 100%",
+            backgroundPosition: "0 0, 0 0, 0 0",
+          }}
+        />
+      </span>
+      <span
+        className="pointer-events-none absolute inset-x-4 h-[2px] rounded-full bg-[#B8FF41] shadow-[0_0_18px_rgba(184,255,65,0.85)]"
+        style={scanStyle}
+      />
+      <span
+        className="pointer-events-none absolute inset-x-4 h-16 -translate-y-1/2 bg-gradient-to-b from-[#B8FF41]/22 via-[#B8FF41]/10 to-transparent blur-md"
+        style={scanStyle}
+      />
+    </>
+  );
+}
 
 function FavoriteButton({ itemId, storageKey, addLabel, removeLabel }: FavoriteButtonProps) {
   const [isFavorite, setIsFavorite] = useState(() =>

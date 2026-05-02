@@ -446,6 +446,15 @@
     },
     "loadingLabel": "Го подготвуваме јадењето...",
     "back": "Назад",
+    "nutrition": {
+      "title": "Нутритивни вредности по порција",
+      "calories": "Калории",
+      "protein": "Протеини",
+      "carbs": "Јаглехидрати",
+      "fat": "Масти",
+      "gramsSuffix": " g",
+      "kcalSuffix": "kcal"
+    },
     "allergens": {
       "fallback": "Алерген",
       "gluten": {

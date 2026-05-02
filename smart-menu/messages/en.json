@@ -446,6 +446,15 @@
     },
     "loadingLabel": "Preparing your dish...",
     "back": "Back",
+    "nutrition": {
+      "title": "Nutrition per serving",
+      "calories": "Calories",
+      "protein": "Protein",
+      "carbs": "Carbs",
+      "fat": "Fat",
+      "gramsSuffix": "g",
+      "kcalSuffix": "kcal"
+    },
     "allergens": {
       "fallback": "Allergen",
       "gluten": {

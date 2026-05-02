@@ -19,6 +19,10 @@ export type MenuItemPayload = {
   imageUrl?: string | null;
   price?: unknown;
   priceValue?: unknown;
+  calories?: unknown;
+  proteinGrams?: unknown;
+  carbsGrams?: unknown;
+  fatGrams?: unknown;
   nutritionBreakdown?: unknown;
   ingredientBreakdown?: unknown;
   ingredientsBreakdown?: unknown;
@@ -40,6 +44,19 @@ export type MenuItemViewModel = {
   imageAlt: string;
   price?: number;
   healthCornerIngredients?: HealthCornerIngredientViewModel[];
+  nutritionSummary?: NutritionSummary;
+};
+
+export type NutritionSummary = {
+  calories?: number;
+  proteinGrams?: number;
+  carbsGrams?: number;
+  fatGrams?: number;
+  macroDistribution?: {
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
 };
 
 const FALLBACK_IMAGE = "/placeholder.jpg";
@@ -89,6 +106,21 @@ export const parsePrice = (value: unknown): number | undefined => {
       return maybeValue;
     }
   }
+  return undefined;
+};
+
+const parseNumber = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number.parseFloat(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
   return undefined;
 };
 
@@ -164,15 +196,11 @@ export const buildHealthCornerIngredients = (
 ): HealthCornerIngredientViewModel[] | undefined => {
   const source = readIngredientBreakdownSource(payload);
 
-  console.log("ingredient source:", source);
-
   if (!source) return undefined;
 
   const ingredients = source.flatMap((item) => {
     if (!item || typeof item !== "object") return [];
     const record = item as Record<string, unknown>;
-
-    console.log("ingredient record:", record);
 
     const label = pickLocalizedValue(
       (record.label ?? record.name ?? record.ingredient ?? record.title) as
@@ -186,8 +214,6 @@ export const buildHealthCornerIngredients = (
     const value = parseIngredientPercent(
       record.percent ?? record.percentage ?? record.value ?? record.ratio
     );
-
-    console.log("mapped label/value:", { label, value });
 
     if (!label || value === undefined || value <= 0) return [];
 
@@ -207,9 +233,47 @@ export const buildHealthCornerIngredients = (
     ];
   });
 
-  console.log("final ingredients:", ingredients);
-
   return ingredients.length > 0 ? ingredients.slice(0, 6) : undefined;
+};
+
+const buildNutritionSummary = (
+  payload: MenuItemPayload
+): NutritionSummary | undefined => {
+  const calories = parseNumber(payload.calories);
+  const proteinGrams = parseNumber(payload.proteinGrams);
+  const carbsGrams = parseNumber(payload.carbsGrams);
+  const fatGrams = parseNumber(payload.fatGrams);
+
+  if (
+    calories === undefined &&
+    proteinGrams === undefined &&
+    carbsGrams === undefined &&
+    fatGrams === undefined
+  ) {
+    return undefined;
+  }
+
+  const proteinCalories =
+    proteinGrams !== undefined ? Math.max(0, proteinGrams) * 4 : 0;
+  const carbsCalories =
+    carbsGrams !== undefined ? Math.max(0, carbsGrams) * 4 : 0;
+  const fatCalories = fatGrams !== undefined ? Math.max(0, fatGrams) * 9 : 0;
+  const totalMacroCalories = proteinCalories + carbsCalories + fatCalories;
+
+  return {
+    calories,
+    proteinGrams,
+    carbsGrams,
+    fatGrams,
+    macroDistribution:
+      totalMacroCalories > 0
+        ? {
+            protein: (proteinCalories / totalMacroCalories) * 100,
+            carbs: (carbsCalories / totalMacroCalories) * 100,
+            fat: (fatCalories / totalMacroCalories) * 100,
+          }
+        : undefined,
+  };
 };
 
 export const buildMenuItemViewModel = (
@@ -237,5 +301,6 @@ export const buildMenuItemViewModel = (
     imageAlt: pickLocalizedValue(imageMeta, localePriority, name),
     price: parsePrice(payload?.price ?? payload?.priceValue),
     healthCornerIngredients: buildHealthCornerIngredients(payload, localePriority),
+    nutritionSummary: buildNutritionSummary(payload),
   };
 };
