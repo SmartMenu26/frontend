@@ -57,6 +57,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="mk">
+      <head>
+        <link rel="preconnect" href="https://smartmenu-media-prod.s3.eu-north-1.amazonaws.com" crossOrigin="" />
+        <link rel="preconnect" href="https://smartmenu-media-prod.s3.eu-central-1.amazonaws.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://smartmenu-media-prod.s3.eu-north-1.amazonaws.com" />
+        <link rel="dns-prefetch" href="https://smartmenu-media-prod.s3.eu-central-1.amazonaws.com" />
+      </head>
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=G-SX57E0RGSR"
         strategy="afterInteractive"

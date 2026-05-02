@@ -10,6 +10,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { incrementMenuItemView } from "@/app/lib/menuItemViews";
+import { preloadImage } from "@/app/lib/imagePreload";
 
 type MenuItem = {
   id: string;
@@ -58,6 +59,10 @@ export default function PopularSection({
     },
     [labelPriority]
   );
+
+  const warmMenuItemImage = useCallback((imageUrl?: string) => {
+    preloadImage(imageUrl);
+  }, []);
 
   useEffect(() => {
     if (!restaurantId) return;
@@ -138,7 +143,11 @@ export default function PopularSection({
                     imageUrl={it.imageUrl}
                     priceLabel={`${it.price}ден`}
                     kind={mealType}
+                    onPointerEnter={() => warmMenuItemImage(it.imageUrl)}
+                    onTouchStart={() => warmMenuItemImage(it.imageUrl)}
+                    onFocus={() => warmMenuItemImage(it.imageUrl)}
                     onClick={() => {
+                      warmMenuItemImage(it.imageUrl);
                       void incrementMenuItemView({
                         restaurantId,
                         menuItemId: it.id,

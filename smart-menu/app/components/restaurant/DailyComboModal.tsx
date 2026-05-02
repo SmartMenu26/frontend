@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { buildLocalizedPath } from "@/lib/routing";
 import type { DailyComboOffer } from "@/app/lib/restaurants";
 import type { Locale } from "@/i18n";
+import { preloadImage } from "@/app/lib/imagePreload";
 
 type DailyComboModalProps = {
   open: boolean;
@@ -118,6 +119,9 @@ export default function DailyComboModal({
                 <button
                   type="button"
                   key={item.id ?? `combo-${index}`}
+                  onMouseEnter={() => preloadImage(item.imageUrl)}
+                  onTouchStart={() => preloadImage(item.imageUrl)}
+                  onFocus={() => preloadImage(item.imageUrl)}
                   onClick={() => handleItemClick(item.menuItemId)}
                   className="flex flex-col items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30"
                 >

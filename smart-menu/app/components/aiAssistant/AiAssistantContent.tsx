@@ -11,6 +11,7 @@ import AiAssistantPromptPanel, {
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { incrementMenuItemView } from "@/app/lib/menuItemViews";
+import { preloadImage } from "@/app/lib/imagePreload";
 
 type Suggestion = {
   id: string;
@@ -357,7 +358,11 @@ export default function AiAssistantContent({
                       <Link
                         key={id + title}
                         href={href}
+                        onMouseEnter={() => preloadImage(resolvedImg)}
+                        onTouchStart={() => preloadImage(resolvedImg)}
+                        onFocus={() => preloadImage(resolvedImg)}
                         onClick={() => {
+                          preloadImage(resolvedImg);
                           if (id) {
                             void incrementMenuItemView({
                               restaurantId,

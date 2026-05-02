@@ -20,6 +20,9 @@ type CardProps = {
   priceLabel?: string;
   description?: string;
   onClick?: () => void;
+  onPointerEnter?: React.PointerEventHandler<HTMLButtonElement>;
+  onTouchStart?: React.TouchEventHandler<HTMLButtonElement>;
+  onFocus?: React.FocusEventHandler<HTMLButtonElement>;
   className?: string;
   variant?: CardVariant;
   index?: number;
@@ -33,6 +36,9 @@ export default function Card({
   priceLabel,
   description,
   onClick,
+  onPointerEnter,
+  onTouchStart,
+  onFocus,
   className = "",
   variant = "default",
   index,
@@ -76,6 +82,9 @@ export default function Card({
     <button
       type="button"
       onClick={onClick}
+      onPointerEnter={onPointerEnter}
+      onTouchStart={onTouchStart}
+      onFocus={onFocus}
       className={[
         "cursor-pointer text-left group",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#355B4B]/50",

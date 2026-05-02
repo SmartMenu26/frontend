@@ -13,6 +13,7 @@ import { useLocale } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { incrementMenuItemView } from "@/app/lib/menuItemViews";
+import { preloadImage } from "@/app/lib/imagePreload";
 
 const ITEMS_PER_PAGE = 4;
 const PAGE_VIEWPORT_PX = 520;
@@ -108,6 +109,10 @@ export default function MenuBrowser({
         },
         [resolveLocalizedLabel]
     );
+
+    const warmMenuItemImage = useCallback((imageUrl?: string) => {
+        preloadImage(imageUrl);
+    }, []);
 
     const mapCategories = useCallback(
         (data: any[]): Category[] =>
@@ -1131,10 +1136,14 @@ export default function MenuBrowser({
                                                         imageUrl={it.imageUrl}
                                                         priceLabel={`${it.price} ден`}
                                                         kind={it.kind ?? mealType}
-                                                    description={it.description}
-                                                    layout="list"
+                                                        description={it.description}
+                                                        layout="list"
+                                                        onPointerEnter={() => warmMenuItemImage(it.imageUrl)}
+                                                        onTouchStart={() => warmMenuItemImage(it.imageUrl)}
+                                                        onFocus={() => warmMenuItemImage(it.imageUrl)}
                                                         onClick={() => {
                                                             userInteractedRef.current = true;
+                                                            warmMenuItemImage(it.imageUrl);
                                                             void incrementMenuItemView({
                                                                 restaurantId,
                                                                 menuItemId: it.id,
