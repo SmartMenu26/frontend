@@ -25,6 +25,7 @@ type MenuItem = {
     title: string;
     imageUrl: string;
     price: number;
+    weightGrams?: number;
     kind?: string;
     description?: string;
 };
@@ -114,6 +115,18 @@ export default function MenuBrowser({
         preloadImage(imageUrl);
     }, []);
 
+    const formatWeightLabel = useCallback((weightGrams?: number) => {
+        if (typeof weightGrams !== "number" || Number.isNaN(weightGrams) || weightGrams <= 0) {
+            return undefined;
+        }
+
+        const normalizedWeight = Number.isInteger(weightGrams)
+            ? weightGrams.toString()
+            : weightGrams.toFixed(1);
+
+        return `${normalizedWeight} g`;
+    }, []);
+
     const mapCategories = useCallback(
         (data: any[]): Category[] =>
             data
@@ -155,6 +168,12 @@ export default function MenuBrowser({
                     title: resolvedTitle,
                     imageUrl: m?.image?.url ?? m?.imageUrl ?? "",
                     price: m?.price ?? 0,
+                    weightGrams:
+                        typeof m?.weightGrams === "number"
+                            ? m.weightGrams
+                            : typeof m?.weightGrams === "string"
+                                ? Number.parseFloat(m.weightGrams)
+                                : undefined,
                     kind: m?.kind ?? m?.baseCategory ?? m?.type,
                     description: resolvedDescription || undefined,
                 };
@@ -1135,6 +1154,7 @@ export default function MenuBrowser({
                                                         title={it.title}
                                                         imageUrl={it.imageUrl}
                                                         priceLabel={`${it.price} ден`}
+                                                        weightLabel={formatWeightLabel(it.weightGrams)}
                                                         kind={it.kind ?? mealType}
                                                         description={it.description}
                                                         layout="list"
