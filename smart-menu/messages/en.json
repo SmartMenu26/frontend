@@ -206,7 +206,7 @@
     },
     "assistantNames": {
       "title": "AI assistant names",
-      "empty": "No language overrides configured. The assistant falls back to the restaurant name."
+      "empty": "No language overrides configured. The assistant will use the default name \"Assistant\"."
     },
     "assistantPhoto": {
       "title": "Assistant illustration",
@@ -220,6 +220,7 @@
       "error": "We couldn't load the feedback right now.",
       "empty": "No feedback has been submitted yet.",
       "loadMore": "Load more",
+      "avgRating": "Avg rating",
       "avgFood": "Avg food",
       "avgService": "Avg service",
       "total": "{count, plural, one {# response} other {# responses}}",
@@ -229,6 +230,7 @@
       "suggestionEmpty": "No suggestion was shared.",
       "ratingLabel": "{type}: {value}/5",
       "ratingTypes": {
+        "overall": "Rating",
         "food": "Food",
         "service": "Service"
       }
@@ -423,7 +425,12 @@
     "assistantPrompt": "What pairs well with {dish}?",
     "shareCta": "Share your thoughts",
     "shareModal": {
-      "title": "Your opinion matters to us",
+      "title": "How was your experience?",
+      "ratingLabel": "Rate from 1 to 5 stars",
+      "thankYouTitle": "Thank you! 🙌",
+      "thankYouDescription": "It would mean a lot if you left us a rating on Google",
+      "reviewButton": "Leave a review",
+      "closeButton": "Close",
       "foodLabel": "Rate our food",
       "serviceLabel": "Rate our service",
       "feedbackLabel": "Your suggestion",

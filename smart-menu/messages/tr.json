@@ -213,6 +213,7 @@
       "error": "Geri bildirimleri su anda yukleyemedik.",
       "empty": "Henuz geri bildirim gonderilmedi.",
       "loadMore": "Daha fazla yukle",
+      "avgRating": "Ortalama puan",
       "avgFood": "Ortalama yemek",
       "avgService": "Ortalama servis",
       "total": "{count, plural, one {# yanit} other {# yanit}}",
@@ -222,6 +223,7 @@
       "suggestionEmpty": "Herhangi bir onerı paylasilmadi.",
       "ratingLabel": "{type}: {value}/5",
       "ratingTypes": {
+        "overall": "Puan",
         "food": "Yemek",
         "service": "Servis"
       }
@@ -415,7 +417,12 @@
     "assistantPrompt": "{dish} ile ne iyi gider?",
     "shareCta": "Dusuncelerinizi paylasin",
     "shareModal": {
-      "title": "Gorusunuz bizim icin onemli",
+      "title": "Deneyiminiz nasildi?",
+      "ratingLabel": "1 ile 5 yildiz arasynda puanlayin",
+      "thankYouTitle": "Tesekkurler! 🙌",
+      "thankYouDescription": "Google'da bir puan birakirsaniz bizim icin cok degerli olur",
+      "reviewButton": "Yorum birak",
+      "closeButton": "Kapat",
       "foodLabel": "Yemegimizi degerlendirin",
       "serviceLabel": "Servisimizi degerlendirin",
       "feedbackLabel": "Oneriniz",
