@@ -18,6 +18,7 @@ type CardProps = {
   title: string;
   imageUrl: string;
   priceLabel?: string;
+  weightLabel?: string;
   description?: string;
   onClick?: () => void;
   onPointerEnter?: React.PointerEventHandler<HTMLButtonElement>;
@@ -34,6 +35,7 @@ export default function Card({
   title,
   imageUrl,
   priceLabel,
+  weightLabel,
   description,
   onClick,
   onPointerEnter,
@@ -136,17 +138,24 @@ export default function Card({
               <p className="mt-1 text-[13px] text-[#6B726E] line-clamp-1">{description}</p>
             )}
           </div>
-          <div className="ml-2 flex items-center gap-2 text-[#0F241A]">
-            {priceLabel && (
-              <span className="text-[14px] font-semibold whitespace-nowrap">
-                {priceLabel}
+          <div className="ml-2 flex flex-col items-start gap-1 text-[#0F241A]">
+            <div className="flex items-center gap-2">
+              {priceLabel ? (
+                <span className="text-[14px] font-semibold whitespace-nowrap">
+                  {priceLabel}
+                </span>
+              ) : null}
+              <ArrowUpRight
+                size={18}
+                aria-hidden
+                className="text-[#6E7571] transition-transform duration-200 group-hover:translate-x-0.5"
+              />
+            </div>
+            {weightLabel ? (
+              <span className="rounded-full bg-[#E7F2FF] px-2.5 py-1 text-[11px] font-medium leading-none whitespace-nowrap text-[#2C6CBF] shadow-[0_6px_16px_rgba(44,108,191,0.14)] transition-all duration-200 group-hover:bg-[#DCEEFF]">
+                {weightLabel}
               </span>
-            )}
-            <ArrowUpRight
-              size={18}
-              aria-hidden
-              className="text-[#6E7571] transition-transform duration-200 group-hover:translate-x-0.5"
-            />
+            ) : null}
           </div>
         </div>
       ) : (
