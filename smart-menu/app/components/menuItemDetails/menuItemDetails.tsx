@@ -666,7 +666,7 @@ function MacroStatsRow({
   }
 
   return (
-    <div className="mt-2 grid grid-cols-3 gap-1.5">
+    <div className="mt-2 grid grid-cols-3 gap-1.5 md:max-w-125 md:mx-auto">
       {metrics.map((metric) => (
         <article
           key={metric.key}
