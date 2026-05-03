@@ -206,7 +206,7 @@
     },
     "assistantNames": {
       "title": "Имиња на AI асистентот",
-      "empty": "Нема јазични прилагодувања. Асистентот ќе го користи името на ресторанот."
+      "empty": "Нема јазични прилагодувања. Асистентот ќе го користи стандардното име „Асистентот“."
     },
     "assistantPhoto": {
       "title": "Илустрација од асистентот",
@@ -220,6 +220,7 @@
       "error": "Не можевме да ги вчитаме впечатоците.",
       "empty": "Сè уште нема оставено мислење.",
       "loadMore": "Вчитај уште",
+      "avgRating": "Просечна оцена",
       "avgFood": "Просек храна",
       "avgService": "Просек услуга",
       "total": "{count, plural, one {# мислење} few {# мислења} other {# мислења}}",
@@ -229,6 +230,7 @@
       "suggestionEmpty": "Нема оставен предлог.",
       "ratingLabel": "{type}: {value}/5",
       "ratingTypes": {
+        "overall": "Оцена",
         "food": "Храна",
         "service": "Услуга"
       }
@@ -423,7 +425,12 @@
     "assistantPrompt": "Што оди со {dish}?",
     "shareCta": "Сподели го твоето мислење",
     "shareModal": {
-      "title": "Вашето мислење ни значи",
+      "title": "Какво е твоето искуство во {restaurantName}?",
+      "ratingLabel": "Оцени со 1 до 5 ѕвезди",
+      "thankYouTitle": "Фала ти!",
+      "thankYouDescription": "Би ни значело многу ако оставиш оцена на Google",
+      "reviewButton": "Остави оценка на Google",
+      "closeButton": "Затвори",
       "foodLabel": "Оценете ја нашата храна",
       "serviceLabel": "Оценете ја нашата услуга",
       "feedbackLabel": "Ваш предлог",

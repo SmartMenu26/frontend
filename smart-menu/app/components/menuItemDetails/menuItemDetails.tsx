@@ -2,7 +2,6 @@
 
 import {
   CSSProperties,
-  FormEvent,
   MouseEvent,
   memo,
   useCallback,
@@ -20,9 +19,7 @@ import {
   Dumbbell,
   Heart,
   MessageSquare,
-  Smile,
-  ThumbsDown,
-  ThumbsUp,
+  Star,
   Wheat,
   X,
 } from "lucide-react";
@@ -46,6 +43,8 @@ type Allergen = {
   code?: string;
 };
 
+const REVIEW_MODAL_MIN_TIME_MS = 30_000;
+const REVIEW_MODAL_IDLE_MS = 5_000;
 
 type Props = {
   id: string;
@@ -56,6 +55,8 @@ type Props = {
   allergens?: Allergen[];
   restaurantId?: string;
   restaurantSlug?: string;
+  restaurantName?: string;
+  googleReviewUrl?: string;
   brandColor?: string;
   price?: number;
   healthCornerIngredients?: HealthCornerIngredient[];
@@ -71,6 +72,8 @@ export default function MenuItemDetails({
   allergens = [],
   restaurantId,
   restaurantSlug,
+  restaurantName,
+  googleReviewUrl,
   brandColor,
   price,
   healthCornerIngredients,
@@ -96,12 +99,29 @@ export default function MenuItemDetails({
   const showHealthCornerInfographic =
     !showNutritionSpotlight && !!healthCornerIngredients?.length;
   const pageBackgroundColor = brandColor?.trim() || "#3F5D50";
+  const reviewScope = useMemo(
+    () => restaurantId ?? restaurantSlug ?? "default",
+    [restaurantId, restaurantSlug]
+  );
+  const reviewSubmittedStorageKey = useMemo(
+    () => `review-modal-submitted:${reviewScope}`,
+    [reviewScope]
+  );
+  const reviewSessionStartStorageKey = useMemo(
+    () => `review-modal-menu-start:${reviewScope}`,
+    [reviewScope]
+  );
   const scanAnimationToken = `${id}:${imageUrl}`;
   const [readyScanToken, setReadyScanToken] = useState<string | null>(null);
   const [nutritionScanProgress, setNutritionScanProgress] = useState(
     showNutritionSpotlight ? 0 : 1
   );
   const isNutritionScanReady = readyScanToken === scanAnimationToken;
+  const [hasSubmittedReview, setHasSubmittedReview] = useState(false);
+  const reviewModalShownRef = useRef(false);
+  const reviewModalOpenRef = useRef(false);
+  const lastActivityAtRef = useRef<number>(Date.now());
+  const menuEnteredAtRef = useRef<number>(Date.now());
 
   const backUrl = useMemo(() => {
     if (!slugOrId) return null;
@@ -220,26 +240,18 @@ export default function MenuItemDetails({
   const shareLabel = t("shareCta");
   const shareModalLabels = useMemo(
     () => ({
-      title: t("shareModal.title"),
-      foodLabel: t("shareModal.foodLabel"),
-      serviceLabel: t("shareModal.serviceLabel"),
-      feedbackLabel: t("shareModal.feedbackLabel"),
-      feedbackPlaceholder: t("shareModal.feedbackPlaceholder"),
-      submit: t("shareModal.submit"),
+      title: t("shareModal.title", {
+        restaurantName: restaurantName ?? restaurantSlug ?? restaurantId ?? "",
+      }),
+      ratingLabel: t("shareModal.ratingLabel"),
+      thankYouTitle: t("shareModal.thankYouTitle"),
+      thankYouDescription: t("shareModal.thankYouDescription"),
+      reviewButton: t("shareModal.reviewButton"),
+      closeButton: t("shareModal.closeButton"),
       closeAriaLabel: t("shareModal.closeAriaLabel"),
-      successTitle: t("shareModal.successTitle"),
-      successDescription: t("shareModal.successDescription"),
       errorMessage: t("shareModal.errorMessage"),
     }),
-    [t]
-  );
-  const shareRatingLabels = useMemo(
-    () => ({
-      negative: t("shareModal.ratings.negative"),
-      neutral: t("shareModal.ratings.neutral"),
-      positive: t("shareModal.ratings.positive"),
-    }),
-    [t]
+    [t, restaurantName, restaurantSlug, restaurantId]
   );
   const priceText = priceLabel ? t("priceLabel", { price: priceLabel }) : null;
   const macroLabels = useMemo(
@@ -255,27 +267,153 @@ export default function MenuItemDetails({
     remove: t("favorite.remove"),
   };
   const backLabel = t("back");
+
+  const openShareModal = useCallback(
+    (source: "manual" | "auto") => {
+      if (hasSubmittedReview) return;
+      setShareModalOpen(true);
+      reviewModalOpenRef.current = true;
+      reviewModalShownRef.current = true;
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem(
+          `review-modal-shown:${reviewScope}`,
+          "true"
+        );
+      }
+      trackEvent("menu_item_feedback_opened", {
+        itemId: id,
+        dish: name,
+        locale,
+        source,
+      });
+    },
+    [hasSubmittedReview, id, locale, name, reviewScope]
+  );
+
   const handleShareClick = useCallback(() => {
-    setShareModalOpen(true);
-    trackEvent("menu_item_feedback_opened", {
-      itemId: id,
-      dish: name,
-      locale,
+    if (isShareModalOpen || hasSubmittedReview) return;
+    lastActivityAtRef.current = Date.now();
+    openShareModal("manual");
+  }, [hasSubmittedReview, isShareModalOpen, openShareModal]);
+
+  useEffect(() => {
+    reviewModalOpenRef.current = isShareModalOpen;
+  }, [isShareModalOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setHasSubmittedReview(
+      window.localStorage.getItem(reviewSubmittedStorageKey) === "true"
+    );
+  }, [reviewSubmittedStorageKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const shownKey = `review-modal-shown:${reviewScope}`;
+    const viewedItemsKey = `review-modal-viewed-items:${reviewScope}`;
+    lastActivityAtRef.current = Date.now();
+    reviewModalShownRef.current = window.sessionStorage.getItem(shownKey) === "true";
+    const rawSessionStart = window.sessionStorage.getItem(
+      reviewSessionStartStorageKey
+    );
+    if (rawSessionStart) {
+      const parsedSessionStart = Number(rawSessionStart);
+      menuEnteredAtRef.current = Number.isFinite(parsedSessionStart)
+        ? parsedSessionStart
+        : Date.now();
+    } else {
+      menuEnteredAtRef.current = Date.now();
+      window.sessionStorage.setItem(
+        reviewSessionStartStorageKey,
+        menuEnteredAtRef.current.toString()
+      );
+    }
+
+    try {
+      const raw = window.sessionStorage.getItem(viewedItemsKey);
+      const viewedItems = new Set<string>(
+        raw ? (JSON.parse(raw) as string[]) : []
+      );
+      viewedItems.add(id);
+      window.sessionStorage.setItem(
+        viewedItemsKey,
+        JSON.stringify(Array.from(viewedItems))
+      );
+    } catch {
+      window.sessionStorage.setItem(viewedItemsKey, JSON.stringify([id]));
+    }
+
+    const markActivity = () => {
+      lastActivityAtRef.current = Date.now();
+    };
+
+    const activityEvents: Array<keyof WindowEventMap> = [
+      "pointerdown",
+      "pointermove",
+      "keydown",
+      "scroll",
+      "touchstart",
+    ];
+
+    activityEvents.forEach((eventName) => {
+      window.addEventListener(eventName, markActivity, { passive: true });
     });
-  }, [id, locale, name]);
+
+    const intervalId = window.setInterval(() => {
+      if (
+        hasSubmittedReview ||
+        reviewModalShownRef.current ||
+        reviewModalOpenRef.current
+      ) {
+        return;
+      }
+
+      const timeSpent = Date.now() - menuEnteredAtRef.current;
+      const idleFor = Date.now() - lastActivityAtRef.current;
+      let itemsViewed = 0;
+
+      try {
+        const raw = window.sessionStorage.getItem(viewedItemsKey);
+        const viewedItems = raw ? (JSON.parse(raw) as string[]) : [];
+        itemsViewed = new Set(viewedItems).size;
+      } catch {
+        itemsViewed = 0;
+      }
+
+      if (
+        timeSpent >= REVIEW_MODAL_MIN_TIME_MS &&
+        itemsViewed >= 2 &&
+        idleFor >= REVIEW_MODAL_IDLE_MS
+      ) {
+        openShareModal("auto");
+      }
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+      activityEvents.forEach((eventName) => {
+        window.removeEventListener(eventName, markActivity);
+      });
+    };
+  }, [
+    hasSubmittedReview,
+    id,
+    openShareModal,
+    reviewScope,
+    reviewSessionStartStorageKey,
+  ]);
+
   const handleShareSubmit = useCallback(
     async (payload: ShareFeedbackPayload) => {
       if (!restaurantId) {
         throw new Error(shareModalLabels.errorMessage);
       }
 
-      const foodRating = ratingValueToScore(payload.foodRating);
-      const serviceRating = ratingValueToScore(payload.serviceRating);
-      if (foodRating === null || serviceRating === null) {
+      const rating = payload.rating;
+      if (!rating || rating < 1 || rating > 5) {
         throw new Error(shareModalLabels.errorMessage);
       }
-
-      const suggestion = payload.comment.trim();
 
       const response = await fetch(`/api/restaurants/${restaurantId}/feedback`, {
         method: "POST",
@@ -283,9 +421,7 @@ export default function MenuItemDetails({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          foodRating,
-          serviceRating,
-          suggestion,
+          rating,
         }),
       });
       const result = await response.json().catch(() => null);
@@ -301,16 +437,27 @@ export default function MenuItemDetails({
         locale,
         restaurantId,
         restaurantSlug,
-        foodRating,
-        serviceRating,
-        comment: suggestion,
-        commentLength: suggestion.length,
+        rating,
       });
+
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(reviewSubmittedStorageKey, "true");
+      }
+      setHasSubmittedReview(true);
     },
-    [restaurantId, shareModalLabels.errorMessage, id, name, locale, restaurantSlug]
+    [
+      restaurantId,
+      shareModalLabels.errorMessage,
+      id,
+      name,
+      locale,
+      restaurantSlug,
+      reviewSubmittedStorageKey,
+    ]
   );
   const handleShareClose = useCallback(() => {
     setShareModalOpen(false);
+    reviewModalOpenRef.current = false;
   }, []);
 
   return (
@@ -469,13 +616,15 @@ export default function MenuItemDetails({
             />
           </div>
 
-          <button
-            type="button"
-            className="cursor-pointer mt-6 pb-6 w-full text-center text-xs text-[#2F3A37]/70 underline underline-offset-4 flex items-center justify-center gap-2"
-            onClick={handleShareClick}
-          >
-            <MessageSquare className="h-4 w-5" /> {shareLabel}
-          </button>
+          {!hasSubmittedReview && (
+            <button
+              type="button"
+              className="cursor-pointer mt-6 pb-6 w-full text-center text-xs text-[#2F3A37]/70 underline underline-offset-4 flex items-center justify-center gap-2"
+              onClick={handleShareClick}
+            >
+              <MessageSquare className="h-4 w-5" /> {shareLabel}
+            </button>
+          )}
         </section>
       </div>
     </div>
@@ -485,7 +634,7 @@ export default function MenuItemDetails({
           onClose={handleShareClose}
           onSubmit={handleShareSubmit}
           labels={shareModalLabels}
-          ratingLabels={shareRatingLabels}
+          googleReviewUrl={googleReviewUrl}
         />
       )}
     </>
@@ -837,63 +986,40 @@ function FavoriteButton({ itemId, storageKey, addLabel, removeLabel }: FavoriteB
   );
 }
 
-type RatingValue = "negative" | "neutral" | "positive";
-
 type ShareFeedbackPayload = {
-  foodRating: RatingValue | null;
-  serviceRating: RatingValue | null;
-  comment: string;
+  rating: number | null;
 };
-
-function ratingValueToScore(value: RatingValue | null): 1 | 3 | 5 | null {
-  switch (value) {
-    case "negative":
-      return 1;
-    case "neutral":
-      return 3;
-    case "positive":
-      return 5;
-    default:
-      return null;
-  }
-}
 
 type ShareFeedbackModalProps = {
   open: boolean;
   onClose: () => void;
   onSubmit: (payload: ShareFeedbackPayload) => Promise<void>;
+  googleReviewUrl?: string;
   labels: {
     title: string;
-    foodLabel: string;
-    serviceLabel: string;
-    feedbackLabel: string;
-    feedbackPlaceholder: string;
-    submit: string;
+    ratingLabel: string;
+    thankYouTitle: string;
+    thankYouDescription: string;
+    reviewButton: string;
+    closeButton: string;
     closeAriaLabel: string;
-    successTitle: string;
-    successDescription: string;
     errorMessage: string;
   };
-  ratingLabels: Record<RatingValue, string>;
 };
 
 function ShareFeedbackModal({
   open,
   onClose,
   onSubmit,
+  googleReviewUrl,
   labels,
-  ratingLabels,
 }: ShareFeedbackModalProps) {
-  const [foodRating, setFoodRating] = useState<RatingValue | null>(null);
-  const [serviceRating, setServiceRating] = useState<RatingValue | null>(null);
-  const [comment, setComment] = useState("");
+  const [rating, setRating] = useState<number | null>(null);
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "success" | "error">(
     "idle"
   );
   const [submitError, setSubmitError] = useState<string | null>(null);
   const titleId = useId();
-  const messageInputId = useId();
-
   useEffect(() => {
     if (!open) return;
     if (typeof document === "undefined") return;
@@ -904,6 +1030,10 @@ function ShareFeedbackModal({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        if (submitState === "submitting") return;
+        setRating(null);
+        setSubmitState("idle");
+        setSubmitError(null);
         onClose();
       }
     };
@@ -914,22 +1044,19 @@ function ShareFeedbackModal({
       body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, submitState]);
 
   if (!open) return null;
 
-  const ratingOptions: Array<{
-    value: RatingValue;
-    Icon: typeof ThumbsUp;
-    ariaLabel: string;
-  }> = [
-    { value: "negative", Icon: ThumbsDown, ariaLabel: ratingLabels.negative },
-    { value: "neutral", Icon: Smile, ariaLabel: ratingLabels.neutral },
-    { value: "positive", Icon: ThumbsUp, ariaLabel: ratingLabels.positive },
-  ];
-
   const formDisabled = submitState === "submitting" || submitState === "success";
-  const canSubmit = foodRating !== null && serviceRating !== null && !formDisabled;
+
+  const handleModalClose = () => {
+    if (submitState === "submitting") return;
+    setRating(null);
+    setSubmitState("idle");
+    setSubmitError(null);
+    onClose();
+  };
 
   const resetErrorState = () => {
     if (submitState === "error") {
@@ -942,29 +1069,22 @@ function ShareFeedbackModal({
 
   const handleOverlayClick = (event: MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget && submitState !== "submitting") {
-      onClose();
+      handleModalClose();
     }
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleRatingSelect = async (value: number) => {
     if (formDisabled) return;
-    if (foodRating === null || serviceRating === null) {
-      setSubmitState("error");
-      setSubmitError(labels.errorMessage);
-      return;
-    }
 
+    resetErrorState();
+    setRating(value);
     setSubmitState("submitting");
     setSubmitError(null);
     try {
       await onSubmit({
-        foodRating,
-        serviceRating,
-        comment: comment.trim(),
+        rating: value,
       });
       setSubmitState("success");
-      onClose();
     } catch (error) {
       setSubmitState("error");
       setSubmitError(
@@ -973,52 +1093,10 @@ function ShareFeedbackModal({
     }
   };
 
-  const renderRatingRow = (
-    label: string,
-    value: RatingValue | null,
-    setter: (value: RatingValue | null) => void
-  ) => (
-    <div className="flex flex-col gap-3">
-      <p className="text-sm font-medium text-[#1B1F1E]">{label}</p>
-      <div className="flex gap-3">
-        {ratingOptions.map(({ value: optionValue, Icon, ariaLabel }) => {
-          const isActive = value === optionValue;
-          return (
-            <button
-              key={optionValue}
-              type="button"
-              aria-pressed={isActive}
-              aria-label={ariaLabel}
-              disabled={formDisabled}
-              className={clsx(
-                "grid h-12 w-12 place-items-center rounded-2xl border border-[#2F3A37]/15 bg-white text-[#1B1F1E]/70 shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/30",
-                isActive &&
-                  "border-transparent !bg-slate-600 shadow-[0_12px_35px_rgba(0,0,0,0.18)]",
-                formDisabled && "opacity-50"
-              )}
-              onClick={() => {
-                if (formDisabled) return;
-                resetErrorState();
-                setter(isActive ? null : optionValue);
-              }}
-            >
-              <Icon
-                className={clsx(
-                  "h-5 w-5",
-                  isActive ? "text-white" : "text-[#1B1F1E]"
-                )}
-                strokeWidth={1.8}
-                fill="none"
-              />
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  const submitLabel =
-    submitState === "submitting" ? `${labels.submit}…` : labels.submit;
+  const handleReviewClick = () => {
+    if (!googleReviewUrl) return;
+    window.open(googleReviewUrl, "_blank");
+  };
 
   return (
     <div
@@ -1039,76 +1117,135 @@ function ShareFeedbackModal({
             : "translate-y-6 scale-95 opacity-0 sm:-translate-y-2 sm:scale-100"
         )}
       >
-        <div className="flex items-start justify-between gap-4">
-          <h2 id={titleId} className="text-2xl font-semibold text-[#1B1F1E]">
-            {labels.title}
-          </h2>
+        <div
+          className={clsx(
+            "relative flex items-start",
+            submitState === "success" ? "justify-end" : "justify-center"
+          )}
+        >
+          {submitState !== "success" && (
+            <h2
+              id={titleId}
+              className="px-10 text-center text-2xl font-semibold text-[#1B1F1E]"
+            >
+              {labels.title}
+            </h2>
+          )}
           <button
             type="button"
             aria-label={labels.closeAriaLabel}
-            onClick={() => {
-              if (submitState === "submitting") return;
-              onClose();
-            }}
-            className="cursor-pointer rounded-full bg-[#EFF1F0] p-2 text-[#1B1F1E]/60 transition hover:text-[#1B1F1E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/30"
+            onClick={handleModalClose}
+            className="absolute right-0 top-0 cursor-pointer rounded-full bg-[#EFF1F0] p-2 text-[#1B1F1E]/60 transition hover:text-[#1B1F1E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/30"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form className="mt-6 flex flex-col gap-6" onSubmit={handleSubmit}>
-          {renderRatingRow(labels.foodLabel, foodRating, setFoodRating)}
-          {renderRatingRow(labels.serviceLabel, serviceRating, setServiceRating)}
-
-          <div className="flex flex-col gap-3">
-            <label
-              htmlFor={messageInputId}
-              className="text-sm font-medium text-[#1B1F1E]"
-            >
-              {`${labels.feedbackLabel}:`}
-            </label>
-            <textarea
-              id={messageInputId}
-              rows={4}
-              disabled={formDisabled}
-              className={clsx(
-                "w-full rounded-2xl border border-[#2F3A37]/15 bg-[#FDFDFD] px-4 py-3 text-sm text-[#1B1F1E] shadow-inner placeholder:text-[#1B1F1E]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/30",
-                formDisabled && "opacity-60"
+        {submitState === "success" ? (
+          <div className="mt-8 flex flex-col items-center gap-5 text-center">
+            <div className="space-y-2">
+              <p className="text-3xl font-semibold text-[#1B1F1E]">
+                {labels.thankYouTitle}
+              </p>
+              {rating === 5 && (
+                <p className="text-sm text-[#1B1F1E]/70">
+                  {labels.thankYouDescription}
+                </p>
               )}
-              placeholder={labels.feedbackPlaceholder}
-              value={comment}
-              onChange={(event) => {
-                resetErrorState();
-                setComment(event.target.value);
-              }}
-            />
+            </div>
+
+            <div className="flex w-full flex-col gap-3">
+              {rating === 5 ? (
+                <button
+                  type="button"
+                  onClick={handleReviewClick}
+                  className="flex w-full items-center justify-center gap-3 rounded-full bg-[#1B1F1E] px-5 py-4 text-sm font-semibold text-white shadow-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/40"
+                >
+                  <GoogleMark />
+                  {labels.reviewButton}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleModalClose}
+                  className="w-full rounded-full bg-[#1B1F1E] px-5 py-4 text-sm font-semibold text-white shadow-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/40"
+                >
+                  {labels.closeButton}
+                </button>
+              )}
+            </div>
           </div>
+        ) : (
+          <div className="mt-6 flex flex-col gap-6">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <p className="text-sm font-medium text-[#1B1F1E]">
+                {labels.ratingLabel}
+              </p>
+              <div className="flex items-center justify-center gap-2">
+                {Array.from({ length: 5 }, (_, index) => {
+                  const value = index + 1;
+                  const isActive = rating !== null && value <= rating;
 
-          <div className="space-y-3">
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className={clsx(
-                "mt-2 w-full cursor-pointer rounded-full bg-[#1B1F1E] py-4 text-center text-sm font-semibold text-white shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/40",
-                !canSubmit && "cursor-not-allowed opacity-60"
-              )}
-            >
-              {submitLabel}
-            </button>
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-pressed={rating === value}
+                      aria-label={`${labels.ratingLabel}: ${value}/5`}
+                      disabled={formDisabled}
+                      className={clsx(
+                        "grid h-12 w-12 place-items-center rounded-2xl border border-[#2F3A37]/15 bg-white shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/30",
+                        isActive
+                          ? "border-amber-200 bg-amber-50 text-amber-500 shadow-[0_12px_35px_rgba(245,158,11,0.18)]"
+                          : "text-[#1B1F1E]/25",
+                        formDisabled && "opacity-50"
+                      )}
+                      onClick={() => void handleRatingSelect(value)}
+                    >
+                      <Star
+                        className="h-6 w-6"
+                        strokeWidth={1.8}
+                        fill="currentColor"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             {submitError && (
-              <p className="text-sm text-rose-600">{submitError}</p>
-            )}
-
-            {submitState === "success" && (
-              <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-inner">
-                <p className="font-semibold">{labels.successTitle}</p>
-                <p className="text-xs text-emerald-700">{labels.successDescription}</p>
-              </div>
+              <p className="text-center text-sm text-rose-600">{submitError}</p>
             )}
           </div>
-        </form>
+        )}
       </div>
     </div>
+  );
+}
+
+function GoogleMark() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-5 w-5 shrink-0"
+    >
+      <path
+        fill="#EA4335"
+        d="M12 10.2v3.9h5.4c-.2 1.3-1.5 3.9-5.4 3.9-3.2 0-5.9-2.7-5.9-6s2.7-6 5.9-6c1.8 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.4 14.6 2.5 12 2.5A9.5 9.5 0 0 0 2.5 12 9.5 9.5 0 0 0 12 21.5c5.5 0 9.1-3.8 9.1-9.2 0-.6-.1-1.1-.2-1.6H12Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M3.6 7.6 6.8 10c.9-2.6 3.3-4.4 5.2-4.4 1.8 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.4 14.6 2.5 12 2.5c-3.7 0-6.9 2.1-8.4 5.1Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 21.5c2.5 0 4.6-.8 6.1-2.3l-2.8-2.3c-.8.6-1.8 1.1-3.3 1.1-3.8 0-5.1-2.5-5.4-3.8l-3.1 2.4c1.5 3.1 4.7 4.9 8.5 4.9Z"
+      />
+      <path
+        fill="#4285F4"
+        d="M21.1 12.3c0-.6-.1-1.1-.2-1.6H12v3.9h5.4c-.3 1.4-1.3 2.4-2.2 3.1l2.8 2.3c1.6-1.5 3.1-4 3.1-7.7Z"
+      />
+    </svg>
   );
 }

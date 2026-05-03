@@ -32,6 +32,19 @@ export default function RestaurantContent({
   const initialMealType: MealKind = kindParam === "drink" ? "drink" : "food";
 
   const [mealType, setMealType] = useState<MealKind>(initialMealType);
+  const reviewScope = useMemo(
+    () => restaurantId ?? restaurantSlug ?? "default",
+    [restaurantId, restaurantSlug]
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const sessionStartKey = `review-modal-menu-start:${reviewScope}`;
+    if (!window.sessionStorage.getItem(sessionStartKey)) {
+      window.sessionStorage.setItem(sessionStartKey, Date.now().toString());
+    }
+  }, [reviewScope]);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParamsString);

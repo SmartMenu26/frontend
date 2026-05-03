@@ -220,6 +220,7 @@
       "error": "Nuk mundëm t'i ngarkojmë komentet.",
       "empty": "Ende nuk ka komente.",
       "loadMore": "Shfaq më shumë",
+      "avgRating": "Mes. vlerësim",
       "avgFood": "Mes. ushqim",
       "avgService": "Mes. shërbim",
       "total": "{count, plural, one {# koment} other {# komente}}",
@@ -229,6 +230,7 @@
       "suggestionEmpty": "Nuk ka sugjerim.",
       "ratingLabel": "{type}: {value}/5",
       "ratingTypes": {
+        "overall": "Vlerësim",
         "food": "Ushqim",
         "service": "Shërbim"
       }
@@ -423,7 +425,12 @@
     "assistantPrompt": "Çfarë përshtatet me {dish}?",
     "shareCta": "Ndaj mendimin tënd",
     "shareModal": {
-      "title": "Mendimi yt na ndihmon",
+      "title": "Si ishte përvoja jote në {restaurantName}?",
+      "ratingLabel": "Vlerëso me 1 deri në 5 yje",
+      "thankYouTitle": "Faleminderit! 🙌",
+      "thankYouDescription": "Do të na vlente shumë nëse lë një vlerësim në Google",
+      "reviewButton": "Lër një recension",
+      "closeButton": "Mbyll",
       "foodLabel": "Vlerëso ushqimin tonë",
       "serviceLabel": "Vlerëso shërbimin tonë",
       "feedbackLabel": "Sugjerimi yt",
