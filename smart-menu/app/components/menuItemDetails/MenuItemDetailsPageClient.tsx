@@ -221,17 +221,8 @@ export default function MenuItemDetailsPageClient({
           );
         }
 
-const rawDetailResponse = await detailRes.json().catch(() => null);
-console.log("RAW DETAIL RESPONSE:", rawDetailResponse);
-console.log(
-  "RAW DETAIL RESPONSE nutritionBreakdown:",
-  rawDetailResponse?.nutritionBreakdown
-);
-
-const payload = getMenuItemPayload(rawDetailResponse, menuItemId);
-console.log("EXTRACTED PAYLOAD:", payload);
-console.log("EXTRACTED PAYLOAD nutritionBreakdown:", payload?.nutritionBreakdown);
-console.log("EXTRACTED PAYLOAD JSON:", JSON.stringify(payload, null, 2));
+        const rawDetailResponse = await detailRes.json().catch(() => null);
+        const payload = getMenuItemPayload(rawDetailResponse, menuItemId);
 
         if (!payload) {
           throw new Error("Menu item not found");

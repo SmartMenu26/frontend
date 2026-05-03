@@ -117,11 +117,14 @@ export default function MenuItemDetails({
     showNutritionSpotlight ? 0 : 1
   );
   const isNutritionScanReady = readyScanToken === scanAnimationToken;
-  const [hasSubmittedReview, setHasSubmittedReview] = useState(false);
+  const [hasSubmittedReview, setHasSubmittedReview] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(reviewSubmittedStorageKey) === "true";
+  });
   const reviewModalShownRef = useRef(false);
   const reviewModalOpenRef = useRef(false);
-  const lastActivityAtRef = useRef<number>(Date.now());
-  const menuEnteredAtRef = useRef<number>(Date.now());
+  const lastActivityAtRef = useRef<number>(0);
+  const menuEnteredAtRef = useRef<number>(0);
 
   const backUrl = useMemo(() => {
     if (!slugOrId) return null;
@@ -151,8 +154,9 @@ export default function MenuItemDetails({
     () =>
       allergens.filter((a) => {
         const label = a.label?.trim();
-        if (!label) return false;
-        const normalizedLabel = label.toLowerCase();
+        const code = a.code?.trim();
+        if (!label && !code) return false;
+        const normalizedLabel = label?.toLowerCase();
         const normalizedCode = a.code?.trim().toLowerCase();
         return normalizedLabel !== "none" && normalizedCode !== "none";
       }),
@@ -299,13 +303,6 @@ export default function MenuItemDetails({
   useEffect(() => {
     reviewModalOpenRef.current = isShareModalOpen;
   }, [isShareModalOpen]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    setHasSubmittedReview(
-      window.localStorage.getItem(reviewSubmittedStorageKey) === "true"
-    );
-  }, [reviewSubmittedStorageKey]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -519,7 +516,7 @@ export default function MenuItemDetails({
 
               <div className="mt-3 flex flex-wrap gap-3">
                 {visibleAllergens.map((a) => {
-                  const iconEntry = getAllergenIconEntry(a.code);
+                  const iconEntry = getAllergenIconEntry(a.code ?? a.label);
                   const tooltipText = resolveTooltipLabel(
                     a.label,
                     iconEntry,
@@ -580,7 +577,7 @@ export default function MenuItemDetails({
                       key={a.key}
                       className="rounded-full border border-[#2F3A37]/15 bg-white px-3 py-1 text-xs text-[#2F3A37]/80"
                     >
-                      {a.label}
+                      {a.label || a.code}
                     </span>
                   );
                 })}

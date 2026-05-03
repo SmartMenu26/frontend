@@ -7,6 +7,8 @@ export type MenuItemPayload = {
   id?: string;
   name?: LocalizedValue | string;
   description?: LocalizedValue | string;
+  allergens?: unknown;
+  allergen?: unknown;
   image?:
     | {
         url?: string;
@@ -36,6 +38,12 @@ export type HealthCornerIngredientViewModel = {
   value: number;
 };
 
+export type AllergenViewModel = {
+  key: string;
+  label: string;
+  code?: string;
+};
+
 export type MenuItemViewModel = {
   id: string;
   name: string;
@@ -43,6 +51,7 @@ export type MenuItemViewModel = {
   imageUrl: string;
   imageAlt: string;
   price?: number;
+  allergens?: AllergenViewModel[];
   healthCornerIngredients?: HealthCornerIngredientViewModel[];
   nutritionSummary?: NutritionSummary;
 };
@@ -158,6 +167,54 @@ const parseIngredientPercent = (value: unknown): number | undefined => {
   return undefined;
 };
 
+const normalizeAllergenToken = (value: string): string =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+const buildAllergenKey = (code?: string, label?: string, index?: number): string => {
+  const normalizedCode = code ? normalizeAllergenToken(code) : "";
+  if (normalizedCode) return normalizedCode;
+
+  const normalizedLabel = label ? normalizeAllergenToken(label) : "";
+  if (normalizedLabel) return normalizedLabel;
+
+  return `allergen-${index ?? 0}`;
+};
+
+const readAllergenSource = (payload: MenuItemPayload): unknown[] | undefined => {
+  const candidates = [payload.allergens, payload.allergen];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      return candidate;
+    }
+
+    if (typeof candidate === "string" && candidate.trim()) {
+      const trimmed = candidate.trim();
+
+      try {
+        const parsed = JSON.parse(trimmed) as unknown;
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch {
+        // Support comma-separated strings from older payloads.
+      }
+
+      return trimmed
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return undefined;
+};
+
 const readIngredientBreakdownSource = (
   payload: MenuItemPayload
 ): unknown[] | undefined => {
@@ -236,6 +293,85 @@ export const buildHealthCornerIngredients = (
   return ingredients.length > 0 ? ingredients.slice(0, 6) : undefined;
 };
 
+const buildAllergens = (
+  payload: MenuItemPayload,
+  localePriority: Locale[]
+): AllergenViewModel[] | undefined => {
+  const source = readAllergenSource(payload);
+
+  if (!source) return undefined;
+
+  const allergens = source.flatMap((item, index) => {
+    if (typeof item === "string") {
+      const label = item.trim();
+      if (!label) return [];
+
+      const code = normalizeAllergenToken(label);
+      if (!code || code === "none") return [];
+
+      return [
+        {
+          key: buildAllergenKey(code, label, index),
+          label,
+          code,
+        },
+      ];
+    }
+
+    if (!item || typeof item !== "object") return [];
+
+    const record = item as Record<string, unknown>;
+    const label = pickLocalizedValue(
+      (record.label ??
+        record.name ??
+        record.title ??
+        record.value ??
+        record.allergen) as LocalizedValue | string | undefined,
+      localePriority,
+      ""
+    );
+    const rawCode =
+      typeof record.code === "string"
+        ? record.code
+        : typeof record.key === "string"
+          ? record.key
+          : typeof record.slug === "string"
+            ? record.slug
+            : typeof record.id === "string"
+              ? record.id
+              : label;
+    const code = rawCode ? normalizeAllergenToken(rawCode) : undefined;
+    const normalizedLabel = label.trim();
+
+    if (!normalizedLabel && !code) return [];
+    if (code === "none" || normalizeAllergenToken(normalizedLabel) === "none") {
+      return [];
+    }
+
+    return [
+      {
+        key: buildAllergenKey(code, normalizedLabel, index),
+        label: normalizedLabel,
+        code,
+      },
+    ];
+  });
+
+  const deduped = allergens.filter((allergen, index, array) => {
+    return (
+      array.findIndex(
+        (candidate) =>
+          candidate.key === allergen.key ||
+          (candidate.code &&
+            allergen.code &&
+            candidate.code === allergen.code)
+      ) === index
+    );
+  });
+
+  return deduped.length > 0 ? deduped : undefined;
+};
+
 const buildNutritionSummary = (
   payload: MenuItemPayload
 ): NutritionSummary | undefined => {
@@ -300,6 +436,7 @@ export const buildMenuItemViewModel = (
     imageUrl: resolveImageUrl(payload) ?? FALLBACK_IMAGE,
     imageAlt: pickLocalizedValue(imageMeta, localePriority, name),
     price: parsePrice(payload?.price ?? payload?.priceValue),
+    allergens: buildAllergens(payload, localePriority),
     healthCornerIngredients: buildHealthCornerIngredients(payload, localePriority),
     nutritionSummary: buildNutritionSummary(payload),
   };
