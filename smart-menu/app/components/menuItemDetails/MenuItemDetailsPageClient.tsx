@@ -41,6 +41,36 @@ const getBrandColor = (payload: Record<string, unknown> | null): string | undefi
   return brandColor || undefined;
 };
 
+const getLocalizedValue = (
+  value: unknown,
+  localePriority: string[]
+): string | undefined => {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || undefined;
+  }
+
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+
+  const record = value as Record<string, unknown>;
+  for (const locale of localePriority) {
+    const candidate = record[locale];
+    if (typeof candidate === "string" && candidate.trim()) {
+      return candidate.trim();
+    }
+  }
+
+  for (const candidate of Object.values(record)) {
+    if (typeof candidate === "string" && candidate.trim()) {
+      return candidate.trim();
+    }
+  }
+
+  return undefined;
+};
+
 const getMenuItemPayload = (
   payload: unknown,
   menuItemId: string,
@@ -103,6 +133,8 @@ type LoadState =
       viewModel: MenuItemViewModel;
       restaurantId: string;
       canonicalSlug: string;
+      restaurantName: string;
+      googleReviewUrl?: string;
       brandColor?: string;
     };
 
@@ -145,6 +177,14 @@ export default function MenuItemDetailsPageClient({
             ? restaurantPayload.slug
             : restaurantSlug;
         const brandColor = getBrandColor(restaurantPayload);
+        const localePriority = buildLocalePriority(locale);
+        const restaurantName =
+          getLocalizedValue(restaurantPayload?.localizedName, localePriority) ??
+          getLocalizedValue(restaurantPayload?.plainName, localePriority) ??
+          canonicalSlug;
+        const googleReviewUrl =
+          getLocalizedValue(restaurantPayload?.googleReviewUrl, localePriority) ??
+          undefined;
 
         if (!restaurantId) {
           throw new Error("Restaurant not found");
@@ -197,7 +237,6 @@ console.log("EXTRACTED PAYLOAD JSON:", JSON.stringify(payload, null, 2));
           throw new Error("Menu item not found");
         }
 
-        const localePriority = buildLocalePriority(locale);
         const viewModel = buildMenuItemViewModel(payload, menuItemId, localePriority);
 
         if (cancelled) {
@@ -209,6 +248,8 @@ console.log("EXTRACTED PAYLOAD JSON:", JSON.stringify(payload, null, 2));
           viewModel,
           restaurantId,
           canonicalSlug,
+          restaurantName,
+          googleReviewUrl,
           brandColor,
         });
       } catch (error) {
@@ -253,6 +294,8 @@ console.log("EXTRACTED PAYLOAD JSON:", JSON.stringify(payload, null, 2));
       {...state.viewModel}
       restaurantId={state.restaurantId}
       restaurantSlug={state.canonicalSlug}
+      restaurantName={state.restaurantName}
+      googleReviewUrl={state.googleReviewUrl}
       brandColor={state.brandColor}
     />
   );

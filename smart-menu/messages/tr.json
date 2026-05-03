@@ -417,7 +417,7 @@
     "assistantPrompt": "{dish} ile ne iyi gider?",
     "shareCta": "Dusuncelerinizi paylasin",
     "shareModal": {
-      "title": "Deneyiminiz nasildi?",
+      "title": "{restaurantName} deneyiminiz nasildi?",
       "ratingLabel": "1 ile 5 yildiz arasynda puanlayin",
       "thankYouTitle": "Tesekkurler! 🙌",
       "thankYouDescription": "Google'da bir puan birakirsaniz bizim icin cok degerli olur",

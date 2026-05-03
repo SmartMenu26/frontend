@@ -425,7 +425,7 @@
     "assistantPrompt": "Што оди со {dish}?",
     "shareCta": "Сподели го твоето мислење",
     "shareModal": {
-      "title": "Какво беше твоето искуство?",
+      "title": "Какво е твоето искуство во {restaurantName}?",
       "ratingLabel": "Оцени со 1 до 5 ѕвезди",
       "thankYouTitle": "Фала ти!",
       "thankYouDescription": "Би ни значело многу ако оставиш оцена на Google",

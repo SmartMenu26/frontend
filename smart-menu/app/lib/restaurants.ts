@@ -56,6 +56,7 @@ export type RestaurantRecord = {
   fullRestaurantName?: string;
   facebookUrl?: string;
   instagramUrl?: string;
+  googleReviewUrl?: string;
   brandColor?: string;
   location?: string;
   mobilePhone?: string;
@@ -452,6 +453,7 @@ const mapRestaurantPayload = (
     fullRestaurantName: normalizeString(payload.fullRestaurantName),
     facebookUrl: normalizeString(payload.facebookUrl),
     instagramUrl: normalizeString(payload.instagramUrl),
+    googleReviewUrl: normalizeString(payload.googleReviewUrl),
     brandColor: normalizeString(payload.brandColor),
     location: normalizeString(payload.location),
     mobilePhone: normalizeString(payload.mobilePhone),

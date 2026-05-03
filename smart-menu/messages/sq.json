@@ -425,7 +425,7 @@
     "assistantPrompt": "Çfarë përshtatet me {dish}?",
     "shareCta": "Ndaj mendimin tënd",
     "shareModal": {
-      "title": "Si ishte përvoja jote?",
+      "title": "Si ishte përvoja jote në {restaurantName}?",
       "ratingLabel": "Vlerëso me 1 deri në 5 yje",
       "thankYouTitle": "Faleminderit! 🙌",
       "thankYouDescription": "Do të na vlente shumë nëse lë një vlerësim në Google",

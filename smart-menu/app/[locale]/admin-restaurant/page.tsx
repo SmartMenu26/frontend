@@ -70,10 +70,7 @@ type AdminMenuItem = {
 
 type RestaurantFeedbackEntry = {
   _id: string;
-  foodRating: number;
-  serviceRating: number;
-  suggestion?: string | null;
-  submittedFrom?: string | null;
+  rating: number;
   createdAt?: string | null;
 };
 
@@ -1384,14 +1381,12 @@ type FeedbackPanelProps = {
 
 type FeedbackSummary = {
   total: number;
-  avgFood: number;
-  avgService: number;
+  avgRating: number;
 };
 
 const EMPTY_FEEDBACK_SUMMARY: FeedbackSummary = {
   total: 0,
-  avgFood: 0,
-  avgService: 0,
+  avgRating: 0,
 };
 
 function RestaurantFeedbackPanel({ session, onSessionExpired }: FeedbackPanelProps) {
@@ -1457,23 +1452,25 @@ function RestaurantFeedbackPanel({ session, onSessionExpired }: FeedbackPanelPro
         : [];
 
       const cleanedItems: RestaurantFeedbackEntry[] = rawItems.map(
-        (entry: any, index: number) => ({
-          _id: String(entry?._id ?? entry?.id ?? `${Date.now()}-${index}`),
-          foodRating: Number(entry?.foodRating ?? 0),
-          serviceRating: Number(entry?.serviceRating ?? 0),
-          suggestion:
-            typeof entry?.suggestion === "string" ? entry.suggestion : "",
-          submittedFrom:
-            typeof entry?.submittedFrom === "string" ? entry.submittedFrom : "",
-          createdAt: entry?.createdAt ?? null,
-        })
+        (entry, index: number) => {
+          const current =
+            entry && typeof entry === "object"
+              ? (entry as Record<string, unknown>)
+              : {};
+
+          return {
+            _id: String(current._id ?? current.id ?? `${Date.now()}-${index}`),
+            rating: Number(current.rating ?? 0),
+            createdAt:
+              typeof current.createdAt === "string" ? current.createdAt : null,
+          };
+        }
       );
 
       const normalizedSummary: FeedbackSummary = dataBlock?.summary
         ? {
             total: Number(dataBlock.summary.total ?? 0),
-            avgFood: Number(dataBlock.summary.avgFood ?? 0),
-            avgService: Number(dataBlock.summary.avgService ?? 0),
+            avgRating: Number(dataBlock.summary.avgRating ?? 0),
           }
         : EMPTY_FEEDBACK_SUMMARY;
 
@@ -1538,7 +1535,7 @@ function RestaurantFeedbackPanel({ session, onSessionExpired }: FeedbackPanelPro
   const isEmpty = status === "success" && items.length === 0;
 
   return (
-    <section className="rounded-3xl bg-white p-6 shadow-lg shadow-slate-950/5 ring-1 ring-slate-100">
+    <section className="flex max-h-[80vh] flex-col overflow-hidden rounded-3xl bg-white p-6 shadow-lg shadow-slate-950/5 ring-1 ring-slate-100">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
@@ -1548,12 +1545,8 @@ function RestaurantFeedbackPanel({ session, onSessionExpired }: FeedbackPanelPro
         </div>
         <div className="flex flex-wrap gap-3 text-sm text-slate-600">
           <FeedbackSummaryCard
-            label={t("avgFood")}
-            value={summary.avgFood.toFixed(1)}
-          />
-          <FeedbackSummaryCard
-            label={t("avgService")}
-            value={summary.avgService.toFixed(1)}
+            label={t("avgRating")}
+            value={summary.avgRating.toFixed(1)}
           />
           <div className="rounded-2xl bg-slate-50 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-600">
             {t("total", { count: summary.total })}
@@ -1576,62 +1569,50 @@ function RestaurantFeedbackPanel({ session, onSessionExpired }: FeedbackPanelPro
       )}
 
       {items.length > 0 && (
-        <div className="mt-6 space-y-4">
-          {items.map((entry) => (
-            <article
-              key={entry._id}
-              className="rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-4"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    {t("submittedAt", {
-                      value: formatDateTime(entry.createdAt, timezone),
-                    })}
-                  </p>
+        <div className="mt-6 min-h-0 flex-1 overflow-y-auto pr-1">
+          <div className="space-y-4">
+            {items.map((entry) => (
+              <article
+                key={entry._id}
+                className="rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-4"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      {t("submittedAt", {
+                        value: formatDateTime(entry.createdAt, timezone),
+                      })}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap justify-end gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    <span className="rounded-full bg-white px-3 py-1 text-[11px] shadow-sm">
+                      {t("ratingLabel", {
+                        type: t("ratingTypes.overall"),
+                        value: entry.rating ?? 0,
+                      })}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-wrap justify-end gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
-                  <span className="rounded-full bg-white px-3 py-1 text-[11px] shadow-sm">
-                    {t("ratingLabel", {
-                      type: t("ratingTypes.food"),
-                      value: entry.foodRating ?? 0,
-                    })}
-                  </span>
-                  <span className="rounded-full bg-white px-3 py-1 text-[11px] shadow-sm">
-                    {t("ratingLabel", {
-                      type: t("ratingTypes.service"),
-                      value: entry.serviceRating ?? 0,
-                    })}
-                  </span>
-                </div>
-              </div>
-              <div className="mt-3 rounded-2xl bg-white px-4 py-3 text-sm text-slate-700 shadow-inner">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  {t("suggestionLabel")}
-                </p>
-                <p className="mt-1 whitespace-pre-line text-slate-800">
-                  {entry.suggestion?.trim() || t("suggestionEmpty")}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+              </article>
+            ))}
+          </div>
 
-      {nextCursor && status === "success" && (
-        <button
-          type="button"
-          onClick={handleLoadMore}
-          disabled={isLoadingMore}
-          className={clsx(
-            "mt-6 inline-flex items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition",
-            isLoadingMore
-              ? "cursor-wait border-slate-100 text-slate-400"
-              : "cursor-pointer border-slate-200 text-slate-700 hover:border-slate-300"
+          {nextCursor && status === "success" && (
+            <button
+              type="button"
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+              className={clsx(
+                "mt-6 inline-flex items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition",
+                isLoadingMore
+                  ? "cursor-wait border-slate-100 text-slate-400"
+                  : "cursor-pointer border-slate-200 text-slate-700 hover:border-slate-300"
+              )}
+            >
+              {isLoadingMore ? `${t("loadMore")}…` : t("loadMore")}
+            </button>
           )}
-        >
-          {isLoadingMore ? `${t("loadMore")}…` : t("loadMore")}
-        </button>
+        </div>
       )}
     </section>
   );
