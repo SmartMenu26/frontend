@@ -25,7 +25,7 @@ type MenuItem = {
     title: string;
     imageUrl: string;
     price: number;
-    calories?: number;
+    weightGrams?: number;
     kind?: string;
     description?: string;
 };
@@ -115,14 +115,14 @@ export default function MenuBrowser({
         preloadImage(imageUrl);
     }, []);
 
-    const formatCaloriesLabel = useCallback((calories?: number) => {
-        if (typeof calories !== "number" || Number.isNaN(calories) || calories <= 0) {
+    const formatCaloriesLabel = useCallback((weightGrams?: number) => {
+        if (typeof weightGrams !== "number" || Number.isNaN(weightGrams) || weightGrams <= 0) {
             return undefined;
         }
 
-        const normalizedCalories = Number.isInteger(calories)
-            ? calories.toString()
-            : calories.toFixed(1);
+        const normalizedCalories = Number.isInteger(weightGrams)
+            ? weightGrams.toString()
+            : weightGrams.toFixed(1);
 
         return `${normalizedCalories} kcal`;
     }, []);
@@ -168,11 +168,11 @@ export default function MenuBrowser({
                     title: resolvedTitle,
                     imageUrl: m?.image?.url ?? m?.imageUrl ?? "",
                     price: m?.price ?? 0,
-                    calories:
-                        typeof m?.calories === "number"
-                            ? m.calories
-                            : typeof m?.calories === "string"
-                                ? Number.parseFloat(m.calories)
+                    weightGrams:
+                        typeof m?.weightGrams === "number"
+                            ? m.weightGrams
+                            : typeof m?.weightGrams === "string"
+                                ? Number.parseFloat(m.weightGrams)
                                 : undefined,
                     kind: m?.kind ?? m?.baseCategory ?? m?.type,
                     description: resolvedDescription || undefined,
@@ -1154,7 +1154,7 @@ export default function MenuBrowser({
                                                         title={it.title}
                                                         imageUrl={it.imageUrl}
                                                         priceLabel={`${it.price} ден`}
-                                                        weightLabel={formatCaloriesLabel(it.calories)}
+                                                        weightLabel={formatCaloriesLabel(it.weightGrams)}
                                                         kind={it.kind ?? mealType}
                                                         description={it.description}
                                                         layout="list"
