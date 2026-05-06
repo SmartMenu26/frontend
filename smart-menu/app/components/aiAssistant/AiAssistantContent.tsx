@@ -16,7 +16,7 @@ import { preloadImage } from "@/app/lib/imagePreload";
 type Suggestion = {
   id: string;
   label: string;
-  icon: string;
+  icon?: string;
 };
 
 type LocalizedField = Partial<Record<Locale, string>> | string;
@@ -27,6 +27,8 @@ type Candidate = {
   description?: LocalizedField;
   price?: number | string;
   priceValue?: number;
+  weightGrams?: number | string;
+  calories?: number | string;
   image?: {
     url?: string;
     alt?: Partial<Record<Locale, string>>;
@@ -204,6 +206,8 @@ export default function AiAssistantContent({
         return "ден";
     }
   }, [displayLocale]);
+  const hasResolvedResults =
+    status !== "loading" && Boolean(assistantText || candidates.length);
 
   useEffect(() => {
     let cancelled = false;
@@ -247,7 +251,11 @@ export default function AiAssistantContent({
         </header>
 
         {hasCredits ? (
-          <div className="pb-4 h-[90vh] text-center flex flex-col justify-around">
+          <div
+            className={`pb-4 h-[90vh] text-center flex flex-col ${
+              hasResolvedResults ? "gap-3" : "justify-around"
+            }`}
+          >
             {status === "idle" && (
               <p className="text-left text-[22px] leading-snug text-[#4B4F54]">
                 {t("intro.prefix")}{" "}
@@ -261,7 +269,9 @@ export default function AiAssistantContent({
               <div
                 role="img"
                 aria-label={`AI Асистент ${assistantDisplayName}`}
-                className="relative aspect-square w-72 max-w-full shrink-0 sm:w-80"
+                className={`relative aspect-square max-w-full shrink-0 transition-all duration-200 ${
+                  hasResolvedResults ? "w-36 sm:w-40" : "w-72 sm:w-80"
+                }`}
               >
                 <div
                   aria-hidden="true"
@@ -296,9 +306,9 @@ export default function AiAssistantContent({
             )}
 
             {status !== "loading" && (assistantText || candidates.length) ? (
-              <div className="mt-4 flex max-h-[40vh] flex-col gap-3 overflow-auto text-left">
+              <div className="mt-1 flex min-h-0 flex-1 flex-col gap-2 overflow-auto text-left pr-1">
                 {assistantText ? (
-                  <p className="mt-6 rounded-2xl bg-[#F4F5F7] px-3 py-3 text-left text-sm text-[#4B4F54]">
+                  <p className="rounded-2xl bg-[#F4F5F7] px-3 py-3 text-left text-sm text-[#4B4F54]">
                     {assistantText}
                   </p>
                 ) : null}
@@ -353,6 +363,22 @@ export default function AiAssistantContent({
                       Number.isFinite(resolvedPriceRaw)
                         ? `${priceFormatter.format(resolvedPriceRaw)} ${priceSuffix}`
                         : null;
+                    const resolvedKcalRaw =
+                      typeof item?.weightGrams === "number"
+                        ? item.weightGrams
+                        : typeof item?.weightGrams === "string"
+                        ? Number(item.weightGrams)
+                        : typeof item?.calories === "number"
+                        ? item.calories
+                        : typeof item?.calories === "string"
+                        ? Number(item.calories)
+                        : undefined;
+                    const kcalLabel =
+                      typeof resolvedKcalRaw === "number" &&
+                      Number.isFinite(resolvedKcalRaw) &&
+                      resolvedKcalRaw > 0
+                        ? `${priceFormatter.format(resolvedKcalRaw)} kcal`
+                        : null;
 
                     return (
                       <Link
@@ -370,7 +396,7 @@ export default function AiAssistantContent({
                             });
                           }
                         }}
-                        className="flex items-center gap-3 rounded-[22px] border border-[#ECEFF5] bg-white px-3 py-3 text-[#1E1F24] shadow-sm transition hover:border-[#C2CADB]"
+                        className="flex items-center gap-3 rounded-[22px] border border-[#ECEFF5] bg-white px-3 py-2.5 text-[#1E1F24] shadow-sm transition hover:border-[#C2CADB]"
                       >
                         <img
                           src={resolvedImg}
@@ -379,7 +405,7 @@ export default function AiAssistantContent({
                           height={CANDIDATE_IMAGE_SIZE}
                           loading="lazy"
                           sizes={CANDIDATE_IMAGE_SIZES}
-                          className="h-14 w-14 rounded-2xl object-cover"
+                          className="h-12 w-12 rounded-2xl object-cover"
                         />
                         <div className="flex flex-1 flex-col">
                           <div className="flex items-start">
@@ -387,14 +413,23 @@ export default function AiAssistantContent({
                               <p className="text-sm font-semibold text-[#1E1F24]">
                                 {title}
                               </p>
-                              <p className="mt-1 text-xs text-[#6B7280] line-clamp-2">
+                              <p className="text-xs text-[#6B7280] line-clamp-2">
                                 {description}
                               </p>
                             </div>
-                            {priceLabel && (
-                              <span className="text-sm font-semibold text-[#1E1F24] whitespace-nowrap">
-                                {priceLabel}
-                              </span>
+                            {(priceLabel || kcalLabel) && (
+                              <div className="ml-3 flex flex-col items-end gap-1">
+                                {priceLabel ? (
+                                  <span className="text-sm font-semibold text-[#1E1F24] whitespace-nowrap">
+                                    {priceLabel}
+                                  </span>
+                                ) : null}
+                                {kcalLabel ? (
+                                  <span className="inline-flex rounded-full bg-[#E7F2FF] px-2.5 py-1 text-[11px] font-medium leading-none whitespace-nowrap text-[#2C6CBF] shadow-[0_6px_16px_rgba(44,108,191,0.14)]">
+                                    {kcalLabel}
+                                  </span>
+                                ) : null}
+                              </div>
                             )}
                           </div>
                         </div>

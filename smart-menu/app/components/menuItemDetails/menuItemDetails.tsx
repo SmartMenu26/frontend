@@ -258,6 +258,12 @@ export default function MenuItemDetails({
     [t, restaurantName, restaurantSlug, restaurantId]
   );
   const priceText = priceLabel ? t("priceLabel", { price: priceLabel }) : null;
+  const caloriesText =
+    typeof nutritionSummary?.calories === "number" &&
+    Number.isFinite(nutritionSummary.calories) &&
+    nutritionSummary.calories > 0
+      ? `${nutritionValueFormat.format(nutritionSummary.calories)} kcal`
+      : null;
   const macroLabels = useMemo(
     () => ({
       protein: t("nutrition.protein"),
@@ -500,10 +506,19 @@ export default function MenuItemDetails({
               {description}
             </p>
           )}
-          {priceText && (
-            <span className="border border-[#1B1F1E] border-solid rounded-full w-fit px-2 py-1 text-lg font-semibold text-[#1B1F1E] leading-tight">
-              {priceText}
-            </span>
+          {(priceText || caloriesText) && (
+            <div className="flex flex-wrap items-center gap-2">
+              {priceText ? (
+                <span className="border border-[#1B1F1E] border-solid rounded-full w-fit px-2 py-1 text-lg font-semibold text-[#1B1F1E] leading-tight">
+                  {priceText}
+                </span>
+              ) : null}
+              {caloriesText ? (
+                <span className="rounded-full bg-[#E7F2FF] px-2.5 py-1 text-sm font-medium leading-tight whitespace-nowrap text-[#2C6CBF] shadow-[0_6px_16px_rgba(44,108,191,0.14)]">
+                  {caloriesText}
+                </span>
+              ) : null}
+            </div>
           )}
         </section>
         <section>

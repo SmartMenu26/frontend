@@ -115,16 +115,16 @@ export default function MenuBrowser({
         preloadImage(imageUrl);
     }, []);
 
-    const formatWeightLabel = useCallback((weightGrams?: number) => {
+    const formatCaloriesLabel = useCallback((weightGrams?: number) => {
         if (typeof weightGrams !== "number" || Number.isNaN(weightGrams) || weightGrams <= 0) {
             return undefined;
         }
 
-        const normalizedWeight = Number.isInteger(weightGrams)
+        const normalizedCalories = Number.isInteger(weightGrams)
             ? weightGrams.toString()
             : weightGrams.toFixed(1);
 
-        return `${normalizedWeight} g`;
+        return `${normalizedCalories} kcal`;
     }, []);
 
     const mapCategories = useCallback(
@@ -1154,7 +1154,7 @@ export default function MenuBrowser({
                                                         title={it.title}
                                                         imageUrl={it.imageUrl}
                                                         priceLabel={`${it.price} ден`}
-                                                        weightLabel={formatWeightLabel(it.weightGrams)}
+                                                        weightLabel={formatCaloriesLabel(it.weightGrams)}
                                                         kind={it.kind ?? mealType}
                                                         description={it.description}
                                                         layout="list"

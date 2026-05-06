@@ -1,5 +1,9 @@
 import AiAssistantContent from "@/app/components/aiAssistant/AiAssistantContent";
-import { fetchRestaurantRecord, pickRestaurantName } from "@/app/lib/restaurants";
+import {
+  fetchRestaurantRecord,
+  pickRestaurantName,
+  resolveLocalizedText,
+} from "@/app/lib/restaurants";
 import { defaultLocale, locales, type Locale } from "@/i18n";
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
@@ -11,6 +15,10 @@ type Props = {
 };
 
 const OBJECT_ID_REGEX = /^[a-f\\d]{24}$/i;
+const getLocalePriority = (locale: Locale): Locale[] =>
+  Array.from(
+    new Set<Locale>([locale, defaultLocale, "en" as Locale, "sq" as Locale, "tr" as Locale])
+  );
 
 const suggestionPromptConfigs = [
   {
@@ -63,11 +71,6 @@ export default async function AiAssistantPage({ params, searchParams }: Props) {
   const restaurantId = record.id;
   const t = await getTranslations({ locale, namespace: "aiAssistantSuggestions" });
 
-  const suggestionPrompts = suggestionPromptConfigs.map(({ messageKey, ...config }) => ({
-    ...config,
-    label: t(messageKey),
-  }));
-
   const base = process.env.BACKEND_URL?.replace(/\/$/, "");
 
   if (!base) {
@@ -93,6 +96,37 @@ export default async function AiAssistantPage({ params, searchParams }: Props) {
 
   const fallbackRestaurantName =
     pickRestaurantName(record, [resolvedLocale]) ?? record.plainName;
+  const localePriority = getLocalePriority(resolvedLocale);
+  const restaurantSuggestionPrompts = record.aiSuggestions?.reduce<
+    { id: string; label: string; icon?: string }[]
+  >((acc, suggestion, index) => {
+    const label = resolveLocalizedText(suggestion.label, localePriority);
+    if (!label) return acc;
+    acc.push({
+      id: `restaurant-suggestion-${index}`,
+      label,
+      icon: suggestion.icon,
+    });
+    return acc;
+  }, []);
+  const defaultSuggestionPrompts = suggestionPromptConfigs.map(
+    ({ messageKey, ...config }) => ({
+      ...config,
+      label: t(messageKey),
+    })
+  );
+  const suggestionPrompts = [
+    ...defaultSuggestionPrompts,
+    ...(restaurantSuggestionPrompts ?? []),
+  ].reduce<{ id: string; label: string; icon?: string }[]>((acc, suggestion) => {
+    const normalizedLabel = suggestion.label.trim().toLowerCase();
+    if (!normalizedLabel) return acc;
+    if (acc.some((entry) => entry.label.trim().toLowerCase() === normalizedLabel)) {
+      return acc;
+    }
+    acc.push(suggestion);
+    return acc;
+  }, []);
 
   return (
     <AiAssistantContent
