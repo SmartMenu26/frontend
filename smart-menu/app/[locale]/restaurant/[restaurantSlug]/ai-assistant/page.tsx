@@ -109,13 +109,24 @@ export default async function AiAssistantPage({ params, searchParams }: Props) {
     });
     return acc;
   }, []);
-  const suggestionPrompts =
-    restaurantSuggestionPrompts && restaurantSuggestionPrompts.length > 0
-      ? restaurantSuggestionPrompts
-      : suggestionPromptConfigs.map(({ messageKey, ...config }) => ({
-          ...config,
-          label: t(messageKey),
-        }));
+  const defaultSuggestionPrompts = suggestionPromptConfigs.map(
+    ({ messageKey, ...config }) => ({
+      ...config,
+      label: t(messageKey),
+    })
+  );
+  const suggestionPrompts = [
+    ...defaultSuggestionPrompts,
+    ...(restaurantSuggestionPrompts ?? []),
+  ].reduce<{ id: string; label: string; icon?: string }[]>((acc, suggestion) => {
+    const normalizedLabel = suggestion.label.trim().toLowerCase();
+    if (!normalizedLabel) return acc;
+    if (acc.some((entry) => entry.label.trim().toLowerCase() === normalizedLabel)) {
+      return acc;
+    }
+    acc.push(suggestion);
+    return acc;
+  }, []);
 
   return (
     <AiAssistantContent

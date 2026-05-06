@@ -25,7 +25,7 @@ type MenuItem = {
     title: string;
     imageUrl: string;
     price: number;
-    weightGrams?: number;
+    calories?: number;
     kind?: string;
     description?: string;
 };
@@ -115,16 +115,16 @@ export default function MenuBrowser({
         preloadImage(imageUrl);
     }, []);
 
-    const formatWeightLabel = useCallback((weightGrams?: number) => {
-        if (typeof weightGrams !== "number" || Number.isNaN(weightGrams) || weightGrams <= 0) {
+    const formatCaloriesLabel = useCallback((calories?: number) => {
+        if (typeof calories !== "number" || Number.isNaN(calories) || calories <= 0) {
             return undefined;
         }
 
-        const normalizedWeight = Number.isInteger(weightGrams)
-            ? weightGrams.toString()
-            : weightGrams.toFixed(1);
+        const normalizedCalories = Number.isInteger(calories)
+            ? calories.toString()
+            : calories.toFixed(1);
 
-        return `${normalizedWeight} g`;
+        return `${normalizedCalories} kcal`;
     }, []);
 
     const mapCategories = useCallback(
@@ -168,11 +168,11 @@ export default function MenuBrowser({
                     title: resolvedTitle,
                     imageUrl: m?.image?.url ?? m?.imageUrl ?? "",
                     price: m?.price ?? 0,
-                    weightGrams:
-                        typeof m?.weightGrams === "number"
-                            ? m.weightGrams
-                            : typeof m?.weightGrams === "string"
-                                ? Number.parseFloat(m.weightGrams)
+                    calories:
+                        typeof m?.calories === "number"
+                            ? m.calories
+                            : typeof m?.calories === "string"
+                                ? Number.parseFloat(m.calories)
                                 : undefined,
                     kind: m?.kind ?? m?.baseCategory ?? m?.type,
                     description: resolvedDescription || undefined,
@@ -1154,7 +1154,7 @@ export default function MenuBrowser({
                                                         title={it.title}
                                                         imageUrl={it.imageUrl}
                                                         priceLabel={`${it.price} ден`}
-                                                        weightLabel={formatWeightLabel(it.weightGrams)}
+                                                        weightLabel={formatCaloriesLabel(it.calories)}
                                                         kind={it.kind ?? mealType}
                                                         description={it.description}
                                                         layout="list"

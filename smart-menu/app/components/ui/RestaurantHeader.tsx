@@ -10,9 +10,16 @@ import { greatVibes } from "@/app/fonts";
 type Props = {
   showName?: boolean;
   name?: string;
+  restaurantSlug?: string;
+  titleImageSrc?: string;
 };
 
-export default function RestaurantHeader({ showName = true, name }: Props) {
+export default function RestaurantHeader({
+  showName = true,
+  name,
+  restaurantSlug,
+  titleImageSrc,
+}: Props) {
   const t = useTranslations("header");
   const locale = useLocale() as Locale;
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,6 +59,9 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
     if (displayName.length > 7) return "text-5xl md:text-8xl";
     return "text-7xl md:text-9xl";
   }, [displayName]);
+  const resolvedTitleImageSrc = titleImageSrc?.trim() || "";
+  const showLogoTitle =
+    restaurantSlug === "am-health-corner" && Boolean(resolvedTitleImageSrc);
 
   return (
     <>
@@ -68,19 +78,32 @@ export default function RestaurantHeader({ showName = true, name }: Props) {
         />
 
         {showName && (
-          <h1
-            className={[
-              greatVibes.className,
-              "pt-3 mx-4 md:mx-0 max-w-[90vw]",
-              headingSizeClass,
-              "text-[#6B2E2E]",
-            ].join(" ")}
-          >
-            {displayName}
-            <span className="block text-4xl md:text-4xl text-[#1B1F1E]/80 md:inline md:ml-3">
-              {menuLabel}
-            </span>
-          </h1>
+          showLogoTitle ? (
+            <div className="pt-3 mx-4 md:mx-0 max-w-[90vw]">
+              <img
+                src={resolvedTitleImageSrc}
+                alt={displayName}
+                width={560}
+                height={220}
+                loading="lazy"
+                className="h-32 md:h-44 w-auto max-w-full object-contain"
+              />
+            </div>
+          ) : (
+            <h1
+              className={[
+                greatVibes.className,
+                "pt-3 mx-4 md:mx-0 max-w-[90vw]",
+                headingSizeClass,
+                "text-[#6B2E2E]",
+              ].join(" ")}
+            >
+              {displayName}
+              <span className="block text-4xl md:text-4xl text-[#1B1F1E]/80 md:inline md:ml-3">
+                {menuLabel}
+              </span>
+            </h1>
+          )
         )}
 
         <nav
