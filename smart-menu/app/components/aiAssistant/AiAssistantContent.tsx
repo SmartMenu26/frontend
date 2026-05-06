@@ -27,6 +27,8 @@ type Candidate = {
   description?: LocalizedField;
   price?: number | string;
   priceValue?: number;
+  weightGrams?: number | string;
+  calories?: number | string;
   image?: {
     url?: string;
     alt?: Partial<Record<Locale, string>>;
@@ -361,6 +363,22 @@ export default function AiAssistantContent({
                       Number.isFinite(resolvedPriceRaw)
                         ? `${priceFormatter.format(resolvedPriceRaw)} ${priceSuffix}`
                         : null;
+                    const resolvedKcalRaw =
+                      typeof item?.weightGrams === "number"
+                        ? item.weightGrams
+                        : typeof item?.weightGrams === "string"
+                        ? Number(item.weightGrams)
+                        : typeof item?.calories === "number"
+                        ? item.calories
+                        : typeof item?.calories === "string"
+                        ? Number(item.calories)
+                        : undefined;
+                    const kcalLabel =
+                      typeof resolvedKcalRaw === "number" &&
+                      Number.isFinite(resolvedKcalRaw) &&
+                      resolvedKcalRaw > 0
+                        ? `${priceFormatter.format(resolvedKcalRaw)} kcal`
+                        : null;
 
                     return (
                       <Link
@@ -399,10 +417,19 @@ export default function AiAssistantContent({
                                 {description}
                               </p>
                             </div>
-                            {priceLabel && (
-                              <span className="text-sm font-semibold text-[#1E1F24] whitespace-nowrap">
-                                {priceLabel}
-                              </span>
+                            {(priceLabel || kcalLabel) && (
+                              <div className="ml-3 flex flex-col items-end gap-1">
+                                {priceLabel ? (
+                                  <span className="text-sm font-semibold text-[#1E1F24] whitespace-nowrap">
+                                    {priceLabel}
+                                  </span>
+                                ) : null}
+                                {kcalLabel ? (
+                                  <span className="inline-flex rounded-full bg-[#E7F2FF] px-2.5 py-1 text-[11px] font-medium leading-none whitespace-nowrap text-[#2C6CBF] shadow-[0_6px_16px_rgba(44,108,191,0.14)]">
+                                    {kcalLabel}
+                                  </span>
+                                ) : null}
+                              </div>
                             )}
                           </div>
                         </div>
