@@ -16,7 +16,7 @@ import { preloadImage } from "@/app/lib/imagePreload";
 type Suggestion = {
   id: string;
   label: string;
-  icon: string;
+  icon?: string;
 };
 
 type LocalizedField = Partial<Record<Locale, string>> | string;

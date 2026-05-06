@@ -2,21 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import ChipsRow, { ChipItem } from "../ui/ChipsRow";
-import {
-  Star,
-  ChefHat,
-  Drumstick,
-  Leaf,
-  Dice5,
-  Flame,
-  Dumbbell,
-  Target,
-  Zap,
-} from "lucide-react";
+import { Star, ChefHat } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { trackEvent } from "@/app/lib/analytics";
+import {
+  getSuggestionIconNode,
+  isSuggestionImageIcon,
+} from "@/app/components/aiSuggestion/suggestionIcons";
 
 type RestaurantChipSuggestion = {
   label: string;
@@ -37,37 +31,6 @@ const DEFAULT_CHIP_COLORS = [
   "bg-[#436d8a] text-white hover:bg-[#7EA0B7]/90",
   "bg-[#C33149] text-white hover:bg-[#C33149]/90",
 ] as const;
-
-const getSuggestionIcon = (iconName?: string, index = 0) => {
-  const normalized = iconName?.trim().toLowerCase();
-
-  switch (normalized) {
-    case "leaf":
-      return <Leaf size={16} />;
-    case "dumbbell":
-      return <Dumbbell size={16} />;
-    case "target":
-      return <Target size={16} />;
-    case "zap":
-      return <Zap size={16} />;
-    case "flame":
-      return <Flame size={16} />;
-    case "drumstick":
-      return <Drumstick size={16} />;
-    case "dice":
-    case "dice5":
-      return <Dice5 size={16} />;
-    default: {
-      const fallbackIcons = [
-        <Leaf key="leaf" size={16} />,
-        <Drumstick key="drumstick" size={16} />,
-        <Dice5 key="dice" size={16} />,
-        <Flame key="flame" size={16} />,
-      ];
-      return fallbackIcons[index % fallbackIcons.length];
-    }
-  }
-};
 
 export default function AiSuggestion({
   className = "",
@@ -118,7 +81,18 @@ export default function AiSuggestion({
     ...suggestionChips.map((suggestion, index) => ({
       id: `suggestion-${index}`,
       label: suggestion.label,
-      icon: getSuggestionIcon(suggestion.icon, index),
+      icon: isSuggestionImageIcon(suggestion.icon) ? (
+        <img
+          src={suggestion.icon}
+          alt=""
+          width={16}
+          height={16}
+          loading="lazy"
+          className="h-4 w-4 opacity-90"
+        />
+      ) : (
+        getSuggestionIconNode(suggestion.icon, index)
+      ),
       variant: "solid" as const,
       colorClassName: DEFAULT_CHIP_COLORS[index % DEFAULT_CHIP_COLORS.length],
     })),
