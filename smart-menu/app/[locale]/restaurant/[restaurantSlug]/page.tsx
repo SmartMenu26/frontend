@@ -62,7 +62,7 @@ type PageProps = {
 
 const OBJECT_ID_REGEX = /^[a-f\\d]{24}$/i;
 const AM_HEALTH_CORNER_HEADER_LOGO =
-  "https://smartmenu-media-prod.s3.eu-north-1.amazonaws.com/restaurants/69e614e90796abf74f9e5421/profile/2c22b097-562c-4e26-8efc-49fdcfb9fc4d.webp";
+  "https://smartmenu-media-prod.s3.eu-north-1.amazonaws.com/restaurants/69e614e90796abf74f9e5421/profile/0473855e-3580-4a1b-91f1-6bf58150dfe3.webp";
 
 const getLocalePriority = (locale: Locale): Locale[] =>
   Array.from(
