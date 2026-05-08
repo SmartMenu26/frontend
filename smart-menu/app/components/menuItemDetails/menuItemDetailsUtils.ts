@@ -21,6 +21,7 @@ export type MenuItemPayload = {
   imageUrl?: string | null;
   price?: unknown;
   priceValue?: unknown;
+  weightGrams?: unknown;
   calories?: unknown;
   proteinGrams?: unknown;
   carbsGrams?: unknown;
@@ -51,6 +52,7 @@ export type MenuItemViewModel = {
   imageUrl: string;
   imageAlt: string;
   price?: number;
+  weightGrams?: number;
   allergens?: AllergenViewModel[];
   healthCornerIngredients?: HealthCornerIngredientViewModel[];
   nutritionSummary?: NutritionSummary;
@@ -436,6 +438,7 @@ export const buildMenuItemViewModel = (
     imageUrl: resolveImageUrl(payload) ?? FALLBACK_IMAGE,
     imageAlt: pickLocalizedValue(imageMeta, localePriority, name),
     price: parsePrice(payload?.price ?? payload?.priceValue),
+    weightGrams: parseNumber(payload?.weightGrams),
     allergens: buildAllergens(payload, localePriority),
     healthCornerIngredients: buildHealthCornerIngredients(payload, localePriority),
     nutritionSummary: buildNutritionSummary(payload),
