@@ -91,6 +91,21 @@ function heroBackgroundImage(src: string) {
   return { backgroundImage: `url(${JSON.stringify(src)})` };
 }
 
+function parseCandidatePrice(item: Candidate) {
+  const resolvedPriceRaw =
+    typeof item?.price === "number"
+      ? item.price
+      : typeof item?.price === "string"
+      ? Number(item.price.replace(/[^\d.,.-]/g, "").replace(/,/g, "."))
+      : typeof item?.priceValue === "number"
+      ? item.priceValue
+      : undefined;
+
+  return typeof resolvedPriceRaw === "number" && Number.isFinite(resolvedPriceRaw)
+    ? resolvedPriceRaw
+    : null;
+}
+
 type Props = {
   restaurantId: string;
   restaurantSlug?: string;
@@ -206,6 +221,17 @@ export default function AiAssistantContent({
         return "ден";
     }
   }, [displayLocale]);
+  const sortedCandidates = useMemo(() => {
+    return [...candidates].sort((left, right) => {
+      const leftPrice = parseCandidatePrice(left);
+      const rightPrice = parseCandidatePrice(right);
+
+      if (leftPrice === null && rightPrice === null) return 0;
+      if (leftPrice === null) return 1;
+      if (rightPrice === null) return -1;
+      return rightPrice - leftPrice;
+    });
+  }, [candidates]);
   const hasResolvedResults =
     status !== "loading" && Boolean(assistantText || candidates.length);
 
@@ -313,8 +339,8 @@ export default function AiAssistantContent({
                   </p>
                 ) : null}
 
-                {candidates.length > 0 ? (
-                  candidates.map((item) => {
+                {sortedCandidates.length > 0 ? (
+                  sortedCandidates.map((item) => {
                     const id = item?._id ?? "";
                     const title =
                       resolveLocalizedField(item?.name, displayLocale) ??
@@ -346,21 +372,9 @@ export default function AiAssistantContent({
                           locale
                         )
                       : restaurantHomeHref;
-                    const resolvedPriceRaw =
-                      typeof item?.price === "number"
-                        ? item.price
-                        : typeof item?.price === "string"
-                        ? Number(
-                            item.price
-                              .replace(/[^\d.,.-]/g, "")
-                              .replace(/,/g, ".")
-                          )
-                        : typeof item?.priceValue === "number"
-                        ? item.priceValue
-                        : undefined;
+                    const resolvedPriceRaw = parseCandidatePrice(item);
                     const priceLabel =
-                      typeof resolvedPriceRaw === "number" &&
-                      Number.isFinite(resolvedPriceRaw)
+                      resolvedPriceRaw !== null
                         ? `${priceFormatter.format(resolvedPriceRaw)} ${priceSuffix}`
                         : null;
                     const resolvedKcalRaw =
