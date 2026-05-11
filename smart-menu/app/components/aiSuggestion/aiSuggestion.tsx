@@ -15,6 +15,11 @@ import {
 type RestaurantChipSuggestion = {
   label: string;
   icon?: string;
+  prompt?: string;
+};
+
+type SuggestionChipItem = ChipItem & {
+  prompt?: string;
 };
 
 type AiSuggestionProps = {
@@ -46,6 +51,15 @@ export default function AiSuggestion({
   const assistantLabel = assistantName?.trim()
     ? t("chips.askNamed", { name: assistantName.trim() })
     : t("chips.askAssistant");
+  const proteinLabel = t("chips.protein").trim().toLowerCase();
+  const proteinPrompt = t("prompts.protein");
+
+  const resolvePrompt = (suggestion: RestaurantChipSuggestion) => {
+    if (suggestion.prompt?.trim()) return suggestion.prompt;
+    return suggestion.label.trim().toLowerCase() === proteinLabel
+      ? proteinPrompt
+      : suggestion.label;
+  };
 
   const defaultSuggestionChips: RestaurantChipSuggestion[] = [
     {
@@ -55,6 +69,7 @@ export default function AiSuggestion({
     {
       label: t("chips.protein"),
       icon: "drumstick",
+      prompt: proteinPrompt,
     },
     {
       label: t("chips.surprise"),
@@ -70,7 +85,7 @@ export default function AiSuggestion({
       ? aiSuggestions
       : defaultSuggestionChips;
 
-  const chips: ChipItem[] = [
+  const chips: SuggestionChipItem[] = [
     {
       id: "ask-assistant",
       label: assistantLabel,
@@ -95,6 +110,7 @@ export default function AiSuggestion({
       ),
       variant: "solid" as const,
       colorClassName: DEFAULT_CHIP_COLORS[index % DEFAULT_CHIP_COLORS.length],
+      prompt: resolvePrompt(suggestion),
     })),
   ];
 
@@ -106,7 +122,10 @@ export default function AiSuggestion({
     const localizedBase = buildLocalizedPath(base, locale);
 
     const chip = chips.find((c) => c.id === chipId);
-    const prompt = chip && chip.id !== "ask-assistant" ? chip.label : undefined;
+    const prompt =
+      chip && chip.id !== "ask-assistant"
+        ? (chip.prompt ?? chip.label)
+        : undefined;
     const target =
       prompt?.trim() && chip?.id !== "ask-assistant"
         ? `${localizedBase}?prompt=${encodeURIComponent(prompt.trim())}`

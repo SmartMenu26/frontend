@@ -9,6 +9,9 @@
       "healthy": "Healthy bites",
       "surprise": "Surprise me",
       "spicy": "Spicy"
+    },
+    "prompts": {
+      "protein": "High-protein food"
     }
   }
   ,

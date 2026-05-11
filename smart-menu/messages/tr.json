@@ -9,6 +9,9 @@
       "healthy": "Saglikli secimler",
       "surprise": "Beni sasirt",
       "spicy": "Acili"
+    },
+    "prompts": {
+      "protein": "Yuksek proteinli"
     }
   },
   "dailyComboPrompt": {
