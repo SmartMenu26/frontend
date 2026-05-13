@@ -134,6 +134,7 @@ type LoadState =
       restaurantId: string;
       canonicalSlug: string;
       restaurantName: string;
+      orderSystem: boolean;
       googleReviewUrl?: string;
       brandColor?: string;
     };
@@ -185,6 +186,14 @@ export default function MenuItemDetailsPageClient({
         const googleReviewUrl =
           getLocalizedValue(restaurantPayload?.googleReviewUrl, localePriority) ??
           undefined;
+        const orderSystem = restaurantPayload?.orderSystem === true;
+
+        console.log("[SmartMenu] menu item restaurant payload", {
+          restaurantSlug,
+          restaurantId,
+          orderSystem,
+          restaurantPayload,
+        });
 
         if (!restaurantId) {
           throw new Error("Restaurant not found");
@@ -240,6 +249,7 @@ export default function MenuItemDetailsPageClient({
           restaurantId,
           canonicalSlug,
           restaurantName,
+          orderSystem,
           googleReviewUrl,
           brandColor,
         });
@@ -286,6 +296,7 @@ export default function MenuItemDetailsPageClient({
       restaurantId={state.restaurantId}
       restaurantSlug={state.canonicalSlug}
       restaurantName={state.restaurantName}
+      orderSystem={state.orderSystem}
       googleReviewUrl={state.googleReviewUrl}
       brandColor={state.brandColor}
     />

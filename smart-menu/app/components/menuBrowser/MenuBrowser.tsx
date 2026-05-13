@@ -8,7 +8,7 @@ import MealTypeToggle from "../mealTypeToggle/MealTypeToggle";
 import type { MealKind, Category } from "@/app/data/dummyMenuCategories";
 import { SkeletonCard } from "../skeletons/cardSkeleton";
 import { CategorySkeleton } from "../skeletons/categorySkeleton";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
@@ -55,7 +55,13 @@ export default function MenuBrowser({
     initialSubcategoryId,
 }: Props) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const locale = useLocale() as Locale;
+    const tableParam =
+        searchParams?.get("table") ??
+        searchParams?.get("utm_table") ??
+        searchParams?.get("t") ??
+        undefined;
 
     const selectionStorageKey = useMemo(
         () => `menu-browser:${restaurantId}:${mealType}`,
@@ -1177,6 +1183,9 @@ export default function MenuBrowser({
                                                         detailParams.set("kind", mealType);
                                                         detailParams.set("categoryId", selectedCategoryId);
                                                         detailParams.set("subcategoryId", selectedSubcategoryId);
+                                                        if (tableParam) {
+                                                            detailParams.set("t", tableParam);
+                                                        }
                                                         const slugOrId = restaurantSlug ?? restaurantId;
                                                         const detailHref = buildLocalizedPath(
                                                             `/restaurant/${slugOrId}/menuItem/${it.id}?${detailParams.toString()}`,

@@ -2,11 +2,13 @@
 
 import clsx from "clsx";
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronDown, PencilLine } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import assistantIllustration from "@/public/images/ai-assistant-cook.png";
 import { type Locale } from "@/i18n";
+import { buildLocalizedPath } from "@/lib/routing";
 
 type LocalizedValue = Partial<Record<Locale, string>> | string | null | undefined;
 
@@ -459,6 +461,7 @@ function Dashboard({ session, onSessionExpired }: DashboardProps) {
   const t = useTranslations("adminDashboard");
   const { admin, restaurant } = session;
   const locale = useLocale() as Locale;
+  const orderSystemHref = buildLocalizedPath("/admin-restaurant/orders", locale);
 
   const creditStats = useMemo(() => {
     const credits = restaurant.aiCredits ?? {};
@@ -494,6 +497,28 @@ function Dashboard({ session, onSessionExpired }: DashboardProps) {
 
   return (
     <div className="space-y-6">
+      <section className="rounded-3xl bg-white p-5 shadow-lg shadow-slate-950/5 ring-1 ring-slate-100">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+              {t("orderSystemCard.eyebrow")}
+            </p>
+            <h2 className="mt-1 text-xl font-semibold text-slate-900">
+              {t("orderSystemCard.title")}
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              {t("orderSystemCard.subtitle")}
+            </p>
+          </div>
+          <Link
+            href={orderSystemHref}
+            className="inline-flex rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            {t("orderSystemCard.action")}
+          </Link>
+        </div>
+      </section>
+
       <section className="rounded-3xl bg-white p-6 shadow-lg shadow-slate-950/5 ring-1 ring-slate-100">
         <div className="grid gap-6 md:grid-cols-[1.5fr,1fr]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">

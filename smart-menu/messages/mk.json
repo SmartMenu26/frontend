@@ -22,6 +22,37 @@
     "chefImageAlt": "Готвачот ја претставува денешната понуда"
   }
   ,
+  "restaurantStickyActions": {
+    "waiter": "Келнер",
+    "bill": "Сметка",
+    "waiterAria": "Повикај келнер",
+    "billAria": "Побарај сметка",
+    "cartAria": "Отвори кошничка со {count} артикли",
+    "cartTitle": "Твоја нарачка",
+    "tableLabel": "Маса {table}",
+    "cartEmpty": "Сѐ уште немаш додадено артикли.",
+    "totalLabel": "Вкупно",
+    "totalValue": "{amount} ден",
+    "sendOrder": "Испрати нарачка",
+    "sendingOrder": "Испраќаме...",
+    "decreaseQuantity": "Намали количина за {item}",
+    "increaseQuantity": "Зголеми количина за {item}",
+    "closeCart": "Затвори кошничка",
+    "closeSheet": "Затвори прозорец",
+    "orderSuccessTitle": "Нарачката е испратена.",
+    "orderSuccessDescription": "Персоналот ја доби вашата нарачка.",
+    "waiterToastTitle": "Келнерот е повикан.",
+    "waiterToastDescription": "Ќе биде кај вас наскоро.",
+    "billToastTitle": "Побарана е сметка.",
+    "billToastDescription": "Персоналот е известен за вашето барање.",
+    "splitBillToastTitle": "Побарана е поделена сметка.",
+    "splitBillToastDescription": "Персоналот е известен за вашето барање.",
+    "billSheetTitle": "Изберете опција",
+    "requestBill": "Побарај сметка",
+    "splitBill": "Подели сметка",
+    "cancel": "Откажи"
+  }
+  ,
   "dailyComboModal": {
     "title": "Препорака за денес",
     "subtitle": "Комбинацијата вклучува",
@@ -165,6 +196,12 @@
       "remainingLabel": "Преостанато",
       "hint": "Вкупно кредити: {total}. Чувајте најмалку 100 за да избегнете ограничување на AI разговорите."
     },
+    "orderSystemCard": {
+      "eyebrow": "Операции",
+      "title": "Табла за нарачки",
+      "subtitle": "Отворете ја живата табла за нови нарачки, повици за келнер и барања за сметка.",
+      "action": "Отвори табла"
+    },
     "weeklyCombos": {
       "title": "Неделни комбинации",
       "subtitle": "Изберете до три артикли за секој ден и објавете ги како комбинации.",
@@ -304,6 +341,76 @@
     }
   }
   ,
+  "adminOperations": {
+    "eyebrow": "Операции во ресторан",
+    "title": "Жива табла за нарачки",
+    "subtitle": "Следете нови нарачки, повици за келнер и барања за сметка со истата ресторан-админ сесија.",
+    "backToDashboard": "Назад кон админ таблата",
+    "refresh": "Освежи",
+    "meta": {
+      "restaurant": "Ресторан"
+    },
+    "socket": {
+      "connected": "Live ажурирања вклучени",
+      "fallback": "Резервно освежување"
+    },
+    "states": {
+      "loadingSession": "Ја проверуваме зачуваната админ сесија",
+      "loadingSessionDescription": "Почекајте додека го вратиме пристапот за ресторан-админ.",
+      "loginRequired": "Потребна е најава",
+      "loginRequiredDescription": "Прво отворете го ресторан админ со вашите стандардни креденцијали, па вратете се на оваа жива табла.",
+      "openAdmin": "Отвори админ најава"
+    },
+    "errors": {
+      "generic": "Се појави проблем при вчитувањето на живата табла.",
+      "sessionExpired": "Сесијата истече. Најавете се повторно.",
+      "loadOrders": "Не можевме да ги вчитаме нарачките.",
+      "loadServiceRequests": "Не можевме да ги вчитаме сервисните барања.",
+      "updateOrder": "Не можевме да го ажурираме статусот на нарачката.",
+      "updateServiceRequest": "Не можевме да го ажурираме статусот на сервисното барање."
+    },
+    "orders": {
+      "title": "Нарачки",
+      "subtitle": "Управувајте со активните гостински нарачки по редоследот на пристигнување.",
+      "newBadge": "Ново",
+      "columns": {
+        "new": "Нови",
+        "accepted": "Прифатени",
+        "preparing": "Подготовка"
+      },
+      "table": "Маса {table}",
+      "guestNote": "Белешка од гостин",
+      "unnamedItem": "Артикл без име",
+      "empty": "Нема активни нарачки во оваа колона.",
+      "actions": {
+        "accepted": "Прифати",
+        "preparing": "Подготовка",
+        "served": "Послужено",
+        "cancelled": "Откажи"
+      }
+    },
+    "serviceRequests": {
+      "title": "Сервисни барања",
+      "subtitle": "Ракувајте со повици за келнер и барања за сметка од салата.",
+      "newBadge": "Ново",
+      "columns": {
+        "new": "Нови",
+        "acknowledged": "Потврдени"
+      },
+      "table": "Маса {table}",
+      "empty": "Нема сервисни барања во оваа колона.",
+      "types": {
+        "call_waiter": "Повик за келнер",
+        "bill_normal": "Барање за сметка",
+        "bill_split": "Поделена сметка"
+      },
+      "actions": {
+        "acknowledged": "Потврди",
+        "resolved": "Завршено",
+        "cancelled": "Откажи"
+      }
+    }
+  },
   "mealTypeToggle": {
     "food": "Храна",
     "drink": "Пијалоци"
@@ -426,6 +533,7 @@
   "menuItemDetails": {
     "assistantButton": "AI ПРЕПОРАКА",
     "assistantPrompt": "Што оди со {dish}?",
+    "addToCart": "Додај во кошничка",
     "shareCta": "Сподели го твоето мислење",
     "shareModal": {
       "title": "Какво е твоето искуство во {restaurantName}?",

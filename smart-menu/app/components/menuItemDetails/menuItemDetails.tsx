@@ -19,6 +19,7 @@ import {
   Dumbbell,
   Heart,
   MessageSquare,
+  ShoppingBasket,
   Star,
   Wheat,
   X,
@@ -32,6 +33,9 @@ import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { trackEvent } from "@/app/lib/analytics";
 import { greatVibes } from "@/app/fonts";
+import RestaurantStickyActions from "@/app/components/restaurant/RestaurantStickyActions";
+import useRestaurantCart from "@/app/components/restaurant/useRestaurantCart";
+import useRestaurantOrderSystem from "@/app/components/restaurant/useRestaurantOrderSystem";
 import HealthCornerRadialInfographic, {
   type HealthCornerIngredient,
 } from "./HealthCornerRadialInfographic";
@@ -56,6 +60,7 @@ type Props = {
   restaurantId?: string;
   restaurantSlug?: string;
   restaurantName?: string;
+  orderSystem?: boolean;
   googleReviewUrl?: string;
   brandColor?: string;
   price?: number;
@@ -74,6 +79,7 @@ export default function MenuItemDetails({
   restaurantId,
   restaurantSlug,
   restaurantName,
+  orderSystem = false,
   googleReviewUrl,
   brandColor,
   price,
@@ -91,6 +97,11 @@ export default function MenuItemDetails({
   const returnKind = searchParams?.get("kind") ?? undefined;
   const returnCategoryId = searchParams?.get("categoryId") ?? undefined;
   const returnSubcategoryId = searchParams?.get("subcategoryId") ?? undefined;
+  const returnTable =
+    searchParams?.get("table") ??
+    searchParams?.get("utm_table") ??
+    searchParams?.get("t") ??
+    undefined;
   const slugOrId = restaurantSlug ?? restaurantId ?? null;
   const showNutritionSpotlight = Boolean(
     nutritionSummary &&
@@ -113,6 +124,15 @@ export default function MenuItemDetails({
     () => `review-modal-menu-start:${reviewScope}`,
     [reviewScope]
   );
+  const resolvedOrderSystem = useRestaurantOrderSystem({
+    restaurantId,
+    restaurantSlug,
+    initialValue: orderSystem,
+  });
+  const { addItem } = useRestaurantCart({
+    restaurantId,
+    restaurantSlug,
+  });
   const scanAnimationToken = `${id}:${imageUrl}`;
   const [readyScanToken, setReadyScanToken] = useState<string | null>(null);
   const [nutritionScanProgress, setNutritionScanProgress] = useState(
@@ -135,9 +155,10 @@ export default function MenuItemDetails({
     if (returnKind) params.set("kind", returnKind);
     if (returnCategoryId) params.set("categoryId", returnCategoryId);
     if (returnSubcategoryId) params.set("subcategoryId", returnSubcategoryId);
+    if (returnTable) params.set("t", returnTable);
     const qs = params.toString();
     return qs ? `${base}?${qs}` : base;
-  }, [slugOrId, locale, returnKind, returnCategoryId, returnSubcategoryId]);
+  }, [slugOrId, locale, returnKind, returnCategoryId, returnSubcategoryId, returnTable]);
 
   const handleBack = useCallback(() => {
     if (backUrl) {
@@ -278,6 +299,16 @@ export default function MenuItemDetails({
     add: t("favorite.add"),
     remove: t("favorite.remove"),
   };
+  const addToCartLabel = t("addToCart");
+
+  const handleAddToCart = useCallback(() => {
+    addItem({
+      menuItemId: id,
+      name,
+      price,
+      note: "",
+    });
+  }, [addItem, id, name, price]);
   const backLabel = t("back");
 
   const openShareModal = useCallback(
@@ -471,177 +502,184 @@ export default function MenuItemDetails({
         className="min-h-dvh bg-[#3F5D50] flex flex-col justify-between gap-5"
         style={{ backgroundColor: pageBackgroundColor }}
       >
-      <MenuItemHero
-        name={name}
-        imageUrl={imageUrl}
-        imageAlt={imageAlt}
-        onBack={handleBack}
-        backLabel={backLabel}
-        showHealthCornerInfographic={showHealthCornerInfographic}
-        healthCornerIngredients={healthCornerIngredients}
-        showNutritionScan={showNutritionSpotlight}
-        scanProgress={isNutritionScanReady ? nutritionScanProgress : 0}
-        scanToken={scanAnimationToken}
-        onNutritionScanReady={handleNutritionScanReady}
-      />
+        <MenuItemHero
+          name={name}
+          imageUrl={imageUrl}
+          imageAlt={imageAlt}
+          onBack={handleBack}
+          backLabel={backLabel}
+          showHealthCornerInfographic={showHealthCornerInfographic}
+          healthCornerIngredients={healthCornerIngredients}
+          showNutritionScan={showNutritionSpotlight}
+          scanProgress={isNutritionScanReady ? nutritionScanProgress : 0}
+          scanToken={scanAnimationToken}
+          onNutritionScanReady={handleNutritionScanReady}
+        />
 
-      {showNutritionSpotlight && nutritionSummary && (
-        <div className="relative z-10 px-2">
-          <MacroStatsRow
-            summary={nutritionSummary}
-            labels={macroLabels}
-            valueFormat={nutritionValueFormat}
-            progress={isNutritionScanReady ? nutritionScanProgress : 0}
-          />
-        </div>
-      )}
-
-      {/* BOTTOM SHEET */}
-      <div className="flex flex-col justify-between gap-3 md:container md:mx-auto min-h-[55dvh] md:max-w-125 rounded-t-[40px] bg-[#F7F7F7] px-6 pb-4 pt-8 shadow-[0_-20px_60px_rgba(0,0,0,0.25)] md:min-h-[45dvh]">
-        <section className="flex flex-col gap-4">
-          <h1 className={`${greatVibes.className} text-5xl leading-tight text-[#2F3A37]`}>
-            {name}
-          </h1>
-
-          {!!description && (
-            <p className="text-lg leading-relaxed text-[#2F3A37]/80">
-              {description}
-            </p>
-          )}
-          {(priceText || kcalText) && (
-            <div className="flex flex-wrap items-center gap-2">
-              {priceText ? (
-                <span className="border border-[#1B1F1E] border-solid rounded-full w-fit px-2 py-1 text-lg font-semibold text-[#1B1F1E] leading-tight">
-                  {priceText}
-                </span>
-              ) : null}
-              {kcalText ? (
-                <span className="rounded-full bg-[#E7F2FF] px-2.5 py-1 text-sm font-medium leading-tight whitespace-nowrap text-[#2C6CBF] shadow-[0_6px_16px_rgba(44,108,191,0.14)]">
-                  {kcalText}
-                </span>
-              ) : null}
-            </div>
-          )}
-        </section>
-        <section>
-          {/* allergens */}
-          {visibleAllergens.length > 0 && (
-            <div className="mt-3">
-              {/* <p className="text-xs font-semibold uppercase tracking-wide text-[#2F3A37]/60">
-                Алергени
-              </p> */}
-
-              <div className="mt-3 flex flex-wrap gap-3">
-                {visibleAllergens.map((a) => {
-                  const iconEntry = getAllergenIconEntry(a.code ?? a.label);
-                  const tooltipText = resolveTooltipLabel(
-                    a.label,
-                    iconEntry,
-                    (key) => tAllergens(key)
-                  );
-                  const tooltipId = `allergen-tooltip-${a.key}`;
-                  const isActive = visibleActiveTooltip === a.key;
-
-                  if (iconEntry) {
-                    const Icon = iconEntry.icon;
-                    return (
-                      <button
-                        type="button"
-                        key={a.key}
-                        aria-label={tooltipText}
-                        aria-describedby={tooltipId}
-                        className="group relative grid h-12 w-12 place-items-center rounded-2xl border border-[#2F3A37]/15 bg-white shadow-sm transition hover:border-[#2F3A37]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/40"
-                        data-active={isActive}
-                        onClick={() =>
-                          setActiveTooltip((prev) =>
-                            prev === a.key ? null : a.key
-                          )
-                        }
-                        onMouseLeave={() =>
-                          setActiveTooltip((prev) =>
-                            prev === a.key ? null : prev
-                          )
-                        }
-                        onBlur={() =>
-                          setActiveTooltip((prev) =>
-                            prev === a.key ? null : prev
-                          )
-                        }
-                      >
-                        <Icon
-                          className="h-5 w-5 text-[#1B1F1E]"
-                          strokeWidth={1.8}
-                        />
-
-                        <span
-                          id={tooltipId}
-                          role="tooltip"
-                          className={clsx(
-                            "pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 rounded-2xl bg-[#2F3A37] px-3 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg transition-all duration-150",
-                            "before:absolute before:left-1/2 before:top-full before:-translate-x-1/2 before:border-[6px] before:border-transparent before:border-t-[#2F3A37] before:content-['']",
-                            "group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100",
-                            isActive ? "translate-y-0 opacity-100" : "translate-y-1"
-                          )}
-                        >
-                          {tooltipText}
-                        </span>
-                      </button>
-                    );
-                  }
-
-                  return (
-                    <span
-                      key={a.key}
-                      className="rounded-full border border-[#2F3A37]/15 bg-white px-3 py-1 text-xs text-[#2F3A37]/80"
-                    >
-                      {a.label || a.code}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* actions */}
-          <div className="mt-3 flex items-center gap-3">
-            <button
-              type="button"
-              className="flex-1 cursor-pointer rounded-full bg-[#1B1F1E] py-4 text-sm font-semibold text-white shadow-lg"
-              onClick={() => {
-                if (!restaurantId) return;
-                const params = new URLSearchParams({ prompt: assistantPrompt });
-                const slugOrId = restaurantSlug ?? restaurantId;
-                const assistantHref = buildLocalizedPath(
-                  `/restaurant/${slugOrId}/ai-assistant?${params.toString()}`,
-                  locale
-                );
-                router.push(assistantHref);
-              }}
-            >
-              {assistantButtonLabel}
-            </button>
-
-            <FavoriteButton
-              key={`${favoritesKey}:${id}`}
-              itemId={id}
-              storageKey={favoritesKey}
-              addLabel={favoriteLabels.add}
-              removeLabel={favoriteLabels.remove}
+        {showNutritionSpotlight && nutritionSummary && (
+          <div className="relative z-10 px-2">
+            <MacroStatsRow
+              summary={nutritionSummary}
+              labels={macroLabels}
+              valueFormat={nutritionValueFormat}
+              progress={isNutritionScanReady ? nutritionScanProgress : 0}
             />
           </div>
+        )}
 
-          {!hasSubmittedReview && (
-            <button
-              type="button"
-              className="cursor-pointer mt-6 pb-6 w-full text-center text-xs text-[#2F3A37]/70 underline underline-offset-4 flex items-center justify-center gap-2"
-              onClick={handleShareClick}
-            >
-              <MessageSquare className="h-4 w-5" /> {shareLabel}
-            </button>
-          )}
-        </section>
+        {/* BOTTOM SHEET */}
+        <div className="flex min-h-[55dvh] flex-col justify-between gap-3 rounded-t-[40px] bg-[#F7F7F7] px-6 pt-8 shadow-[0_-20px_60px_rgba(0,0,0,0.25)] md:container md:mx-auto md:min-h-[45dvh] md:max-w-125 md:pb-6">
+          <section className="flex flex-col gap-4">
+            <h1 className={`${greatVibes.className} text-5xl leading-tight text-[#2F3A37]`}>
+              {name}
+            </h1>
+
+            {!!description && (
+              <p className="text-lg leading-relaxed text-[#2F3A37]/80">
+                {description}
+              </p>
+            )}
+            {(priceText || kcalText) && (
+              <div className="flex flex-wrap items-center gap-2">
+                {priceText ? (
+                  <span className="border border-[#1B1F1E] border-solid rounded-full w-fit px-2 py-1 text-lg font-semibold text-[#1B1F1E] leading-tight">
+                    {priceText}
+                  </span>
+                ) : null}
+                {kcalText ? (
+                  <span className="rounded-full bg-[#E7F2FF] px-2.5 py-1 text-sm font-medium leading-tight whitespace-nowrap text-[#2C6CBF] shadow-[0_6px_16px_rgba(44,108,191,0.14)]">
+                    {kcalText}
+                  </span>
+                ) : null}
+              </div>
+            )}
+          </section>
+          <section>
+            {visibleAllergens.length > 0 && (
+              <div className="mt-3">
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {visibleAllergens.map((a) => {
+                    const iconEntry = getAllergenIconEntry(a.code ?? a.label);
+                    const tooltipText = resolveTooltipLabel(
+                      a.label,
+                      iconEntry,
+                      (key) => tAllergens(key)
+                    );
+                    const tooltipId = `allergen-tooltip-${a.key}`;
+                    const isActive = visibleActiveTooltip === a.key;
+
+                    if (iconEntry) {
+                      const Icon = iconEntry.icon;
+                      return (
+                        <button
+                          type="button"
+                          key={a.key}
+                          aria-label={tooltipText}
+                          aria-describedby={tooltipId}
+                          className="group relative grid h-12 w-12 place-items-center rounded-2xl border border-[#2F3A37]/15 bg-white shadow-sm transition hover:border-[#2F3A37]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A37]/40"
+                          data-active={isActive}
+                          onClick={() =>
+                            setActiveTooltip((prev) =>
+                              prev === a.key ? null : a.key
+                            )
+                          }
+                          onMouseLeave={() =>
+                            setActiveTooltip((prev) =>
+                              prev === a.key ? null : prev
+                            )
+                          }
+                          onBlur={() =>
+                            setActiveTooltip((prev) =>
+                              prev === a.key ? null : prev
+                            )
+                          }
+                        >
+                          <Icon
+                            className="h-5 w-5 text-[#1B1F1E]"
+                            strokeWidth={1.8}
+                          />
+
+                          <span
+                            id={tooltipId}
+                            role="tooltip"
+                            className={clsx(
+                              "pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 -translate-x-1/2 rounded-2xl bg-[#2F3A37] px-3 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg transition-all duration-150",
+                              "before:absolute before:left-1/2 before:top-full before:-translate-x-1/2 before:border-[6px] before:border-transparent before:border-t-[#2F3A37] before:content-['']",
+                              "group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100",
+                              isActive ? "translate-y-0 opacity-100" : "translate-y-1"
+                            )}
+                          >
+                            {tooltipText}
+                          </span>
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <span
+                        key={a.key}
+                        className="rounded-full border border-[#2F3A37]/15 bg-white px-3 py-1 text-xs text-[#2F3A37]/80"
+                      >
+                        {a.label || a.code}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-3 flex items-center gap-3">
+              <button
+                type="button"
+                className="flex-1 cursor-pointer rounded-full bg-[#1B1F1E] py-4 text-sm font-semibold text-white shadow-lg"
+                onClick={() => {
+                  if (!restaurantId) return;
+                  const params = new URLSearchParams({ prompt: assistantPrompt });
+                  const slugOrId = restaurantSlug ?? restaurantId;
+                  const assistantHref = buildLocalizedPath(
+                    `/restaurant/${slugOrId}/ai-assistant?${params.toString()}`,
+                    locale
+                  );
+                  router.push(assistantHref);
+                }}
+              >
+                {assistantButtonLabel}
+              </button>
+
+              {resolvedOrderSystem ? (
+                <AddToCartButton
+                  ariaLabel={addToCartLabel}
+                  onClick={handleAddToCart}
+                />
+              ) : (
+                <FavoriteButton
+                  key={`${favoritesKey}:${id}`}
+                  itemId={id}
+                  storageKey={favoritesKey}
+                  addLabel={favoriteLabels.add}
+                  removeLabel={favoriteLabels.remove}
+                />
+              )}
+            </div>
+
+            {!hasSubmittedReview && (
+              <button
+                type="button"
+                className="cursor-pointer mt-6 w-full pb-6 text-center text-xs text-[#2F3A37]/70 underline underline-offset-4 flex items-center justify-center gap-2"
+                onClick={handleShareClick}
+              >
+                <MessageSquare className="h-4 w-5" /> {shareLabel}
+              </button>
+            )}
+          </section>
+        </div>
       </div>
-    </div>
+      {resolvedOrderSystem ? (
+        <RestaurantStickyActions
+          restaurantId={restaurantId}
+          restaurantSlug={restaurantSlug}
+        />
+      ) : null}
       {isShareModalOpen && (
         <ShareFeedbackModal
           open={isShareModalOpen}
@@ -660,6 +698,11 @@ type FavoriteButtonProps = {
   storageKey: string;
   addLabel: string;
   removeLabel: string;
+};
+
+type AddToCartButtonProps = {
+  ariaLabel: string;
+  onClick: () => void;
 };
 
 const readStoredFavorite = (storageKey: string, itemId: string) => {
@@ -829,7 +872,7 @@ function MacroStatsRow({
   }
 
   return (
-    <div className="mt-2 grid grid-cols-3 gap-1.5 md:max-w-125 md:mx-auto">
+    <div className="grid grid-cols-3 gap-1.5 md:max-w-125 md:mx-auto">
       {metrics.map((metric) => (
         <article
           key={metric.key}
@@ -927,6 +970,66 @@ function NutritionScanOverlay({ progress }: NutritionScanOverlayProps) {
         style={scanStyle}
       />
     </>
+  );
+}
+
+function AddToCartButton({ ariaLabel, onClick }: AddToCartButtonProps) {
+  const [isAnimating, setIsAnimating] = useState(false);
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    },
+    []
+  );
+
+  const handleClick = () => {
+    onClick();
+    setIsAnimating(true);
+
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+    }
+
+    animationTimeoutRef.current = setTimeout(() => {
+      setIsAnimating(false);
+    }, 420);
+  };
+
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      onClick={handleClick}
+      className={clsx(
+        "cursor-pointer grid h-14 w-14 place-items-center rounded-full bg-[#1B1F1E] text-white shadow-lg transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
+        isAnimating ? "scale-110" : "scale-100"
+      )}
+    >
+      <span className="relative inline-flex h-6 w-6 items-center justify-center">
+        {isAnimating && (
+          <span className="absolute inset-0 rounded-full bg-white/35 animate-ping" />
+        )}
+        <ShoppingBasket
+          className={clsx(
+            "h-5 w-5 transition-transform duration-200",
+            isAnimating ? "-translate-y-0.5" : ""
+          )}
+          strokeWidth={2}
+        />
+        <span
+          className={clsx(
+            "absolute -right-2 -top-1 grid h-4 w-4 place-items-center rounded-full bg-[#D1FF5E] text-[10px] font-bold text-[#131715] transition-transform duration-200",
+            isAnimating ? "scale-125" : "scale-100"
+          )}
+        >
+          +
+        </span>
+      </span>
+    </button>
   );
 }
 

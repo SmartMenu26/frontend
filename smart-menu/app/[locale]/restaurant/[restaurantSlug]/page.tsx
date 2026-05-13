@@ -4,12 +4,12 @@ import InstallAppButton from "@/app/_components/InstallAppButton";
 import AiSuggestion from "@/app/components/aiSuggestion/aiSuggestion";
 import RestaurantContent from "@/app/components/restaurant/RestaurantContext";
 import RestaurantDailyComboPrompt from "@/app/components/restaurant/RestaurantDailyComboPrompt";
+import RestaurantFloatingUi from "@/app/components/restaurant/RestaurantFloatingUi";
 import RestaurantContactCard, {
   type RestaurantContactLabels,
 } from "@/app/components/restaurant/RestaurantContactCard";
 import Footer from "@/app/components/ui/Footer";
 import RestaurantHeader from "@/app/components/ui/RestaurantHeader";
-import LanguageSwitcher from "@/app/components/languageSwitcher/LanguageSwitcher";
 import {
   fetchRestaurantRecord,
   fetchWeeklyCombos,
@@ -24,7 +24,8 @@ import { buildLocalizedPath } from "@/lib/routing";
 import { getSiteUrl } from "@/lib/siteMeta";
 import { notFound, redirect } from "next/navigation";
 
-export const revalidate = 3600;
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 const TITLE_COPY: Record<Locale, (name: string) => string> = {
   mk: (name) => `Мени | ${name} | Smart Menu`,
@@ -61,8 +62,12 @@ type PageProps = {
 };
 
 const OBJECT_ID_REGEX = /^[a-f\\d]{24}$/i;
-const AM_HEALTH_CORNER_HEADER_LOGO =
-  "https://smartmenu-media-prod.s3.eu-north-1.amazonaws.com/restaurants/69e614e90796abf74f9e5421/profile/0473855e-3580-4a1b-91f1-6bf58150dfe3.webp";
+const RESTAURANT_HEADER_TITLE_IMAGES: Record<string, string> = {
+  "am-health-corner":
+    "https://smartmenu-media-prod.s3.eu-north-1.amazonaws.com/restaurants/69e614e90796abf74f9e5421/profile/0473855e-3580-4a1b-91f1-6bf58150dfe3.webp",
+  "zdrava-stanica":
+    "https://smartmenu-media-prod.s3.eu-north-1.amazonaws.com/restaurants/6a0331a1eb6a2990a29f7be9/profile/613e9463-1149-4c1f-9df4-354dd929ced4.webp",
+};
 
 const getLocalePriority = (locale: Locale): Locale[] =>
   Array.from(
@@ -239,18 +244,21 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   const structuredData = JSON.stringify(schemaPayload);
 
   const dailyCombo = buildTodaysComboOffer(weeklyCombos, localePriority);
+  const customHeaderTitleImage = RESTAURANT_HEADER_TITLE_IMAGES[record.slug];
 
   return (
     <>
-      <div className="pt-8 md:pt-0 flex flex-col gap-6">
+      <div className="flex flex-col gap-6 pt-8 md:pt-0">
         <InstallAppButton />
         <RestaurantHeader
           name={restaurantName}
           restaurantSlug={record.slug}
+          preferTitleImage={Boolean(customHeaderTitleImage)}
           titleImageSrc={
-            record.slug === "am-health-corner"
-              ? AM_HEALTH_CORNER_HEADER_LOGO
-              : record.imageUrl ?? record.heroImageUrl ?? undefined
+            customHeaderTitleImage ??
+            record.imageUrl ??
+            record.heroImageUrl ??
+            undefined
           }
         />
 
@@ -279,6 +287,12 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
 
         <Footer />
       </div>
+      <RestaurantFloatingUi
+        restaurantId={record.id}
+        restaurantSlug={record.slug}
+        supportedLanguages={record.supportedLanguages}
+        initialOrderSystem={record.orderSystem}
+      />
       {dailyCombo ? (
         <RestaurantDailyComboPrompt
           restaurantSlug={record.slug}
@@ -290,9 +304,6 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: structuredData }}
       />
-      <div className="fixed bottom-4 right-4 z-50">
-        <LanguageSwitcher allowedLocales={record.supportedLanguages} />
-      </div>
   </>
 );
 }

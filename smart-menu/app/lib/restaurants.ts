@@ -46,6 +46,7 @@ export type WeeklyComboEntry = {
 export type RestaurantRecord = {
   id: string;
   slug: string;
+  orderSystem?: boolean;
   plainName?: string;
   localizedName?: LocalizedRecord;
   assistantName?: string | LocalizedRecord;
@@ -105,6 +106,11 @@ const getBackendBase = () =>
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
+
+const readBoolean = (value: unknown): boolean | undefined => {
+  if (typeof value === "boolean") return value;
+  return undefined;
+};
 
 const toLocalizedRecord = (value: unknown): LocalizedRecord | undefined => {
   if (!isRecord(value)) return undefined;
@@ -434,6 +440,7 @@ const mapRestaurantPayload = (
   return {
     id: possibleId,
     slug,
+    orderSystem: readBoolean(payload.orderSystem),
     plainName:
       typeof payload.name === "string" && payload.name.trim()
         ? payload.name.trim()
@@ -503,6 +510,37 @@ const tryMapPayload = (
   }
 
   return null;
+};
+
+const mergeRestaurantRecords = (
+  current: RestaurantRecord | null,
+  incoming: RestaurantRecord | null
+): RestaurantRecord | null => {
+  if (!incoming) return current;
+  if (!current) return incoming;
+
+  const merged = { ...current } as RestaurantRecord;
+
+  for (const [key, value] of Object.entries(incoming) as Array<
+    [keyof RestaurantRecord, RestaurantRecord[keyof RestaurantRecord]]
+  >) {
+    const existing = merged[key];
+    const shouldPreferTrueBoolean =
+      typeof existing === "boolean" &&
+      typeof value === "boolean" &&
+      existing === false &&
+      value === true;
+    const shouldFill =
+      existing === undefined ||
+      existing === null ||
+      (Array.isArray(existing) && existing.length === 0);
+
+    if ((shouldFill || shouldPreferTrueBoolean) && value !== undefined) {
+      merged[key] = value as never;
+    }
+  }
+
+  return merged;
 };
 
 const normalizeWeeklyComboArray = (
@@ -604,22 +642,23 @@ export async function fetchRestaurantRecord(
   urlCandidates.push(`${backendBase}/api/restaurants/${trimmed}`);
 
   const seen = new Set<string>();
+  let bestMatch: RestaurantRecord | null = null;
 
   for (const url of urlCandidates) {
     if (!url || seen.has(url)) continue;
     seen.add(url);
     const payload = await fetchJson(url);
     const mapped = tryMapPayload(payload, trimmed);
-    if (mapped) return mapped;
+    bestMatch = mergeRestaurantRecords(bestMatch, mapped);
   }
 
   const listPayload = await fetchJson(`${backendBase}/api/restaurants`);
   if (listPayload) {
     const mapped = tryMapPayload(listPayload, trimmed);
-    if (mapped) return mapped;
+    bestMatch = mergeRestaurantRecords(bestMatch, mapped);
   }
 
-  return null;
+  return bestMatch;
 }
 
 export async function fetchWeeklyCombos(

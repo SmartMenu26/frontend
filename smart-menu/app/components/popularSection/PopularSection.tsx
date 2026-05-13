@@ -5,7 +5,7 @@ import Card from "../ui/Card";
 import { DUMMY_ITEMS } from "@/app/data/dummyMenuItems";
 import type { MealKind } from "@/app/data/dummyMenuCategories";
 import { PopularSkeletonCard } from "../skeletons/popularItemsSkeleton";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { defaultLocale, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
@@ -33,8 +33,14 @@ export default function PopularSection({
   className = "",
 }: PopularSectionProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const locale = useLocale() as Locale;
   const t = useTranslations("popularSection");
+  const tableParam =
+    searchParams?.get("table") ??
+    searchParams?.get("utm_table") ??
+    searchParams?.get("t") ??
+    undefined;
 
   const [popularItems, setPopularItems] = useState<MenuItem[]>([]);
   const [loadingPopular, setLoadingPopular] = useState(false);
@@ -154,6 +160,9 @@ export default function PopularSection({
                       });
                       const detailParams = new URLSearchParams();
                       detailParams.set("kind", mealType);
+                      if (tableParam) {
+                        detailParams.set("t", tableParam);
+                      }
                       const slugOrId = restaurantSlug ?? restaurantId;
                       const detailHref = buildLocalizedPath(
                         `/restaurant/${slugOrId}/menuItem/${it.id}?${detailParams.toString()}`,
