@@ -22,6 +22,37 @@
     "chefImageAlt": "Shefi po paraqet ofertën e sotme"
   }
   ,
+  "restaurantStickyActions": {
+    "waiter": "Kamerier",
+    "bill": "Llogaria",
+    "waiterAria": "Thirr kamerierin",
+    "billAria": "Kërko llogarinë",
+    "cartAria": "Hap shportën me {count} artikuj",
+    "cartTitle": "Porosia jote",
+    "tableLabel": "Tavolina {table}",
+    "cartEmpty": "Ende nuk ke shtuar artikuj.",
+    "totalLabel": "Gjithsej",
+    "totalValue": "{amount} den",
+    "sendOrder": "Dërgo porosinë",
+    "sendingOrder": "Po dërgohet...",
+    "decreaseQuantity": "Ule sasinë për {item}",
+    "increaseQuantity": "Rrite sasinë për {item}",
+    "closeCart": "Mbyll shportën",
+    "closeSheet": "Mbyll dritaren",
+    "orderSuccessTitle": "Porosia u dërgua.",
+    "orderSuccessDescription": "Stafi e mori porosinë tuaj.",
+    "waiterToastTitle": "Kamerieri u thirr.",
+    "waiterToastDescription": "Do të vijë te ju shumë shpejt.",
+    "billToastTitle": "Llogaria u kërkua.",
+    "billToastDescription": "Stafi u njoftua për kërkesën tuaj.",
+    "splitBillToastTitle": "U kërkua ndarja e llogarisë.",
+    "splitBillToastDescription": "Stafi u njoftua për kërkesën tuaj.",
+    "billSheetTitle": "Zgjidh një opsion",
+    "requestBill": "Kërko llogarinë",
+    "splitBill": "Ndaje llogarinë",
+    "cancel": "Anulo"
+  }
+  ,
   "dailyComboModal": {
     "title": "Rekomandimi i sotëm",
     "subtitle": "Përfshin kombinimin",
@@ -165,6 +196,12 @@
       "remainingLabel": "Të mbetura",
       "hint": "Kredite gjithsej: {total}. Mbani të paktën 100 për të shmangur kufizimet në bisedat me AI."
     },
+    "orderSystemCard": {
+      "eyebrow": "Operacionet",
+      "title": "Tabela e porosive",
+      "subtitle": "Hap tabelën e drejtpërdrejtë për porositë e reja, thirrjet e kamerierit dhe kërkesat për llogari.",
+      "action": "Hap tabelën"
+    },
     "weeklyCombos": {
       "title": "Kombinimet javore",
       "subtitle": "Zgjidh deri në tre artikuj për çdo ditë dhe publikoji si kombinime.",
@@ -304,6 +341,76 @@
     }
   }
   ,
+  "adminOperations": {
+    "eyebrow": "Operacionet e restorantit",
+    "title": "Tabela live e porosive",
+    "subtitle": "Ndiq porositë e reja, thirrjet e kamerierit dhe kërkesat për llogari me të njëjtën sesion admin.",
+    "backToDashboard": "Kthehu te admin paneli",
+    "refresh": "Rifresko",
+    "meta": {
+      "restaurant": "Restoranti"
+    },
+    "socket": {
+      "connected": "Përditësime live aktive",
+      "fallback": "Rifreskim rezervë"
+    },
+    "states": {
+      "loadingSession": "Po kontrollohet sesioni i ruajtur i adminit",
+      "loadingSessionDescription": "Prit pak ndërsa rikthejmë qasjen e adminit të restorantit.",
+      "loginRequired": "Nevojitet hyrje",
+      "loginRequiredDescription": "Hape fillimisht restaurant admin me kredencialet e tua të zakonshme, pastaj kthehu në këtë tabelë live.",
+      "openAdmin": "Hap hyrjen admin"
+    },
+    "errors": {
+      "generic": "Ndodhi një problem gjatë ngarkimit të tabelës live.",
+      "sessionExpired": "Sesioni skadoi. Hyr sërish.",
+      "loadOrders": "Nuk i ngarkuam dot porositë.",
+      "loadServiceRequests": "Nuk i ngarkuam dot kërkesat e shërbimit.",
+      "updateOrder": "Nuk e përditësuam dot statusin e porosisë.",
+      "updateServiceRequest": "Nuk e përditësuam dot statusin e kërkesës së shërbimit."
+    },
+    "orders": {
+      "title": "Porositë",
+      "subtitle": "Menaxho porositë aktive të mysafirëve sipas rendit të mbërritjes.",
+      "newBadge": "E re",
+      "columns": {
+        "new": "Të reja",
+        "accepted": "Të pranuara",
+        "preparing": "Në përgatitje"
+      },
+      "table": "Tavolina {table}",
+      "guestNote": "Shënim nga mysafiri",
+      "unnamedItem": "Artikull pa emër",
+      "empty": "Nuk ka porosi aktive në këtë kolonë.",
+      "actions": {
+        "accepted": "Prano",
+        "preparing": "Përgatitje",
+        "served": "E shërbyer",
+        "cancelled": "Anulo"
+      }
+    },
+    "serviceRequests": {
+      "title": "Kërkesa shërbimi",
+      "subtitle": "Menaxho thirrjet për kamerier dhe kërkesat për llogari nga salla.",
+      "newBadge": "E re",
+      "columns": {
+        "new": "Të reja",
+        "acknowledged": "Të pranuara"
+      },
+      "table": "Tavolina {table}",
+      "empty": "Nuk ka kërkesa shërbimi në këtë kolonë.",
+      "types": {
+        "call_waiter": "Thirr kamerierin",
+        "bill_normal": "Kërko llogarinë",
+        "bill_split": "Llogari e ndarë"
+      },
+      "actions": {
+        "acknowledged": "Prano",
+        "resolved": "Përfundo",
+        "cancelled": "Anulo"
+      }
+    }
+  },
   "mealTypeToggle": {
     "food": "Ushqim",
     "drink": "Pije"
@@ -426,6 +533,7 @@
   "menuItemDetails": {
     "assistantButton": "Rekomandim AI",
     "assistantPrompt": "Çfarë përshtatet me {dish}?",
+    "addToCart": "Shto në shportë",
     "shareCta": "Ndaj mendimin tënd",
     "shareModal": {
       "title": "Si ishte përvoja jote në {restaurantName}?",

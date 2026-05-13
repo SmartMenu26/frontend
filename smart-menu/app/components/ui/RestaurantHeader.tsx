@@ -12,13 +12,14 @@ type Props = {
   name?: string;
   restaurantSlug?: string;
   titleImageSrc?: string;
+  preferTitleImage?: boolean;
 };
 
 export default function RestaurantHeader({
   showName = true,
   name,
-  restaurantSlug,
   titleImageSrc,
+  preferTitleImage = false,
 }: Props) {
   const t = useTranslations("header");
   const locale = useLocale() as Locale;
@@ -60,8 +61,7 @@ export default function RestaurantHeader({
     return "text-7xl md:text-9xl";
   }, [displayName]);
   const resolvedTitleImageSrc = titleImageSrc?.trim() || "";
-  const showLogoTitle =
-    restaurantSlug === "am-health-corner" && Boolean(resolvedTitleImageSrc);
+  const showLogoTitle = preferTitleImage && Boolean(resolvedTitleImageSrc);
 
   return (
     <>

@@ -22,6 +22,37 @@
     "chefImageAlt": "Chef presenting today's combo"
   }
   ,
+  "restaurantStickyActions": {
+    "waiter": "Waiter",
+    "bill": "Bill",
+    "waiterAria": "Call waiter",
+    "billAria": "Request bill",
+    "cartAria": "Open cart with {count} items",
+    "cartTitle": "Your order",
+    "tableLabel": "Table {table}",
+    "cartEmpty": "You have not added any items yet.",
+    "totalLabel": "Total",
+    "totalValue": "MKD {amount}",
+    "sendOrder": "Send order",
+    "sendingOrder": "Sending...",
+    "decreaseQuantity": "Decrease quantity for {item}",
+    "increaseQuantity": "Increase quantity for {item}",
+    "closeCart": "Close cart",
+    "closeSheet": "Close sheet",
+    "orderSuccessTitle": "Order sent.",
+    "orderSuccessDescription": "The staff has received your order.",
+    "waiterToastTitle": "The waiter has been called.",
+    "waiterToastDescription": "They will be with you shortly.",
+    "billToastTitle": "Bill requested.",
+    "billToastDescription": "The staff has been notified.",
+    "splitBillToastTitle": "Split bill requested.",
+    "splitBillToastDescription": "The staff has been notified.",
+    "billSheetTitle": "Choose an option",
+    "requestBill": "Request bill",
+    "splitBill": "Split bill",
+    "cancel": "Cancel"
+  }
+  ,
   "dailyComboModal": {
     "title": "Today's recommendation",
     "subtitle": "Chef's pick includes",
@@ -165,6 +196,12 @@
       "remainingLabel": "Remaining",
       "hint": "Total credits: {total}. Keep at least 100 available to avoid throttling AI conversations."
     },
+    "orderSystemCard": {
+      "eyebrow": "Operations",
+      "title": "Order system board",
+      "subtitle": "Open the live board for incoming orders, waiter calls, and bill requests.",
+      "action": "Open board"
+    },
     "weeklyCombos": {
       "title": "Weekly combos",
       "subtitle": "Pick up to three menu items per day and publish them as curated combos.",
@@ -304,6 +341,76 @@
     }
   }
   ,
+  "adminOperations": {
+    "eyebrow": "Restaurant operations",
+    "title": "Live order board",
+    "subtitle": "Track new orders, waiter calls, and bill requests with the same restaurant-admin session.",
+    "backToDashboard": "Back to admin dashboard",
+    "refresh": "Refresh",
+    "meta": {
+      "restaurant": "Restaurant"
+    },
+    "socket": {
+      "connected": "Live updates on",
+      "fallback": "Polling fallback"
+    },
+    "states": {
+      "loadingSession": "Checking saved admin session",
+      "loadingSessionDescription": "Please wait while we restore your restaurant-admin access.",
+      "loginRequired": "Login required",
+      "loginRequiredDescription": "Open the restaurant admin first with your usual credentials, then return to this live order board.",
+      "openAdmin": "Open admin login"
+    },
+    "errors": {
+      "generic": "Something went wrong while loading the live board.",
+      "sessionExpired": "Your session expired. Please sign in again.",
+      "loadOrders": "Unable to load restaurant orders.",
+      "loadServiceRequests": "Unable to load service requests.",
+      "updateOrder": "Unable to update the order status.",
+      "updateServiceRequest": "Unable to update the service request status."
+    },
+    "orders": {
+      "title": "Orders",
+      "subtitle": "Manage active guest orders in the order they arrive.",
+      "newBadge": "New",
+      "columns": {
+        "new": "New",
+        "accepted": "Accepted",
+        "preparing": "Preparing"
+      },
+      "table": "Table {table}",
+      "guestNote": "Guest note",
+      "unnamedItem": "Unnamed item",
+      "empty": "No active orders in this column.",
+      "actions": {
+        "accepted": "Accept",
+        "preparing": "Preparing",
+        "served": "Served",
+        "cancelled": "Cancel"
+      }
+    },
+    "serviceRequests": {
+      "title": "Service requests",
+      "subtitle": "Handle waiter calls and bill requests from the dining room.",
+      "newBadge": "New",
+      "columns": {
+        "new": "New",
+        "acknowledged": "Acknowledged"
+      },
+      "table": "Table {table}",
+      "empty": "No service requests in this column.",
+      "types": {
+        "call_waiter": "Call waiter",
+        "bill_normal": "Request bill",
+        "bill_split": "Split bill"
+      },
+      "actions": {
+        "acknowledged": "Acknowledge",
+        "resolved": "Resolve",
+        "cancelled": "Cancel"
+      }
+    }
+  },
   "mealTypeToggle": {
     "food": "Food",
     "drink": "Drinks"
@@ -426,6 +533,7 @@
   "menuItemDetails": {
     "assistantButton": "AI Recommendation",
     "assistantPrompt": "What pairs well with {dish}?",
+    "addToCart": "Add to cart",
     "shareCta": "Share your thoughts",
     "shareModal": {
       "title": "How was your experience at {restaurantName}?",

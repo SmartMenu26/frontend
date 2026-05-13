@@ -20,6 +20,36 @@
     "dismissButtonAria": "Kombo onerini kapat",
     "chefImageAlt": "Bugunun kombosunu sunan sef"
   },
+  "restaurantStickyActions": {
+    "waiter": "Garson",
+    "bill": "Hesap",
+    "waiterAria": "Garson cagir",
+    "billAria": "Hesap iste",
+    "cartAria": "{count} urunlu sepeti ac",
+    "cartTitle": "Siparisin",
+    "tableLabel": "Masa {table}",
+    "cartEmpty": "Henuz urun eklemediniz.",
+    "totalLabel": "Toplam",
+    "totalValue": "MKD {amount}",
+    "sendOrder": "Siparisi gonder",
+    "sendingOrder": "Gonderiliyor...",
+    "decreaseQuantity": "{item} icin miktari azalt",
+    "increaseQuantity": "{item} icin miktari artir",
+    "closeCart": "Sepeti kapat",
+    "closeSheet": "Pencereyi kapat",
+    "orderSuccessTitle": "Siparis gonderildi.",
+    "orderSuccessDescription": "Personel siparisinizi aldi.",
+    "waiterToastTitle": "Garson cagirildi.",
+    "waiterToastDescription": "Kisa sure icinde yaninizda olacak.",
+    "billToastTitle": "Hesap istendi.",
+    "billToastDescription": "Personel bilgilendirildi.",
+    "splitBillToastTitle": "Bolunmus hesap istendi.",
+    "splitBillToastDescription": "Personel bilgilendirildi.",
+    "billSheetTitle": "Bir secenek belirleyin",
+    "requestBill": "Hesap iste",
+    "splitBill": "Hesabi bol",
+    "cancel": "Iptal"
+  },
   "dailyComboModal": {
     "title": "Bugunun onerisi",
     "subtitle": "Sefin secimi sunlari icerir",
@@ -157,6 +187,12 @@
       "usedLabel": "Kullanilan",
       "remainingLabel": "Kalan",
       "hint": "Toplam kredi: {total}. AI sohbetlerinin yavaslamamasi icin en az 100 kredi bulundurun."
+    },
+    "orderSystemCard": {
+      "eyebrow": "Operasyonlar",
+      "title": "Siparis panosu",
+      "subtitle": "Yeni siparisler, garson cagrilari ve hesap istekleri icin canli panoyu acin.",
+      "action": "Panoyu ac"
     },
     "weeklyCombos": {
       "title": "Haftalik kombolar",
@@ -296,6 +332,76 @@
       }
     }
   },
+  "adminOperations": {
+    "eyebrow": "Restoran operasyonlari",
+    "title": "Canli siparis panosu",
+    "subtitle": "Yeni siparisleri, garson cagrilarini ve hesap isteklerini ayni restoran-admin oturumuyla takip edin.",
+    "backToDashboard": "Admin panosuna don",
+    "refresh": "Yenile",
+    "meta": {
+      "restaurant": "Restoran"
+    },
+    "socket": {
+      "connected": "Canli guncellemeler acik",
+      "fallback": "Yedek yenileme"
+    },
+    "states": {
+      "loadingSession": "Kaydedilmis admin oturumu kontrol ediliyor",
+      "loadingSessionDescription": "Restoran-admin erisimini geri yuklerken lutfen bekleyin.",
+      "loginRequired": "Giris gerekli",
+      "loginRequiredDescription": "Once restoran admini normal bilgilerinizle acin, sonra bu canli siparis panosuna donun.",
+      "openAdmin": "Admin girisini ac"
+    },
+    "errors": {
+      "generic": "Canli pano yuklenirken bir sorun olustu.",
+      "sessionExpired": "Oturum suresi doldu. Lutfen tekrar giris yapin.",
+      "loadOrders": "Siparisler yuklenemedi.",
+      "loadServiceRequests": "Servis istekleri yuklenemedi.",
+      "updateOrder": "Siparis durumu guncellenemedi.",
+      "updateServiceRequest": "Servis istegi durumu guncellenemedi."
+    },
+    "orders": {
+      "title": "Siparisler",
+      "subtitle": "Aktif misafir siparislerini gelis sirasina gore yonetin.",
+      "newBadge": "Yeni",
+      "columns": {
+        "new": "Yeni",
+        "accepted": "Kabul edildi",
+        "preparing": "Hazirlaniyor"
+      },
+      "table": "Masa {table}",
+      "guestNote": "Misafir notu",
+      "unnamedItem": "Isimsiz urun",
+      "empty": "Bu kolonda aktif siparis yok.",
+      "actions": {
+        "accepted": "Kabul et",
+        "preparing": "Hazirlaniyor",
+        "served": "Servis edildi",
+        "cancelled": "Iptal et"
+      }
+    },
+    "serviceRequests": {
+      "title": "Servis istekleri",
+      "subtitle": "Salondan gelen garson cagrilari ve hesap isteklerini yonetin.",
+      "newBadge": "Yeni",
+      "columns": {
+        "new": "Yeni",
+        "acknowledged": "Onaylandi"
+      },
+      "table": "Masa {table}",
+      "empty": "Bu kolonda servis istegi yok.",
+      "types": {
+        "call_waiter": "Garson cagir",
+        "bill_normal": "Hesap iste",
+        "bill_split": "Bolunmus hesap"
+      },
+      "actions": {
+        "acknowledged": "Onayla",
+        "resolved": "Cozuldu",
+        "cancelled": "Iptal et"
+      }
+    }
+  },
   "mealTypeToggle": {
     "food": "Yemek",
     "drink": "Icecek"
@@ -418,6 +524,7 @@
   "menuItemDetails": {
     "assistantButton": "AI onerisi",
     "assistantPrompt": "{dish} ile ne iyi gider?",
+    "addToCart": "Sepete ekle",
     "shareCta": "Dusuncelerinizi paylasin",
     "shareModal": {
       "title": "{restaurantName} deneyiminiz nasildi?",
