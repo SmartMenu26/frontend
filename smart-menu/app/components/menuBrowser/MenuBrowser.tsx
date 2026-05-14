@@ -17,6 +17,7 @@ import { preloadImage } from "@/app/lib/imagePreload";
 
 const ITEMS_PER_PAGE = 4;
 const PAGE_VIEWPORT_PX = 520;
+const EDGE_SCROLL_TRANSFER_PX = 24;
 const SCROLL_HINT_STORAGE_KEY = "menuBrowserSwipeHintShown";
 const TAP_HINT_STORAGE_KEY = "menuBrowserTapHintShown";
 
@@ -269,15 +270,19 @@ export default function MenuBrowser({
 
             if (Math.abs(deltaY) < 0.5) return;
 
-            const atTop = container.scrollTop <= 0;
-            const atBottom =
-                container.scrollTop + container.clientHeight >= container.scrollHeight - 1;
+            const nearTop = container.scrollTop <= EDGE_SCROLL_TRANSFER_PX;
+            const nearBottom =
+                container.scrollTop + container.clientHeight >=
+                container.scrollHeight - EDGE_SCROLL_TRANSFER_PX;
 
             if (typeof window === "undefined") return;
 
-            if (atTop && deltaY > 0) {
+            if (nearTop && deltaY > 0) {
+                if (container.scrollTop !== 0) {
+                    container.scrollTop = 0;
+                }
                 window.scrollBy({ top: -deltaY, left: 0, behavior: "auto" });
-            } else if (atBottom && deltaY < 0) {
+            } else if (nearBottom && deltaY < 0) {
                 window.scrollBy({ top: -deltaY, left: 0, behavior: "auto" });
             }
         },
@@ -1045,7 +1050,15 @@ export default function MenuBrowser({
 
 
     return (
-        <section aria-labelledby="menu-browser-heading" className="bg-[#F7F7F7] min-h-[56vh] h-fit flex flex-col justify-start items-center">
+        <section
+            aria-labelledby="menu-browser-heading"
+            className={[
+                "bg-[#F7F7F7] h-fit flex flex-col justify-start items-center",
+                shouldForcePagedLayout ? "min-h-[56vh]" : "",
+            ]
+                .filter(Boolean)
+                .join(" ")}
+        >
             <div className="container mx-auto space-y-1 py-5 pl-4">
                 <h2 id="menu-browser-heading" className="sr-only">
                     Мени

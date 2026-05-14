@@ -58,7 +58,7 @@ export default function RestaurantHeader({
     if (displayName.length > 22) return "text-5xl md:text-6xl";
     if (displayName.length > 16) return "text-6xl md:text-7xl";
     if (displayName.length > 7) return "text-5xl md:text-8xl";
-    return "text-7xl md:text-9xl";
+    return "text-5xl md:text-9xl";
   }, [displayName]);
   const resolvedTitleImageSrc = titleImageSrc?.trim() || "";
   const showLogoTitle = preferTitleImage && Boolean(resolvedTitleImageSrc);
@@ -99,7 +99,7 @@ export default function RestaurantHeader({
               ].join(" ")}
             >
               {displayName}
-              <span className="block text-4xl md:text-4xl text-[#1B1F1E]/80 md:inline md:ml-3">
+              <span className="block text-3xl md:text-4xl text-[#1B1F1E]/80 md:inline md:ml-3">
                 {menuLabel}
               </span>
             </h1>
