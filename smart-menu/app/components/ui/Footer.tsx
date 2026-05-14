@@ -41,7 +41,7 @@ export default function Footer() {
         </div>
 
         <a
-          href="https://www.instagram.com/smartmenu.mk/"
+          href="https://www.instagram.com/smartmenumk/"
           target="_blank"
           rel="noreferrer"
           aria-label="Visit Smart Menu on Instagram"

@@ -45,8 +45,8 @@ const CONTACT_ITEMS: ContactItem[] = [
   },
   {
     key: "instagram",
-    value: "smartmenu.mk",
-    href: "https://www.instagram.com/smartmenu.mk/",
+    value: "smartmenumk",
+    href: "https://www.instagram.com/smartmenumk/",
     icon: Instagram,
   },
 ];
