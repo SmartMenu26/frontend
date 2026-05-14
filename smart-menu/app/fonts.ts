@@ -1,4 +1,4 @@
-import { Inter, Great_Vibes } from "next/font/google";
+import { Antic, Inter, Great_Vibes } from "next/font/google";
 
 export const greatVibes = Great_Vibes({
   weight: "400",
@@ -11,5 +11,12 @@ export const inter = Inter({
   subsets: ["latin"],
   weight: ["100","200","300","400","500","600","700","800","900"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+export const antic = Antic({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-antic",
   display: "swap",
 });

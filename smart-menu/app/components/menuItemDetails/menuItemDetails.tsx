@@ -32,7 +32,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { trackEvent } from "@/app/lib/analytics";
-import { greatVibes } from "@/app/fonts";
+import { antic, greatVibes } from "@/app/fonts";
 import RestaurantStickyActions from "@/app/components/restaurant/RestaurantStickyActions";
 import useRestaurantCart from "@/app/components/restaurant/useRestaurantCart";
 import useRestaurantOrderSystem from "@/app/components/restaurant/useRestaurantOrderSystem";
@@ -89,6 +89,12 @@ export default function MenuItemDetails({
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const useRestaurantAccentTitle =
+    restaurantSlug === "am-health-corner" ||
+    restaurantSlug === "zdrava-stanica";
+  const titleFontClassName = useRestaurantAccentTitle
+    ? antic.className
+    : greatVibes.className;
   const locale = useLocale() as Locale;
   const t = useTranslations("menuItemDetails");
   const tAllergens = useTranslations("menuItemDetails.allergens");
@@ -530,7 +536,13 @@ export default function MenuItemDetails({
         {/* BOTTOM SHEET */}
         <div className="flex min-h-[55dvh] flex-col justify-between gap-3 rounded-t-[40px] bg-[#F7F7F7] px-6 pt-8 shadow-[0_-20px_60px_rgba(0,0,0,0.25)] md:container md:mx-auto md:min-h-[45dvh] md:max-w-125 md:pb-6">
           <section className="flex flex-col gap-4">
-            <h1 className={`${greatVibes.className} text-5xl leading-tight text-[#2F3A37]`}>
+            <h1
+              className={clsx(
+                titleFontClassName,
+                "leading-tight text-[#2F3A37]",
+                useRestaurantAccentTitle ? "text-[40px] italic" : "text-5xl"
+              )}
+            >
               {name}
             </h1>
 
