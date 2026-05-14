@@ -652,7 +652,7 @@ export default function MenuItemDetails({
               </div>
             )}
 
-            <div className="mt-3 flex items-center gap-3 pb-11">
+            <div className="mt-3 flex items-center gap-3 pb-12">
               <button
                 type="button"
                 className="flex-1 cursor-pointer rounded-full bg-[#1B1F1E] py-4 text-sm font-semibold text-white shadow-lg"
