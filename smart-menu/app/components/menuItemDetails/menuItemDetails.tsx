@@ -287,12 +287,24 @@ export default function MenuItemDetails({
     [t, restaurantName, restaurantSlug, restaurantId]
   );
   const priceText = priceLabel ? t("priceLabel", { price: priceLabel }) : null;
-  const kcalText =
-    typeof weightGrams === "number" &&
-    Number.isFinite(weightGrams) &&
-    weightGrams > 0
-      ? `${nutritionValueFormat.format(weightGrams)} kcal`
-      : null;
+  const calorieBadgeText = useMemo(() => {
+    const rawValue =
+      restaurantSlug === "zdrava-stanica"
+        ? nutritionSummary?.calories
+        : weightGrams;
+
+    if (
+      typeof rawValue !== "number" ||
+      !Number.isFinite(rawValue) ||
+      rawValue <= 0
+    ) {
+      return null;
+    }
+
+    return `${nutritionValueFormat.format(rawValue)} ${
+      restaurantSlug === "zdrava-stanica" ? "cal" : "kcal"
+    }`;
+  }, [nutritionSummary?.calories, nutritionValueFormat, restaurantSlug, weightGrams]);
   const macroLabels = useMemo(
     () => ({
       protein: t("nutrition.protein"),
@@ -551,16 +563,16 @@ export default function MenuItemDetails({
                 {description}
               </p>
             )}
-            {(priceText || kcalText) && (
+            {(priceText || calorieBadgeText) && (
               <div className="flex flex-wrap items-center gap-2">
                 {priceText ? (
                   <span className="border border-[#1B1F1E] border-solid rounded-full w-fit px-2 py-1 text-lg font-semibold text-[#1B1F1E] leading-tight">
                     {priceText}
                   </span>
                 ) : null}
-                {kcalText ? (
+                {calorieBadgeText ? (
                   <span className="rounded-full bg-[#E7F2FF] px-2.5 py-1 text-sm font-medium leading-tight whitespace-nowrap text-[#2C6CBF] shadow-[0_6px_16px_rgba(44,108,191,0.14)]">
-                    {kcalText}
+                    {calorieBadgeText}
                   </span>
                 ) : null}
               </div>
@@ -640,7 +652,7 @@ export default function MenuItemDetails({
               </div>
             )}
 
-            <div className="mt-3 flex items-center gap-3">
+            <div className="mt-3 flex items-center gap-3 pb-11">
               <button
                 type="button"
                 className="flex-1 cursor-pointer rounded-full bg-[#1B1F1E] py-4 text-sm font-semibold text-white shadow-lg"

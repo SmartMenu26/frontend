@@ -86,7 +86,7 @@ export default function RestaurantHeader({
                 width={560}
                 height={220}
                 loading="lazy"
-                className="h-32 md:h-44 w-auto max-w-full object-contain"
+                className="h-20 md:h-44 w-auto max-w-full object-contain"
               />
             </div>
           ) : (

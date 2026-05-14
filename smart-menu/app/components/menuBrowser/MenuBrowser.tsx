@@ -26,6 +26,7 @@ type MenuItem = {
     imageUrl: string;
     price: number;
     weightGrams?: number;
+    calories?: number;
     kind?: string;
     description?: string;
 };
@@ -121,17 +122,23 @@ export default function MenuBrowser({
         preloadImage(imageUrl);
     }, []);
 
-    const formatCaloriesLabel = useCallback((weightGrams?: number) => {
-        if (typeof weightGrams !== "number" || Number.isNaN(weightGrams) || weightGrams <= 0) {
-            return undefined;
-        }
+    const formatCaloriesLabel = useCallback(
+        (item: Pick<MenuItem, "weightGrams" | "calories">) => {
+            const rawValue =
+                restaurantSlug === "zdrava-stanica" ? item.calories : item.weightGrams;
 
-        const normalizedCalories = Number.isInteger(weightGrams)
-            ? weightGrams.toString()
-            : weightGrams.toFixed(1);
+            if (typeof rawValue !== "number" || Number.isNaN(rawValue) || rawValue <= 0) {
+                return undefined;
+            }
 
-        return `${normalizedCalories} kcal`;
-    }, []);
+            const normalizedCalories = Number.isInteger(rawValue)
+                ? rawValue.toString()
+                : rawValue.toFixed(1);
+
+            return `${normalizedCalories} ${restaurantSlug === "zdrava-stanica" ? "cal" : "kcal"}`;
+        },
+        [restaurantSlug]
+    );
 
     const mapCategories = useCallback(
         (data: any[]): Category[] =>
@@ -179,6 +186,12 @@ export default function MenuBrowser({
                             ? m.weightGrams
                             : typeof m?.weightGrams === "string"
                                 ? Number.parseFloat(m.weightGrams)
+                                : undefined,
+                    calories:
+                        typeof m?.calories === "number"
+                            ? m.calories
+                            : typeof m?.calories === "string"
+                                ? Number.parseFloat(m.calories)
                                 : undefined,
                     kind: m?.kind ?? m?.baseCategory ?? m?.type,
                     description: resolvedDescription || undefined,
@@ -1160,7 +1173,7 @@ export default function MenuBrowser({
                                                         title={it.title}
                                                         imageUrl={it.imageUrl}
                                                         priceLabel={`${it.price} ден`}
-                                                        weightLabel={formatCaloriesLabel(it.weightGrams)}
+                                                        weightLabel={formatCaloriesLabel(it)}
                                                         kind={it.kind ?? mealType}
                                                         description={it.description}
                                                         layout="list"
