@@ -221,17 +221,6 @@ export default function AiAssistantContent({
         return "ден";
     }
   }, [displayLocale]);
-  const sortedCandidates = useMemo(() => {
-    return [...candidates].sort((left, right) => {
-      const leftPrice = parseCandidatePrice(left);
-      const rightPrice = parseCandidatePrice(right);
-
-      if (leftPrice === null && rightPrice === null) return 0;
-      if (leftPrice === null) return 1;
-      if (rightPrice === null) return -1;
-      return rightPrice - leftPrice;
-    });
-  }, [candidates]);
   const hasResolvedResults =
     status !== "loading" && Boolean(assistantText || candidates.length);
 
@@ -339,8 +328,8 @@ export default function AiAssistantContent({
                   </p>
                 ) : null}
 
-                {sortedCandidates.length > 0 ? (
-                  sortedCandidates.map((item) => {
+                {candidates.length > 0 ? (
+                  candidates.map((item) => {
                     const id = item?._id ?? "";
                     const title =
                       resolveLocalizedField(item?.name, displayLocale) ??
