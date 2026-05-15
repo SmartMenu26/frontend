@@ -248,7 +248,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
 
   return (
     <>
-      <div className="flex flex-col gap-4 pt-8 md:pt-0">
+      <div className="flex flex-col gap-4 pt-4 md:pt-0">
         <InstallAppButton />
         <RestaurantHeader
           name={restaurantName}
