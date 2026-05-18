@@ -90,7 +90,7 @@ export default function AdminPwaInstallButton({
       </button>
 
       {showHelp ? (
-        <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-72 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-xl shadow-slate-950/10">
+        <div className="fixed left-4 right-4 top-[calc(env(safe-area-inset-top)+1rem)] z-50 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-xl shadow-slate-950/10 sm:absolute sm:left-auto sm:right-0 sm:top-[calc(100%+0.5rem)] sm:w-80">
           <div className="flex items-start gap-3">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
             <p className="leading-5">
