@@ -138,6 +138,12 @@
       "subtitle": "Përdorni panelin e administratorit për të përditësuar produktet e menusë, kreditë AI, emrat e asistentit dhe gjuhët e mbështetura.",
       "logout": "Dil"
     },
+    "installApp": {
+      "install": "Instalo aplikacionin",
+      "iosHelp": "Në Safari, prek Share, pastaj Add to Home Screen.",
+      "browserHelp": "Në menunë e Chrome ose Edge zgjidh Install app. Nëse sheh vetëm Add to Home screen, rifresko faqen një herë dhe provo përsëri.",
+      "close": "Mbyll ndihmën e instalimit"
+    },
     "login": {
       "labels": {
         "username": "Emri i përdoruesit",
@@ -347,6 +353,12 @@
     "subtitle": "Ndiq porositë e reja, thirrjet e kamerierit dhe kërkesat për llogari me të njëjtën sesion admin.",
     "backToDashboard": "Kthehu te admin paneli",
     "refresh": "Rifresko",
+    "installApp": {
+      "install": "Instalo aplikacionin",
+      "iosHelp": "Në Safari, prek Share, pastaj Add to Home Screen.",
+      "browserHelp": "Në menunë e Chrome ose Edge zgjidh Install app. Nëse sheh vetëm Add to Home screen, rifresko faqen një herë dhe provo përsëri.",
+      "close": "Mbyll ndihmën e instalimit"
+    },
     "meta": {
       "restaurant": "Restoranti"
     },

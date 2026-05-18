@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { io, type Socket } from "socket.io-client";
 import type { Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
+import AdminPwaInstallButton from "@/app/_components/AdminPwaInstallButton";
 import {
   extractApiData,
   type LocalizedValue,
@@ -429,6 +430,14 @@ export default function AdminRestaurantOrdersPage() {
 
           <div className="ml-auto flex w-full flex-col items-start gap-3 sm:w-auto sm:items-end">
             <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:justify-end">
+              <AdminPwaInstallButton
+                labels={{
+                  install: t("installApp.install"),
+                  iosHelp: t("installApp.iosHelp"),
+                  browserHelp: t("installApp.browserHelp"),
+                  close: t("installApp.close"),
+                }}
+              />
               <div
                 className={clsx(
                   "rounded-full px-3 py-2 text-xs font-semibold ring-1",

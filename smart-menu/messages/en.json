@@ -138,6 +138,12 @@
       "subtitle": "Use the admin dashboard to update menu items, AI credits, assistant names, and supported languages.",
       "logout": "Log out"
     },
+    "installApp": {
+      "install": "Install app",
+      "iosHelp": "In Safari, tap Share, then Add to Home Screen.",
+      "browserHelp": "Use Chrome or Edge menu and choose Install app. If you only see Add to Home screen, refresh this page once and try again.",
+      "close": "Close install help"
+    },
     "login": {
       "labels": {
         "username": "Username",
@@ -347,6 +353,12 @@
     "subtitle": "Track new orders, waiter calls, and bill requests with the same restaurant-admin session.",
     "backToDashboard": "Back to admin dashboard",
     "refresh": "Refresh",
+    "installApp": {
+      "install": "Install app",
+      "iosHelp": "In Safari, tap Share, then Add to Home Screen.",
+      "browserHelp": "Use Chrome or Edge menu and choose Install app. If you only see Add to Home screen, refresh this page once and try again.",
+      "close": "Close install help"
+    },
     "meta": {
       "restaurant": "Restaurant"
     },

@@ -130,6 +130,12 @@
       "subtitle": "Menu urunlerini, AI kredilerini, asistan adlarini ve desteklenen dilleri guncellemek icin yonetim panelini kullanin.",
       "logout": "Cikis yap"
     },
+    "installApp": {
+      "install": "Uygulamayi yukle",
+      "iosHelp": "Safari'de Paylas'a, ardindan Ana Ekrana Ekle'ye dokunun.",
+      "browserHelp": "Chrome veya Edge menusunden Uygulamayi yukle'yi secin. Yalnizca Ana ekrana ekle gorunuyorsa sayfayi bir kez yenileyip tekrar deneyin.",
+      "close": "Yukleme yardimini kapat"
+    },
     "login": {
       "labels": {
         "username": "Kullanici adi",
@@ -338,6 +344,12 @@
     "subtitle": "Yeni siparisleri, garson cagrilarini ve hesap isteklerini ayni restoran-admin oturumuyla takip edin.",
     "backToDashboard": "Admin panosuna don",
     "refresh": "Yenile",
+    "installApp": {
+      "install": "Uygulamayi yukle",
+      "iosHelp": "Safari'de Paylas'a, ardindan Ana Ekrana Ekle'ye dokunun.",
+      "browserHelp": "Chrome veya Edge menusunden Uygulamayi yukle'yi secin. Yalnizca Ana ekrana ekle gorunuyorsa sayfayi bir kez yenileyip tekrar deneyin.",
+      "close": "Yukleme yardimini kapat"
+    },
     "meta": {
       "restaurant": "Restoran"
     },

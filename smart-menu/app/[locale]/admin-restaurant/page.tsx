@@ -9,6 +9,7 @@ import { useLocale, useTranslations } from "next-intl";
 import assistantIllustration from "@/public/images/ai-assistant-cook.png";
 import { type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
+import AdminPwaInstallButton from "@/app/_components/AdminPwaInstallButton";
 
 type LocalizedValue = Partial<Record<Locale, string>> | string | null | undefined;
 
@@ -312,15 +313,25 @@ export default function AdminDashboardPage() {
                 {t("header.subtitle")}
               </p>
             </div>
-            {session && (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white cursor-pointer"
-              >
-                {t("header.logout")}
-              </button>
-            )}
+            <div className="flex flex-wrap items-center gap-3">
+              <AdminPwaInstallButton
+                labels={{
+                  install: t("installApp.install"),
+                  iosHelp: t("installApp.iosHelp"),
+                  browserHelp: t("installApp.browserHelp"),
+                  close: t("installApp.close"),
+                }}
+              />
+              {session && (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white"
+                >
+                  {t("header.logout")}
+                </button>
+              )}
+            </div>
           </div>
         </header>
 
