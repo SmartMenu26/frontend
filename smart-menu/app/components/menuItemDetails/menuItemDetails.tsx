@@ -546,7 +546,14 @@ export default function MenuItemDetails({
         )}
 
         {/* BOTTOM SHEET */}
-        <div className="flex min-h-[55dvh] flex-col justify-between gap-3 rounded-t-[40px] bg-[#F7F7F7] px-6 pt-8 shadow-[0_-20px_60px_rgba(0,0,0,0.25)] md:container md:mx-auto md:min-h-[45dvh] md:max-w-125 md:pb-6">
+        <div
+          className={clsx(
+            "flex min-h-[55dvh] flex-col justify-between gap-3 rounded-t-[40px] bg-[#F7F7F7] px-6 pt-8 shadow-[0_-20px_60px_rgba(0,0,0,0.25)] md:container md:mx-auto md:min-h-[45dvh] md:max-w-125",
+            resolvedOrderSystem
+              ? "pb-[calc(env(safe-area-inset-bottom)+5rem)]"
+              : "pb-6"
+          )}
+        >
           <section className="flex flex-col gap-4">
             <h1
               className={clsx(
@@ -652,7 +659,7 @@ export default function MenuItemDetails({
               </div>
             )}
 
-            <div className="mt-3 flex items-center gap-3 pb-12">
+            <div className="mt-3 flex items-center gap-3">
               <button
                 type="button"
                 className="flex-1 cursor-pointer rounded-full bg-[#1B1F1E] py-4 text-sm font-semibold text-white shadow-lg"
