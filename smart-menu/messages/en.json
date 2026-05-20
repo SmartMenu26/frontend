@@ -436,7 +436,7 @@
   },
   "footer": {
     "home": "Home",
-    "contact": "Contact"
+    "contact": "Want Smart Menu?"
   },
   "header": {
     "toggleLabel": "Toggle navigation menu",
@@ -447,7 +447,7 @@
       "whyUs": "Why us",
       "aboutUs": "About us",
       "blog": "Blog",
-      "contact": "Contact us"
+      "contact": "Want Smart Menu?"
     }
   },
   "home": {

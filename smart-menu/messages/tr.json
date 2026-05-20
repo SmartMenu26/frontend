@@ -427,7 +427,7 @@
   },
   "footer": {
     "home": "Ana sayfa",
-    "contact": "Iletisim"
+    "contact": "Smart Menu ister misiniz?"
   },
   "header": {
     "toggleLabel": "Gezinme menusunu ac veya kapat",
@@ -438,7 +438,7 @@
       "whyUs": "Neden biz",
       "aboutUs": "Hakkimizda",
       "blog": "Blog",
-      "contact": "Iletisim"
+      "contact": "Smart Menu ister misiniz?"
     }
   },
   "home": {
