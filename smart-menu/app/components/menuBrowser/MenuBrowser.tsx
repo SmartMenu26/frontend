@@ -1066,7 +1066,7 @@ export default function MenuBrowser({
                 <MealTypeToggle value={mealType} onChange={onMealTypeChange} className="ml-auto" />
                 <nav
                     ref={categoryContainerRef}
-                    className="pr-2 flex gap-4 overflow-x-auto [&::-webkit-scrollbar]:hidden scroll-smooth"
+                    className="pr-2 flex gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden scroll-smooth"
                     aria-label="Категории"
                 >
                     {loadingCategories ? (

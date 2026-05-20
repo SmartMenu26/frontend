@@ -92,7 +92,7 @@ export default function Card({
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#355B4B]/50",
         isListLayout
           ? [
-              "flex w-full items-center gap-3 px-1 py-3",
+              "flex w-full items-center gap-3 px-1 py-2",
               "rounded-none border-none bg-transparent",
               "transition-colors duration-150",
               "hover:bg-[#F6F8F7]",
