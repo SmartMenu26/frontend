@@ -2,9 +2,12 @@ import {
   Dice5,
   Drumstick,
   Dumbbell,
+  Egg,
   Flame,
+  Gauge,
   Leaf,
   Target,
+  WheatOff,
   Zap,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -29,10 +32,17 @@ export const getSuggestionIconNode = (
       return <Leaf size={size} />;
     case "dumbbell":
       return <Dumbbell size={size} />;
+    case "egg":
+      return <Egg size={size} />;
     case "target":
       return <Target size={size} />;
+    case "gauge":
+      return <Gauge size={size} />;
     case "zap":
       return <Zap size={size} />;
+    case "wheat-off":
+    case "wheatoff":
+      return <WheatOff size={size} />;
     case "flame":
       return <Flame size={size} />;
     case "drumstick":

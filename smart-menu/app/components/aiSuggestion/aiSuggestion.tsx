@@ -68,7 +68,7 @@ export default function AiSuggestion({
     },
     {
       label: t("chips.protein"),
-      icon: "drumstick",
+      icon: "egg",
       prompt: proteinPrompt,
     },
     {
