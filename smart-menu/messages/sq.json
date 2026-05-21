@@ -366,6 +366,10 @@
       "connected": "Përditësime live aktive",
       "fallback": "Rifreskim rezervë"
     },
+    "sound": {
+      "enable": "Aktivizo zërin",
+      "enabled": "Zëri aktiv"
+    },
     "states": {
       "loadingSession": "Po kontrollohet sesioni i ruajtur i adminit",
       "loadingSessionDescription": "Prit pak ndërsa rikthejmë qasjen e adminit të restorantit.",

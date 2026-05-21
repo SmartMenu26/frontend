@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { ArrowLeft, BellRing, ReceiptText, RefreshCw, Soup } from "lucide-react";
+import { ArrowLeft, BellRing, ReceiptText, RefreshCw, Soup, Volume2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { io, type Socket } from "socket.io-client";
@@ -16,7 +16,6 @@ import {
   type RestaurantOrderStatus,
   type RestaurantServiceRequest,
   type RestaurantServiceRequestStatus,
-  type RestaurantServiceRequestType,
 } from "@/app/lib/restaurantOperations";
 
 type AdminUser = {
@@ -60,9 +59,13 @@ export default function AdminRestaurantOrdersPage() {
   const [orderPendingIds, setOrderPendingIds] = useState<Record<string, boolean>>({});
   const [servicePendingIds, setServicePendingIds] = useState<Record<string, boolean>>({});
   const [socketConnected, setSocketConnected] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(false);
   const [recentOrderIds, setRecentOrderIds] = useState<Record<string, boolean>>({});
   const [recentServiceRequestIds, setRecentServiceRequestIds] = useState<Record<string, boolean>>({});
   const highlightTimeoutsRef = useRef<Record<string, number>>({});
+  const knownOrderIdsRef = useRef<Set<string>>(new Set());
+  const knownServiceRequestIdsRef = useRef<Set<string>>(new Set());
+  const hasLoadedSnapshotRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -96,6 +99,39 @@ export default function AdminRestaurantOrdersPage() {
   const restaurantId = session?.restaurant._id;
   const timezone = session?.restaurant.timezone ?? undefined;
   const restaurantName = resolveLocalizedText(session?.restaurant.name, locale) ?? "Restaurant";
+
+  useEffect(() => {
+    knownOrderIdsRef.current = new Set();
+    knownServiceRequestIdsRef.current = new Set();
+    hasLoadedSnapshotRef.current = false;
+    setRecentOrderIds({});
+    setRecentServiceRequestIds({});
+  }, [restaurantId]);
+
+  const enableNotificationSound = useCallback(async () => {
+    const enabled = await unlockNotificationAudio();
+    setSoundEnabled(enabled);
+
+    if (enabled) {
+      playNotificationTone("service");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const enableFromInteraction = () => {
+      void unlockNotificationAudio().then(setSoundEnabled);
+    };
+
+    window.addEventListener("pointerdown", enableFromInteraction, { once: true });
+    window.addEventListener("keydown", enableFromInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", enableFromInteraction);
+      window.removeEventListener("keydown", enableFromInteraction);
+    };
+  }, []);
 
   const markRecent = useCallback(
     (kind: "order" | "service", id: string) => {
@@ -193,14 +229,45 @@ export default function AdminRestaurantOrdersPage() {
         );
       }
 
-      setOrders(extractApiData<RestaurantOrder[]>(ordersPayload) ?? []);
-      setServiceRequests(extractApiData<RestaurantServiceRequest[]>(servicePayload) ?? []);
+      const nextOrders = extractApiData<RestaurantOrder[]>(ordersPayload) ?? [];
+      const nextServiceRequests =
+        extractApiData<RestaurantServiceRequest[]>(servicePayload) ?? [];
+
+      if (hasLoadedSnapshotRef.current) {
+        const incomingOrders = nextOrders.filter(
+          (order) => !knownOrderIdsRef.current.has(order._id)
+        );
+        const incomingServiceRequests = nextServiceRequests.filter(
+          (request) => !knownServiceRequestIdsRef.current.has(request._id)
+        );
+
+        for (const order of incomingOrders) {
+          markRecent("order", order._id);
+        }
+
+        for (const request of incomingServiceRequests) {
+          markRecent("service", request._id);
+        }
+
+        if (incomingOrders.length > 0 || incomingServiceRequests.length > 0) {
+          playNotificationTone(incomingOrders.length > 0 ? "order" : "service");
+        }
+      }
+
+      knownOrderIdsRef.current = new Set(nextOrders.map((order) => order._id));
+      knownServiceRequestIdsRef.current = new Set(
+        nextServiceRequests.map((request) => request._id)
+      );
+      hasLoadedSnapshotRef.current = true;
+
+      setOrders(nextOrders);
+      setServiceRequests(nextServiceRequests);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : t("errors.generic"));
     } finally {
       setLoading(false);
     }
-  }, [handleSessionExpired, restaurantId, session?.token, t]);
+  }, [handleSessionExpired, markRecent, restaurantId, session?.token, t]);
 
   useEffect(() => {
     if (!session?.token || !restaurantId) return;
@@ -223,6 +290,11 @@ export default function AdminRestaurantOrdersPage() {
     if (!session?.token || !restaurantId || typeof window === "undefined") return;
 
     const socketUrl = resolveSocketUrl();
+    if (!socketUrl) {
+      setSocketConnected(false);
+      return;
+    }
+
     const socket: Socket = io(socketUrl, {
       auth: {
         token: session.token,
@@ -242,15 +314,21 @@ export default function AdminRestaurantOrdersPage() {
       const order = extractSocketData<RestaurantOrder>(payload);
       if (!order || order.restaurantId !== restaurantId) return;
 
+      const isNewArrival = !knownOrderIdsRef.current.has(order._id);
+      knownOrderIdsRef.current.add(order._id);
       setOrders((current) => upsertById(current, order));
-      markRecent("order", order._id);
-      playNotificationTone("order");
+
+      if (isNewArrival) {
+        markRecent("order", order._id);
+        playNotificationTone("order");
+      }
     };
 
     const handleOrderUpdated = (payload: unknown) => {
       const order = extractSocketData<RestaurantOrder>(payload);
       if (!order || order.restaurantId !== restaurantId) return;
 
+      knownOrderIdsRef.current.add(order._id);
       setOrders((current) => upsertById(current, order));
     };
 
@@ -258,15 +336,21 @@ export default function AdminRestaurantOrdersPage() {
       const request = extractSocketData<RestaurantServiceRequest>(payload);
       if (!request || request.restaurantId !== restaurantId) return;
 
+      const isNewArrival = !knownServiceRequestIdsRef.current.has(request._id);
+      knownServiceRequestIdsRef.current.add(request._id);
       setServiceRequests((current) => upsertById(current, request));
-      markRecent("service", request._id);
-      playNotificationTone("service");
+
+      if (isNewArrival) {
+        markRecent("service", request._id);
+        playNotificationTone("service");
+      }
     };
 
     const handleServiceRequestUpdated = (payload: unknown) => {
       const request = extractSocketData<RestaurantServiceRequest>(payload);
       if (!request || request.restaurantId !== restaurantId) return;
 
+      knownServiceRequestIdsRef.current.add(request._id);
       setServiceRequests((current) => upsertById(current, request));
     };
 
@@ -439,6 +523,19 @@ export default function AdminRestaurantOrdersPage() {
                   close: t("installApp.close"),
                 }}
               />
+              <button
+                type="button"
+                onClick={() => void enableNotificationSound()}
+                className={clsx(
+                  "inline-flex cursor-pointer items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ring-1 transition",
+                  soundEnabled
+                    ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                    : "bg-white text-slate-700 ring-slate-200 hover:bg-slate-50"
+                )}
+              >
+                <Volume2 className="h-4 w-4" />
+                {soundEnabled ? t("sound.enabled") : t("sound.enable")}
+              </button>
               <div
                 className={clsx(
                   "rounded-full px-3 py-2 text-xs font-semibold ring-1",
@@ -484,14 +581,14 @@ export default function AdminRestaurantOrdersPage() {
               </div>
             ) : null}
 
-            <div className="grid gap-6 xl:grid-cols-[1.6fr,1fr]">
+            <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(240px,0.85fr)] md:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.85fr)] xl:grid-cols-[minmax(0,1.6fr)_minmax(340px,1fr)]">
               <section className="space-y-4">
                 <SectionHeader
                   icon={Soup}
                   title={t("orders.title")}
                   subtitle={t("orders.subtitle")}
                 />
-                <div className="grid gap-4 lg:grid-cols-3">
+                <div className="grid gap-4 xl:grid-cols-3">
                   <OrderColumn
                     title={t("orders.columns.new")}
                     orders={orderGroups.new}
@@ -754,7 +851,7 @@ function ServiceRequestColumn({
               className={clsx(
                 "rounded-[24px] border p-4 transition-all duration-500",
                 recentIds[request._id]
-                  ? "border-amber-300 bg-amber-50 shadow-[0_18px_44px_rgba(245,158,11,0.18)] ring-2 ring-amber-200"
+                  ? "border-emerald-300 bg-emerald-50 shadow-[0_18px_44px_rgba(16,185,129,0.18)] ring-2 ring-emerald-200"
                   : "border-slate-200 bg-slate-50"
               )}
             >
@@ -765,7 +862,7 @@ function ServiceRequestColumn({
                       {t("serviceRequests.table", { table: request.tableNumber })}
                     </p>
                     {recentIds[request._id] ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-sm">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-sm">
                         <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                         {t("serviceRequests.newBadge")}
                       </span>
@@ -932,6 +1029,10 @@ function upsertById<T extends { _id: string; createdAt?: string }>(
 }
 
 function resolveSocketUrl() {
+  if (process.env.NEXT_PUBLIC_ORDER_SOCKET_ENABLED !== "true") {
+    return null;
+  }
+
   const configured =
     process.env.NEXT_PUBLIC_BACKEND_URL?.trim().replace(/\/$/, "") ?? null;
 
@@ -950,7 +1051,7 @@ function resolveSocketUrl() {
 
 let audioContextRef: AudioContext | null = null;
 
-function playNotificationTone(kind: "order" | "service") {
+function getNotificationAudioContext() {
   if (typeof window === "undefined") return;
 
   const AudioContextCtor =
@@ -963,22 +1064,59 @@ function playNotificationTone(kind: "order" | "service") {
     audioContextRef = new AudioContextCtor();
   }
 
-  const context = audioContextRef;
+  return audioContextRef;
+}
+
+async function unlockNotificationAudio() {
+  const context = getNotificationAudioContext();
+  if (!context) return false;
+  if (context.state === "closed") return false;
+
   if (context.state === "suspended") {
-    void context.resume();
+    try {
+      await context.resume();
+    } catch {
+      return false;
+    }
   }
 
-  const notes =
+  return context.state === "running";
+}
+
+function playNotificationTone(kind: "order" | "service") {
+  const context = getNotificationAudioContext();
+  if (!context) return;
+  if (context.state === "closed") return;
+
+  if (context.state === "suspended") {
+    void context
+      .resume()
+      .then(() => {
+        scheduleNotificationTone(context, kind);
+      })
+      .catch(() => undefined);
+    return;
+  }
+
+  scheduleNotificationTone(context, kind);
+}
+
+function scheduleNotificationTone(context: AudioContext, kind: "order" | "service") {
+  const ringRepeats = kind === "order" ? [0, 0.46, 0.92] : [0, 0.42, 0.84];
+  const ringNotes =
     kind === "order"
       ? [
-          { at: 0, frequency: 880, duration: 0.13, gain: 0.085 },
-          { at: 0.16, frequency: 1174, duration: 0.18, gain: 0.09 },
+          { at: 0, frequency: 1046.5, duration: 0.16, gain: 0.12 },
+          { at: 0.18, frequency: 1318.5, duration: 0.18, gain: 0.115 },
         ]
       : [
-          { at: 0, frequency: 740, duration: 0.11, gain: 0.075 },
-          { at: 0.14, frequency: 880, duration: 0.14, gain: 0.08 },
-          { at: 0.3, frequency: 740, duration: 0.14, gain: 0.07 },
+          { at: 0, frequency: 880, duration: 0.14, gain: 0.11 },
+          { at: 0.16, frequency: 1174.7, duration: 0.16, gain: 0.105 },
         ];
+
+  const notes = ringRepeats.flatMap((repeatAt) =>
+    ringNotes.map((note) => ({ ...note, at: repeatAt + note.at }))
+  );
 
   for (const note of notes) {
     const oscillator = context.createOscillator();

@@ -357,6 +357,10 @@
       "connected": "Canli guncellemeler acik",
       "fallback": "Yedek yenileme"
     },
+    "sound": {
+      "enable": "Sesi ac",
+      "enabled": "Ses acik"
+    },
     "states": {
       "loadingSession": "Kaydedilmis admin oturumu kontrol ediliyor",
       "loadingSessionDescription": "Restoran-admin erisimini geri yuklerken lutfen bekleyin.",

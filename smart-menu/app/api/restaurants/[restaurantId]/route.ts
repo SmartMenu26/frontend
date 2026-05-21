@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   buildResponseHeaders,
+  cacheTags,
   RESTAURANT_REVALIDATE_SECONDS,
 } from "@/app/api/cache";
 
@@ -22,7 +23,13 @@ export async function GET(
 
   try {
     const res = await fetch(url, {
-      next: { revalidate: RESTAURANT_REVALIDATE_SECONDS },
+      next: {
+        revalidate: RESTAURANT_REVALIDATE_SECONDS,
+        tags: [
+          cacheTags.restaurants,
+          cacheTags.restaurant(restaurantId),
+        ],
+      },
     });
     const data = await res.json().catch(() => ({ ok: false, data: null }));
     return NextResponse.json(data, {

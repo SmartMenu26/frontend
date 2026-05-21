@@ -715,6 +715,7 @@ function WeeklyCombosPanel({ session, onSessionExpired }: WeeklyCombosPanelProps
   const t = useTranslations("adminDashboard.weeklyCombos");
   const locale = useLocale() as Locale;
   const restaurantId = session.restaurant._id;
+  const restaurantSlug = session.restaurant.slug ?? undefined;
   const currency = session.restaurant.currency ?? "MKD";
   const sessionToken = session.token;
 
@@ -973,6 +974,7 @@ function WeeklyCombosPanel({ session, onSessionExpired }: WeeklyCombosPanelProps
           headers: {
             Authorization: `Bearer ${sessionToken}`,
             "Content-Type": "application/json",
+            ...(restaurantSlug ? { "x-restaurant-slug": restaurantSlug } : {}),
           },
           body: JSON.stringify(payload),
         }
@@ -1657,6 +1659,7 @@ function MenuItemsPanel({ session, onSessionExpired }: MenuItemsPanelProps) {
   const [filter, setFilter] = useState<"all" | "food" | "drink">("all");
   const [page, setPage] = useState<{ food: number; drink: number }>({ food: 1, drink: 1 });
   const restaurantId = session.restaurant._id;
+  const restaurantSlug = session.restaurant.slug ?? undefined;
   const timezone = session.restaurant.timezone ?? undefined;
   const currency = session.restaurant.currency ?? "MKD";
   const sessionToken = session.token;
@@ -1915,6 +1918,8 @@ function MenuItemsPanel({ session, onSessionExpired }: MenuItemsPanelProps) {
             currency={currency}
             timezone={timezone}
             sessionToken={sessionToken}
+            restaurantId={restaurantId}
+            restaurantSlug={restaurantSlug}
             onItemUpdated={handleItemUpdated}
             onSessionExpired={onSessionExpired}
           />
@@ -1934,6 +1939,8 @@ type MenuItemsGroupProps = {
   currency?: string | null;
   timezone?: string | null;
   sessionToken: string;
+  restaurantId?: string;
+  restaurantSlug?: string;
   onItemUpdated: (item: AdminMenuItem) => void;
   onSessionExpired: () => void;
 };
@@ -1947,6 +1954,8 @@ function MenuItemsGroup({
   currency,
   timezone,
   sessionToken,
+  restaurantId,
+  restaurantSlug,
   onItemUpdated,
   onSessionExpired,
 }: MenuItemsGroupProps) {
@@ -1980,6 +1989,8 @@ function MenuItemsGroup({
             currency={currency}
             timezone={timezone}
             sessionToken={sessionToken}
+            restaurantId={restaurantId}
+            restaurantSlug={restaurantSlug}
             onItemUpdated={onItemUpdated}
             onSessionExpired={onSessionExpired}
           />
@@ -2028,6 +2039,8 @@ type MenuItemCardProps = {
   currency?: string | null;
   timezone?: string | null;
   sessionToken: string;
+  restaurantId?: string;
+  restaurantSlug?: string;
   onItemUpdated: (item: AdminMenuItem) => void;
   onSessionExpired: () => void;
 };
@@ -2038,6 +2051,8 @@ function MenuItemCard({
   currency,
   timezone,
   sessionToken,
+  restaurantId,
+  restaurantSlug,
   onItemUpdated,
   onSessionExpired,
 }: MenuItemCardProps) {
@@ -2127,6 +2142,8 @@ function MenuItemCard({
         headers: {
           Authorization: `Bearer ${sessionToken}`,
           "Content-Type": "application/json",
+          ...(restaurantId ? { "x-restaurant-id": restaurantId } : {}),
+          ...(restaurantSlug ? { "x-restaurant-slug": restaurantSlug } : {}),
         },
         body: JSON.stringify(payload),
       });

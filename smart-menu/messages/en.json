@@ -366,6 +366,10 @@
       "connected": "Live updates on",
       "fallback": "Polling fallback"
     },
+    "sound": {
+      "enable": "Enable sound",
+      "enabled": "Sound on"
+    },
     "states": {
       "loadingSession": "Checking saved admin session",
       "loadingSessionDescription": "Please wait while we restore your restaurant-admin access.",

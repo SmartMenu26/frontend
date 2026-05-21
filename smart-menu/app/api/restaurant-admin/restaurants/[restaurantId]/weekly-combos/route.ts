@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePublicRestaurantCache } from "@/app/api/cache";
 
 type RouteContext = {
   params: Promise<{ restaurantId: string }>;
@@ -61,6 +62,16 @@ export async function GET(req: NextRequest, context: RouteContext) {
       cache: "no-store",
     });
     const data = await response.json().catch(() => null);
+    if (response.ok) {
+      revalidatePublicRestaurantCache({
+        restaurantId,
+        restaurantSlug: req.headers.get("x-restaurant-slug"),
+        includeRestaurant: false,
+        includeCategories: false,
+        includeMenuItems: false,
+        includeWeeklyCombos: true,
+      });
+    }
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Weekly combos GET proxy error:", error);

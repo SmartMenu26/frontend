@@ -1,4 +1,5 @@
 import { locales, type Locale } from "@/i18n";
+import { cacheTags } from "@/app/api/cache";
 
 type LocalizedRecord = Record<string, string | null | undefined>;
 
@@ -482,11 +483,12 @@ const unwrapPayload = (input: unknown): unknown => {
 
 const fetchJson = async (
   url: string,
-  revalidateSeconds = RESTAURANT_RECORD_REVALIDATE_SECONDS
+  revalidateSeconds = RESTAURANT_RECORD_REVALIDATE_SECONDS,
+  tags: string[] = [cacheTags.restaurants]
 ) => {
   try {
     const res = await fetch(url, {
-      next: { revalidate: revalidateSeconds },
+      next: { revalidate: revalidateSeconds, tags },
     });
     if (!res.ok) return null;
     return await res.json().catch(() => null);
@@ -654,12 +656,19 @@ export async function fetchRestaurantRecord(
   for (const url of urlCandidates) {
     if (!url || seen.has(url)) continue;
     seen.add(url);
-    const payload = await fetchJson(url);
+    const payload = await fetchJson(url, RESTAURANT_RECORD_REVALIDATE_SECONDS, [
+      cacheTags.restaurants,
+      ...(OBJECT_ID_REGEX.test(trimmed) ? [cacheTags.restaurant(trimmed)] : []),
+      ...(!OBJECT_ID_REGEX.test(trimmed) ? [cacheTags.restaurantSlug(trimmed)] : []),
+    ]);
     const mapped = tryMapPayload(payload, trimmed);
     bestMatch = mergeRestaurantRecords(bestMatch, mapped);
   }
 
-  const listPayload = await fetchJson(`${backendBase}/api/restaurants`);
+  const listPayload = await fetchJson(`${backendBase}/api/restaurants`, RESTAURANT_RECORD_REVALIDATE_SECONDS, [
+    cacheTags.restaurants,
+    ...(!OBJECT_ID_REGEX.test(trimmed) ? [cacheTags.restaurantSlug(trimmed)] : []),
+  ]);
   if (listPayload) {
     const mapped = tryMapPayload(listPayload, trimmed);
     bestMatch = mergeRestaurantRecords(bestMatch, mapped);
@@ -676,7 +685,9 @@ export async function fetchWeeklyCombos(
   const trimmed = restaurantId.trim();
   if (!trimmed) return null;
   const url = `${backendBase}/api/restaurants/${encodeURIComponent(trimmed)}/weekly-combos`;
-  const payload = await fetchJson(url, WEEKLY_COMBOS_REVALIDATE_SECONDS);
+  const payload = await fetchJson(url, WEEKLY_COMBOS_REVALIDATE_SECONDS, [
+    cacheTags.weeklyCombos(trimmed),
+  ]);
   if (!payload) return null;
   return normalizeWeeklyComboPayload(payload);
 }

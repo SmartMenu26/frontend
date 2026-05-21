@@ -30,5 +30,21 @@ self.addEventListener("notificationclick", (event) => {
 // Minimal fetch handler so Chrome sees this SW as controlling network requests
 self.addEventListener("fetch", (event) => {
   // pass-through response keeps the SW installable without custom caching yet
-  event.respondWith(fetch(event.request));
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      if (event.request.mode === "navigate") {
+        return caches.match(event.request).then((cachedResponse) => {
+          return (
+            cachedResponse ||
+            new Response("Network unavailable.", {
+              status: 503,
+              headers: { "Content-Type": "text/plain; charset=utf-8" },
+            })
+          );
+        });
+      }
+
+      return Response.error();
+    })
+  );
 });
