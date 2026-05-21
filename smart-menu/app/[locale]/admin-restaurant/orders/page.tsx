@@ -39,6 +39,7 @@ type AdminSession = {
 };
 
 const SESSION_KEY = "smart-menu::restaurant-admin-session";
+const ADMIN_TOKEN_KEY = "restaurantAdminToken";
 const POLL_INTERVAL_MS = 10_000;
 const SOCKET_EVENT_ORDER_NEW = "order:new";
 const SOCKET_EVENT_ORDER_UPDATED = "order:updated";
@@ -66,24 +67,20 @@ export default function AdminRestaurantOrdersPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const restoreSession = (raw: string | null, storage: Storage) => {
+    const restoreSession = (raw: string | null) => {
       if (!raw) return null;
       try {
         const parsed = JSON.parse(raw) as AdminSession;
-        return parsed?.token ? parsed : null;
+        const token = window.localStorage.getItem(ADMIN_TOKEN_KEY) ?? parsed?.token;
+        return token ? { ...parsed, token } : null;
       } catch {
-        storage.removeItem(SESSION_KEY);
+        window.localStorage.removeItem(SESSION_KEY);
+        window.localStorage.removeItem(ADMIN_TOKEN_KEY);
         return null;
       }
     };
 
-    const fromLocal = restoreSession(window.localStorage.getItem(SESSION_KEY), window.localStorage);
-    const fromSession = restoreSession(
-      window.sessionStorage.getItem(SESSION_KEY),
-      window.sessionStorage
-    );
-
-    setSession(fromLocal ?? fromSession ?? null);
+    setSession(restoreSession(window.localStorage.getItem(SESSION_KEY)));
     setSessionChecked(true);
   }, []);
 
@@ -135,6 +132,13 @@ export default function AdminRestaurantOrdersPage() {
     []
   );
 
+  const handleSessionExpired = useCallback(() => {
+    window.localStorage.removeItem(SESSION_KEY);
+    window.localStorage.removeItem(ADMIN_TOKEN_KEY);
+    setSession(null);
+    setError(t("errors.sessionExpired"));
+  }, [t]);
+
   const loadData = useCallback(async () => {
     if (!session?.token || !restaurantId) {
       setLoading(false);
@@ -169,8 +173,7 @@ export default function AdminRestaurantOrdersPage() {
       const servicePayload = await serviceRequestsResponse.json().catch(() => null);
 
       if (ordersResponse.status === 401 || serviceRequestsResponse.status === 401) {
-        setSession(null);
-        setError(t("errors.sessionExpired"));
+        handleSessionExpired();
         return;
       }
 
@@ -197,7 +200,7 @@ export default function AdminRestaurantOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [restaurantId, session?.token, t]);
+  }, [handleSessionExpired, restaurantId, session?.token, t]);
 
   useEffect(() => {
     if (!session?.token || !restaurantId) return;
@@ -321,8 +324,7 @@ export default function AdminRestaurantOrdersPage() {
         const payload = await response.json().catch(() => null);
 
         if (response.status === 401) {
-          setSession(null);
-          setError(t("errors.sessionExpired"));
+          handleSessionExpired();
           return;
         }
 
@@ -348,7 +350,7 @@ export default function AdminRestaurantOrdersPage() {
         setOrderPendingIds((current) => ({ ...current, [orderId]: false }));
       }
     },
-    [loadData, session?.token, t]
+    [handleSessionExpired, loadData, session?.token, t]
   );
 
   const updateServiceRequestStatus = useCallback(
@@ -371,8 +373,7 @@ export default function AdminRestaurantOrdersPage() {
         const payload = await response.json().catch(() => null);
 
         if (response.status === 401) {
-          setSession(null);
-          setError(t("errors.sessionExpired"));
+          handleSessionExpired();
           return;
         }
 
@@ -402,7 +403,7 @@ export default function AdminRestaurantOrdersPage() {
         setServicePendingIds((current) => ({ ...current, [serviceRequestId]: false }));
       }
     },
-    [loadData, session?.token, t]
+    [handleSessionExpired, loadData, session?.token, t]
   );
 
   return (

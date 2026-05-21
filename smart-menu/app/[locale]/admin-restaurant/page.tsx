@@ -116,6 +116,7 @@ type LoginFormState = {
 type LoginStatus = "idle" | "submitting" | "success" | "error";
 
 const SESSION_KEY = "smart-menu::restaurant-admin-session";
+const ADMIN_TOKEN_KEY = "restaurantAdminToken";
 const REMEMBER_KEY = "smart-menu::restaurant-admin-remember";
 const SESSION_EXPIRED_ERROR = "ADMIN_SESSION_EXPIRED";
 
@@ -159,16 +160,19 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const restoreSession = (raw: string | null, storage: Storage) => {
+    const restoreSession = (raw: string | null) => {
       if (!raw) return false;
       try {
         const parsed = JSON.parse(raw) as AdminSession;
-        if (parsed?.token) {
-          setSession(parsed);
+        const token = window.localStorage.getItem(ADMIN_TOKEN_KEY) ?? parsed?.token;
+        if (token) {
+          setSession({ ...parsed, token });
+          window.localStorage.setItem(ADMIN_TOKEN_KEY, token);
           return true;
         }
       } catch {
-        storage.removeItem(SESSION_KEY);
+        window.localStorage.removeItem(SESSION_KEY);
+        window.localStorage.removeItem(ADMIN_TOKEN_KEY);
       }
       return false;
     };
@@ -178,18 +182,7 @@ export default function AdminDashboardPage() {
       setRememberMe(true);
     }
 
-    const hasLocalSession = restoreSession(
-      window.localStorage.getItem(SESSION_KEY),
-      window.localStorage
-    );
-    if (hasLocalSession) {
-      if (storedPreference !== "true") {
-        setRememberMe(true);
-      }
-      return;
-    }
-
-    restoreSession(window.sessionStorage.getItem(SESSION_KEY), window.sessionStorage);
+    restoreSession(window.localStorage.getItem(SESSION_KEY));
   }, []);
 
   useEffect(() => {
@@ -197,18 +190,13 @@ export default function AdminDashboardPage() {
 
     if (session) {
       const payload = JSON.stringify(session);
-      if (rememberMe) {
-        window.localStorage.setItem(SESSION_KEY, payload);
-        window.sessionStorage.removeItem(SESSION_KEY);
-      } else {
-        window.sessionStorage.setItem(SESSION_KEY, payload);
-        window.localStorage.removeItem(SESSION_KEY);
-      }
+      window.localStorage.setItem(SESSION_KEY, payload);
+      window.localStorage.setItem(ADMIN_TOKEN_KEY, session.token);
     } else {
-      window.sessionStorage.removeItem(SESSION_KEY);
       window.localStorage.removeItem(SESSION_KEY);
+      window.localStorage.removeItem(ADMIN_TOKEN_KEY);
     }
-  }, [session, rememberMe]);
+  }, [session]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
