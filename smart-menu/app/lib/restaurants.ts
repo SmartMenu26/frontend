@@ -91,6 +91,8 @@ const COLLECTION_KEYS = ["images", "gallery", "photos"] as const;
 
 const LOCALIZED_KEYS = ["name", "aiAssistantName", "description"] as const;
 const SUPPORTED_LOCALE_SET = new Set<Locale>(locales);
+const RESTAURANT_RECORD_REVALIDATE_SECONDS = 86400;
+const WEEKLY_COMBOS_REVALIDATE_SECONDS = 3600;
 
 const CITY_KEYS = [
   "city",
@@ -478,9 +480,14 @@ const unwrapPayload = (input: unknown): unknown => {
   return input;
 };
 
-const fetchJson = async (url: string) => {
+const fetchJson = async (
+  url: string,
+  revalidateSeconds = RESTAURANT_RECORD_REVALIDATE_SECONDS
+) => {
   try {
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, {
+      next: { revalidate: revalidateSeconds },
+    });
     if (!res.ok) return null;
     return await res.json().catch(() => null);
   } catch (error) {
@@ -669,7 +676,7 @@ export async function fetchWeeklyCombos(
   const trimmed = restaurantId.trim();
   if (!trimmed) return null;
   const url = `${backendBase}/api/restaurants/${encodeURIComponent(trimmed)}/weekly-combos`;
-  const payload = await fetchJson(url);
+  const payload = await fetchJson(url, WEEKLY_COMBOS_REVALIDATE_SECONDS);
   if (!payload) return null;
   return normalizeWeeklyComboPayload(payload);
 }

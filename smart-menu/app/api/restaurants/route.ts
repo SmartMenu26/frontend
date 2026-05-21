@@ -1,6 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import {
+  buildResponseHeaders,
+  RESTAURANT_REVALIDATE_SECONDS,
+} from "@/app/api/cache";
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   const backendBase = process.env.BACKEND_URL;
 
   if (!backendBase) {
@@ -18,9 +22,14 @@ export async function GET(_req: NextRequest) {
   const url = `${backendBase}/api/restaurants`;
 
   try {
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, {
+      next: { revalidate: RESTAURANT_REVALIDATE_SECONDS },
+    });
     const data = await res.json().catch(() => ({ ok: false, data: null }));
-    return NextResponse.json(data, { status: res.status });
+    return NextResponse.json(data, {
+      status: res.status,
+      headers: buildResponseHeaders(res.ok, RESTAURANT_REVALIDATE_SECONDS),
+    });
   } catch (error) {
     console.error("Restaurants proxy error:", error);
     return NextResponse.json(

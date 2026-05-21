@@ -24,8 +24,7 @@ import { buildLocalizedPath } from "@/lib/routing";
 import { getSiteUrl } from "@/lib/siteMeta";
 import { notFound, redirect } from "next/navigation";
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 const TITLE_COPY: Record<Locale, (name: string) => string> = {
   mk: (name) => `Мени | ${name} | Smart Menu`,

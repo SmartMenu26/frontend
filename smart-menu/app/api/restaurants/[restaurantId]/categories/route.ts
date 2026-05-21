@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  buildResponseHeaders,
+  RESTAURANT_REVALIDATE_SECONDS,
+} from "@/app/api/cache";
 
 export async function GET(
   req: NextRequest,
@@ -14,10 +18,15 @@ export async function GET(
   if (kind) url.searchParams.set("kind", kind);
 
   try {
-    const res = await fetch(url.toString(), { cache: "no-store" });
+    const res = await fetch(url.toString(), {
+      next: { revalidate: RESTAURANT_REVALIDATE_SECONDS },
+    });
 
     const data = await res.json().catch(() => ({ ok: false, data: [] }));
-    return NextResponse.json(data, { status: res.status });
+    return NextResponse.json(data, {
+      status: res.status,
+      headers: buildResponseHeaders(res.ok, RESTAURANT_REVALIDATE_SECONDS),
+    });
   } catch (error) {
     console.error("Categories proxy error:", error);
     return NextResponse.json({ ok: false, data: [] }, { status: 500 });

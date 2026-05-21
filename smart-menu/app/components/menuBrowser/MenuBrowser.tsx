@@ -86,6 +86,7 @@ export default function MenuBrowser({
     const touchStateRef = useRef<{ lastY: number } | null>(null);
     const requestedItemsKeyRef = useRef<string | null>(null);
     const fulfilledItemsKeyRef = useRef<string | null>(null);
+    const menuItemsCacheRef = useRef<Map<string, MenuItem[]>>(new Map());
     const hasCompletedInitialRestoreRef = useRef(false);
     const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
@@ -313,8 +314,7 @@ export default function MenuBrowser({
 
             try {
                 const res = await fetch(
-                    `/api/restaurants/${restaurantId}/categories?kind=${mealType}`,
-                    { cache: "no-store" }
+                    `/api/restaurants/${restaurantId}/categories?kind=${mealType}`
                 );
 
                 if (!res.ok) throw new Error("Failed to load categories");
@@ -682,9 +682,16 @@ export default function MenuBrowser({
                 }
                 params.set("kind", mealType);
 
+                const requestUrl = `/api/menuItems/${restaurantId}/menu-items?${params.toString()}`;
+                const cachedItems = menuItemsCacheRef.current.get(requestUrl);
+                if (cachedItems) {
+                    setItems(cachedItems);
+                    fulfilledItemsKeyRef.current = itemsQueryKey;
+                    return;
+                }
+
                 const res = await fetch(
-                    `/api/menuItems/${restaurantId}/menu-items?${params.toString()}`,
-                    { cache: "no-store" }
+                    requestUrl
                 );
 
 
@@ -701,6 +708,7 @@ export default function MenuBrowser({
                 const mapped = mapMenuItems(data);
 
                 if (!cancelled) {
+                    menuItemsCacheRef.current.set(requestUrl, mapped);
                     setItems(mapped);
                     fulfilledItemsKeyRef.current = itemsQueryKey;
                 }

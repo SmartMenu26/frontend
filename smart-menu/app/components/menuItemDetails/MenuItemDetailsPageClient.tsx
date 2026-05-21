@@ -158,8 +158,7 @@ export default function MenuItemDetailsPageClient({
       setState({ status: "loading" });
       try {
         const restaurantRes = await fetch(
-          `/api/restaurants/slug/${encodeURIComponent(restaurantSlug)}`,
-          { cache: "no-store" }
+          `/api/restaurants/slug/${encodeURIComponent(restaurantSlug)}`
         );
 
         if (!restaurantRes.ok) {
@@ -223,7 +222,7 @@ export default function MenuItemDetailsPageClient({
           detailSearch.size > 0 ? `?${detailSearch.toString()}` : ""
         }`;
 
-        const detailRes = await fetch(detailUrl, { cache: "no-store" });
+        const detailRes = await fetch(detailUrl);
         if (!detailRes.ok) {
           throw new Error(
             detailRes.status === 404 ? "Menu item not found" : "Failed to fetch menu item"

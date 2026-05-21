@@ -43,7 +43,7 @@ export default function useRestaurantOrderSystem({
 
     async function load() {
       try {
-        const response = await fetch("/api/restaurants", { cache: "no-store" });
+        const response = await fetch("/api/restaurants");
         if (!response.ok) return;
 
         const payload = await response.json().catch(() => null);

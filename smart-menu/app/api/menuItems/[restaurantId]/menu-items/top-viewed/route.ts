@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  buildResponseHeaders,
+  MENU_REVALIDATE_SECONDS,
+} from "@/app/api/cache";
 
 type RouteContext = {
   params: Promise<{ restaurantId: string }>;
@@ -30,9 +34,14 @@ export async function GET(req: NextRequest, context: RouteContext) {
   }`;
 
   try {
-    const response = await fetch(url, { cache: "no-store" });
+    const response = await fetch(url, {
+      next: { revalidate: MENU_REVALIDATE_SECONDS },
+    });
     const payload = await response.json().catch(() => null);
-    return NextResponse.json(payload, { status: response.status });
+    return NextResponse.json(payload, {
+      status: response.status,
+      headers: buildResponseHeaders(response.ok, MENU_REVALIDATE_SECONDS),
+    });
   } catch (error) {
     console.error("Top viewed menu items proxy error:", error);
     return NextResponse.json(

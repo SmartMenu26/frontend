@@ -70,7 +70,9 @@ async function loadRestaurants(): Promise<RestaurantRecord[]> {
     "http://localhost:3000";
 
   try {
-    const res = await fetch(`${origin}/api/restaurants`);
+    const res = await fetch(`${origin}/api/restaurants`, {
+      next: { revalidate: 86400 },
+    });
     if (!res.ok) {
       console.warn("Failed to fetch restaurants:", res.status);
       return [];

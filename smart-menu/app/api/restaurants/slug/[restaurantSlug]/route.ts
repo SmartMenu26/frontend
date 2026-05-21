@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  buildPublicCacheHeaders,
+  RESTAURANT_REVALIDATE_SECONDS,
+} from "@/app/api/cache";
 import { fetchRestaurantRecord } from "@/app/lib/restaurants";
 
 export async function GET(
@@ -21,7 +25,13 @@ export async function GET(
       return NextResponse.json({ ok: false, data: null }, { status: 404 });
     }
 
-    return NextResponse.json({ ok: true, data: record }, { status: 200 });
+    return NextResponse.json(
+      { ok: true, data: record },
+      {
+        status: 200,
+        headers: buildPublicCacheHeaders(RESTAURANT_REVALIDATE_SECONDS),
+      }
+    );
   } catch (error) {
     console.error("Restaurant slug proxy error", error);
     return NextResponse.json(

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 
 const CARD_IMAGE_SIZE = 155;
@@ -69,11 +69,20 @@ export default function Card({
       : isDrink
       ? "border-[#6B2E2E]"
       : "border-[#355B4B]";
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
+  const imageLoaded = loadedImageUrl === resolvedImageUrl;
   const isListLayout = layout === "list";
 
   useEffect(() => {
-    setImageLoaded(false);
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth > 0) {
+      setLoadedImageUrl(resolvedImageUrl);
+      return;
+    }
+    setLoadedImageUrl((current) =>
+      current === resolvedImageUrl ? null : current
+    );
   }, [resolvedImageUrl]);
 
   const tileSizeClasses = "h-[200px] w-[200px]";
@@ -126,7 +135,8 @@ export default function Card({
               sizes="96px"
               placeholder="blur"
               blurDataURL={BLUR_PLACEHOLDER}
-              onLoad={() => setImageLoaded(true)}
+              ref={imageRef}
+              onLoad={() => setLoadedImageUrl(resolvedImageUrl)}
               className="h-full w-full object-cover"
             />
           </div>
@@ -198,7 +208,8 @@ export default function Card({
                 sizes={CARD_IMAGE_SIZES}
                 placeholder="blur"
                 blurDataURL={BLUR_PLACEHOLDER}
-                onLoad={() => setImageLoaded(true)}
+                ref={imageRef}
+                onLoad={() => setLoadedImageUrl(resolvedImageUrl)}
                 className="rounded-full h-full w-full object-cover shadow-[0_0_12px_-4px_rgba(63,93,80,0.35)]"
               />
             </div>
