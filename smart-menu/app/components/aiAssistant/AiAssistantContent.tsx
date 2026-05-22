@@ -416,7 +416,7 @@ export default function AiAssistantContent({
                               <p className="text-sm font-semibold text-[#1E1F24]">
                                 {title}
                               </p>
-                              <p className="text-xs text-[#6B7280] line-clamp-2">
+                              <p className="text-xs text-[#6B7280] line-clamp-2 max-w-[130px]">
                                 {description}
                               </p>
                             </div>

@@ -359,7 +359,9 @@
     },
     "sound": {
       "enable": "Sesi ac",
-      "enabled": "Ses acik"
+      "enabled": "Ses acik",
+      "notificationsEnable": "Arka plan bildirimlerini aç",
+      "notificationsActive": "Arka plan bildirimleri aktif"
     },
     "states": {
       "loadingSession": "Kaydedilmis admin oturumu kontrol ediliyor",
@@ -402,7 +404,9 @@
       "newBadge": "Yeni",
       "columns": {
         "new": "Yeni",
-        "acknowledged": "Onaylandi"
+        "acknowledged": "Onaylandi",
+        "resolved": "Cozuldu",
+        "cancelled": "Iptal edildi"
       },
       "table": "Masa {table}",
       "empty": "Bu kolonda servis istegi yok.",

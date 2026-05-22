@@ -368,7 +368,9 @@
     },
     "sound": {
       "enable": "Enable sound",
-      "enabled": "Sound on"
+      "enabled": "Sound on",
+      "notificationsEnable": "Enable Lockscreen Alerts",
+      "notificationsActive": "Alerts Active"
     },
     "states": {
       "loadingSession": "Checking saved admin session",
@@ -411,7 +413,9 @@
       "newBadge": "New",
       "columns": {
         "new": "New",
-        "acknowledged": "Acknowledged"
+        "acknowledged": "Acknowledged",
+        "resolved": "Resolved",
+        "cancelled": "Cancelled"
       },
       "table": "Table {table}",
       "empty": "No service requests in this column.",

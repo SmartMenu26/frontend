@@ -368,7 +368,9 @@
     },
     "sound": {
       "enable": "Вклучи звук",
-      "enabled": "Звук вклучен"
+      "enabled": "Звук вклучен",
+      "notificationsEnable": "Вклучи нотификации во позадина",
+      "notificationsActive": "Нотификации во позадина се активни"
     },
     "states": {
       "loadingSession": "Ја проверуваме зачуваната админ сесија",
@@ -411,7 +413,9 @@
       "newBadge": "Ново",
       "columns": {
         "new": "Нови",
-        "acknowledged": "Потврдени"
+        "acknowledged": "Потврдени",
+        "resolved": "Завршени",
+        "cancelled": "Откажани"
       },
       "table": "Маса {table}",
       "empty": "Нема сервисни барања во оваа колона.",

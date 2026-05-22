@@ -368,7 +368,9 @@
     },
     "sound": {
       "enable": "Aktivizo zërin",
-      "enabled": "Zëri aktiv"
+      "enabled": "Zëri aktiv",
+      "notificationsEnable": "Aktivizo njoftimet në prapavijë",
+      "notificationsActive": "Njoftimet në prapavijë janë aktive"
     },
     "states": {
       "loadingSession": "Po kontrollohet sesioni i ruajtur i adminit",
@@ -411,7 +413,9 @@
       "newBadge": "E re",
       "columns": {
         "new": "Të reja",
-        "acknowledged": "Të pranuara"
+        "acknowledged": "Të pranuara",
+        "resolved": "Të përfunduara",
+        "cancelled": "Të anuluara"
       },
       "table": "Tavolina {table}",
       "empty": "Nuk ka kërkesa shërbimi në këtë kolonë.",

@@ -2,13 +2,14 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { ArrowLeft, BellRing, ReceiptText, RefreshCw, Soup, Volume2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Bell, BellRing, ReceiptText, RefreshCw, Soup, Volume2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { io, type Socket } from "socket.io-client";
 import type { Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import AdminPwaInstallButton from "@/app/_components/AdminPwaInstallButton";
+import { subscribeUser, unsubscribeUser } from "@/app/actions";
 import {
   extractApiData,
   type LocalizedValue,
@@ -60,6 +61,49 @@ export default function AdminRestaurantOrdersPage() {
   const [servicePendingIds, setServicePendingIds] = useState<Record<string, boolean>>({});
   const [socketConnected, setSocketConnected] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+
+  const sortedOrders = useMemo(() => {
+    return [...orders].sort((a, b) => {
+      const statusPriority = { new: 0, accepted: 1, preparing: 2, served: 3, cancelled: 4 };
+      const pA = statusPriority[a.status] ?? 99;
+      const pB = statusPriority[b.status] ?? 99;
+      if (pA !== pB) return pA - pB;
+      const timeA = leftTime(a);
+      const timeB = leftTime(b);
+      return timeB - timeA;
+    });
+
+    function leftTime(order: RestaurantOrder) {
+      return order.createdAt ? new Date(order.createdAt).getTime() : 0;
+    }
+  }, [orders]);
+
+  const sortedServices = useMemo(() => {
+    return [...serviceRequests].sort((a, b) => {
+      const statusPriority = { new: 0, acknowledged: 1, resolved: 2, cancelled: 3 };
+      const pA = statusPriority[a.status] ?? 99;
+      const pB = statusPriority[b.status] ?? 99;
+      if (pA !== pB) return pA - pB;
+      const timeA = leftTime(a);
+      const timeB = leftTime(b);
+      return timeB - timeA;
+    });
+
+    function leftTime(req: RestaurantServiceRequest) {
+      return req.createdAt ? new Date(req.createdAt).getTime() : 0;
+    }
+  }, [serviceRequests]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+
+    void navigator.serviceWorker.ready.then(async (registration) => {
+      const existingSub = await registration.pushManager.getSubscription();
+      setPushSubscribed(!!existingSub);
+    }).catch((err) => console.error("Service Worker not ready for push subscription status check:", err));
+  }, []);
   const [recentOrderIds, setRecentOrderIds] = useState<Record<string, boolean>>({});
   const [recentServiceRequestIds, setRecentServiceRequestIds] = useState<Record<string, boolean>>({});
   const highlightTimeoutsRef = useRef<Record<string, number>>({});
@@ -116,6 +160,63 @@ export default function AdminRestaurantOrdersPage() {
       playNotificationTone("service");
     }
   }, []);
+
+  const togglePushNotifications = async () => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    setPushLoading(true);
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+
+      if (pushSubscribed) {
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          await subscription.unsubscribe();
+          await unsubscribeUser(subscription.endpoint);
+        }
+        setPushSubscribed(false);
+      } else {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+          alert("Notification permission denied.");
+          setPushLoading(false);
+          return;
+        }
+
+        const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!vapidPublicKey) {
+          throw new Error("VAPID public key is missing in environment.");
+        }
+
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+        });
+
+        const subJson = subscription.toJSON();
+        if (!subJson.endpoint || !subJson.keys?.p256dh || !subJson.keys?.auth) {
+          throw new Error("Invalid subscription JSON payload received.");
+        }
+
+        const payload = {
+          endpoint: subJson.endpoint,
+          expirationTime: subJson.expirationTime,
+          keys: {
+            p256dh: subJson.keys.p256dh,
+            auth: subJson.keys.auth,
+          },
+        };
+
+        await subscribeUser(payload);
+        setPushSubscribed(true);
+      }
+    } catch (err) {
+      console.error("Failed to toggle push notifications:", err);
+      setError(t("errors.generic"));
+    } finally {
+      setPushLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -536,6 +637,20 @@ export default function AdminRestaurantOrdersPage() {
                 <Volume2 className="h-4 w-4" />
                 {soundEnabled ? t("sound.enabled") : t("sound.enable")}
               </button>
+              <button
+                type="button"
+                onClick={() => void togglePushNotifications()}
+                disabled={pushLoading}
+                className={clsx(
+                  "inline-flex cursor-pointer items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ring-1 transition",
+                  pushSubscribed
+                    ? "bg-emerald-50 text-emerald-700 ring-emerald-200 shadow-sm"
+                    : "bg-white text-slate-700 ring-slate-200 hover:bg-slate-50"
+                )}
+              >
+                <Bell className={clsx("h-4 w-4", pushSubscribed ? "text-emerald-600 animate-pulse" : "text-slate-400")} />
+                {pushSubscribed ? t("sound.notificationsActive") : t("sound.notificationsEnable")}
+              </button>
               <div
                 className={clsx(
                   "rounded-full px-3 py-2 text-xs font-semibold ring-1",
@@ -581,67 +696,262 @@ export default function AdminRestaurantOrdersPage() {
               </div>
             ) : null}
 
-            <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(240px,0.85fr)] md:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.85fr)] xl:grid-cols-[minmax(0,1.6fr)_minmax(340px,1fr)]">
-              <section className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:h-[calc(100vh-210px)] lg:overflow-hidden pb-4">
+              {/* Column 1: Orders (55% / 7 cols) */}
+              <section className="md:col-span-6 flex flex-col h-full min-h-[400px] lg:min-h-0">
                 <SectionHeader
                   icon={Soup}
                   title={t("orders.title")}
                   subtitle={t("orders.subtitle")}
                 />
-                <div className="grid gap-4 xl:grid-cols-3">
-                  <OrderColumn
-                    title={t("orders.columns.new")}
-                    orders={orderGroups.new}
-                    locale={locale}
-                    timezone={timezone}
-                    pendingIds={orderPendingIds}
-                    recentIds={recentOrderIds}
-                    onUpdateStatus={updateOrderStatus}
-                  />
-                  <OrderColumn
-                    title={t("orders.columns.accepted")}
-                    orders={orderGroups.accepted}
-                    locale={locale}
-                    timezone={timezone}
-                    pendingIds={orderPendingIds}
-                    recentIds={recentOrderIds}
-                    onUpdateStatus={updateOrderStatus}
-                  />
-                  <OrderColumn
-                    title={t("orders.columns.preparing")}
-                    orders={orderGroups.preparing}
-                    locale={locale}
-                    timezone={timezone}
-                    pendingIds={orderPendingIds}
-                    recentIds={recentOrderIds}
-                    onUpdateStatus={updateOrderStatus}
-                  />
+                <div className="flex-1 min-h-0 mt-4 rounded-[28px] bg-white p-6 shadow-lg shadow-slate-950/5 ring-1 ring-slate-100 flex flex-col overflow-hidden">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      {t("orders.title")}
+                    </h3>
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                      {orders.length}
+                    </span>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+                    {sortedOrders.length ? (
+                      sortedOrders.map((order) => (
+                        <article
+                          key={order._id}
+                          className={clsx(
+                            "rounded-[24px] border p-5 transition-all duration-500",
+                            recentOrderIds[order._id]
+                              ? "border-emerald-300 bg-emerald-50 shadow-[0_18px_44px_rgba(16,185,129,0.18)] ring-2 ring-emerald-200"
+                              : "border-slate-200 bg-slate-50"
+                          )}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-lg font-bold text-slate-950">
+                                  {t("orders.table", { table: order.tableNumber })}
+                                </p>
+                                {recentOrderIds[order._id] ? (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-sm">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                                    {t("orders.newBadge")}
+                                  </span>
+                                ) : null}
+                                <span className={clsx(
+                                  "rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1",
+                                  order.status === "new"
+                                    ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                                    : order.status === "accepted"
+                                      ? "bg-sky-50 text-sky-700 ring-sky-200"
+                                      : "bg-amber-50 text-amber-700 ring-amber-200"
+                                )}>
+                                  {t("orders.columns." + order.status)}
+                                </span>
+                              </div>
+                              <p className="mt-1 text-xs text-slate-500 font-medium">
+                                {formatDateTime(order.createdAt, timezone)}
+                              </p>
+                            </div>
+                            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-800 ring-1 ring-slate-200 shadow-sm">
+                              {formatCurrency(order.subtotal, order.currency, locale)}
+                            </span>
+                          </div>
+
+                          <ul className="mt-4 space-y-2 border-t border-slate-200/60 pt-3">
+                            {order.items.map((item, index) => (
+                              <li key={`${order._id}:${item.menuItemId}:${index}`} className="text-sm text-slate-800 flex items-start justify-between">
+                                <div>
+                                  <span className="font-semibold text-slate-950">
+                                    {item.quantity}x
+                                  </span>{" "}
+                                  <span className="text-slate-900">
+                                    {resolveLocalizedText(item.nameSnapshot, locale) ?? t("orders.unnamedItem")}
+                                  </span>
+                                  {item.note ? (
+                                    <span className="block text-xs text-slate-500 italic mt-0.5">
+                                      — {item.note}
+                                    </span>
+                                  ) : null}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+
+                          {order.guestNote ? (
+                            <div className="mt-4 rounded-xl bg-amber-50/70 border border-amber-200/60 px-3 py-2.5 text-xs text-amber-900 flex items-start gap-2">
+                              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
+                              <div>
+                                <span className="font-semibold">{t("orders.guestNote")}:</span>{" "}
+                                {order.guestNote}
+                              </div>
+                            </div>
+                          ) : null}
+
+                          <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-200/60 pt-3">
+                            <div className="flex-1 flex gap-2">
+                              {order.status === "new" && (
+                                <button
+                                  type="button"
+                                  disabled={Boolean(orderPendingIds[order._id])}
+                                  onClick={() => void updateOrderStatus(order._id, "accepted")}
+                                  className="flex-1 cursor-pointer rounded-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-semibold transition shadow-sm text-center"
+                                >
+                                  {t("orders.actions.accepted")}
+                                </button>
+                              )}
+                              {order.status === "accepted" && (
+                                <button
+                                  type="button"
+                                  disabled={Boolean(orderPendingIds[order._id])}
+                                  onClick={() => void updateOrderStatus(order._id, "preparing")}
+                                  className="flex-1 cursor-pointer rounded-full bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 text-sm font-semibold transition shadow-sm text-center"
+                                >
+                                  {t("orders.actions.preparing")}
+                                </button>
+                              )}
+                              {order.status === "preparing" && (
+                                <button
+                                  type="button"
+                                  disabled={Boolean(orderPendingIds[order._id])}
+                                  onClick={() => void updateOrderStatus(order._id, "served")}
+                                  className="flex-1 cursor-pointer rounded-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-semibold transition shadow-sm text-center"
+                                >
+                                  {t("orders.actions.served")}
+                                </button>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              disabled={Boolean(orderPendingIds[order._id])}
+                              onClick={() => void updateOrderStatus(order._id, "cancelled")}
+                              className="cursor-pointer rounded-full text-rose-600 hover:bg-rose-50 px-4 py-2.5 text-xs font-semibold transition shrink-0"
+                            >
+                              {t("orders.actions.cancelled")}
+                            </button>
+                          </div>
+                        </article>
+                      ))
+                    ) : (
+                      <div className="rounded-[22px] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 font-medium">
+                        {t("orders.empty")}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </section>
 
-              <section className="space-y-4">
+              {/* Column 2: Service Requests (45% / 5 cols) */}
+              <section className="md:col-span-6 flex flex-col h-full min-h-[400px] lg:min-h-0">
                 <SectionHeader
                   icon={BellRing}
                   title={t("serviceRequests.title")}
                   subtitle={t("serviceRequests.subtitle")}
                 />
-                <div className="grid gap-4">
-                  <ServiceRequestColumn
-                    title={t("serviceRequests.columns.new")}
-                    requests={serviceGroups.new}
-                    timezone={timezone}
-                    pendingIds={servicePendingIds}
-                    recentIds={recentServiceRequestIds}
-                    onUpdateStatus={updateServiceRequestStatus}
-                  />
-                  <ServiceRequestColumn
-                    title={t("serviceRequests.columns.acknowledged")}
-                    requests={serviceGroups.acknowledged}
-                    timezone={timezone}
-                    pendingIds={servicePendingIds}
-                    recentIds={recentServiceRequestIds}
-                    onUpdateStatus={updateServiceRequestStatus}
-                  />
+                <div className="flex-1 min-h-0 mt-4 rounded-[28px] bg-white p-6 shadow-lg shadow-slate-950/5 ring-1 ring-slate-100 flex flex-col overflow-hidden">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      {t("serviceRequests.title")}
+                    </h3>
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                      {serviceRequests.length}
+                    </span>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+                    {sortedServices.length ? (
+                      sortedServices.map((request) => (
+                        <article
+                          key={request._id}
+                          className={clsx(
+                            "rounded-[24px] border p-5 transition-all duration-500",
+                            recentServiceRequestIds[request._id]
+                              ? "border-emerald-300 bg-emerald-50 shadow-[0_18px_44px_rgba(16,185,129,0.18)] ring-2 ring-emerald-200"
+                              : "border-slate-200 bg-slate-50"
+                          )}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-lg font-bold text-slate-950">
+                                  {t("serviceRequests.table", { table: request.tableNumber })}
+                                </p>
+                                {recentServiceRequestIds[request._id] ? (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-sm">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                                    {t("serviceRequests.newBadge")}
+                                  </span>
+                                ) : null}
+                                <span className={clsx(
+                                  "rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1",
+                                  request.status === "new"
+                                    ? "bg-emerald-50 text-emerald-700 ring-emerald-200 animate-pulse"
+                                    : "bg-sky-50 text-sky-700 ring-sky-200"
+                                )}>
+                                  {t("serviceRequests.columns." + request.status)}
+                                </span>
+                              </div>
+                              <p className="mt-1.5 text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+                                <span className="text-lg">
+                                  {request.type === "call_waiter" ? "🙋‍♂️" : "💳"}
+                                </span>
+                                {t(`serviceRequests.types.${request.type}`)}
+                              </p>
+                            </div>
+                            <ReceiptText className="h-5 w-5 text-slate-400 mt-1" />
+                          </div>
+
+                          <p className="mt-3 text-xs font-medium text-slate-500">
+                            {formatDateTime(request.createdAt, timezone)}
+                          </p>
+
+                          {request.note ? (
+                            <div className="mt-3 rounded-xl bg-white px-3 py-2.5 text-xs text-slate-700 border border-slate-200/60 shadow-sm flex items-start gap-2">
+                              <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                              <p className="leading-relaxed">{request.note}</p>
+                            </div>
+                          ) : null}
+
+                          <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-200/60 pt-3">
+                            <div className="flex-1 flex gap-2">
+                              {request.status === "new" && (
+                                <button
+                                  type="button"
+                                  disabled={Boolean(servicePendingIds[request._id])}
+                                  onClick={() => void updateServiceRequestStatus(request._id, "acknowledged")}
+                                  className="flex-1 cursor-pointer rounded-full bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 text-sm font-semibold transition shadow-sm text-center"
+                                >
+                                  {t("serviceRequests.actions.acknowledged")}
+                                </button>
+                              )}
+                              {request.status === "acknowledged" && (
+                                <button
+                                  type="button"
+                                  disabled={Boolean(servicePendingIds[request._id])}
+                                  onClick={() => void updateServiceRequestStatus(request._id, "resolved")}
+                                  className="flex-1 cursor-pointer rounded-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-semibold transition shadow-sm text-center"
+                                >
+                                  {t("serviceRequests.actions.resolved")}
+                                </button>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              disabled={Boolean(servicePendingIds[request._id])}
+                              onClick={() => void updateServiceRequestStatus(request._id, "cancelled")}
+                              className="cursor-pointer rounded-full text-rose-600 hover:bg-rose-50 px-4 py-2.5 text-xs font-semibold transition shrink-0"
+                            >
+                              {t("serviceRequests.actions.cancelled")}
+                            </button>
+                          </div>
+                        </article>
+                      ))
+                    ) : (
+                      <div className="rounded-[22px] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 font-medium">
+                        {t("serviceRequests.empty")}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </section>
             </div>
@@ -701,217 +1011,15 @@ function EmptyStateCard({
   );
 }
 
-function OrderColumn({
-  title,
-  orders,
-  locale,
-  timezone,
-  pendingIds,
-  recentIds,
-  onUpdateStatus,
-}: {
-  title: string;
-  orders: RestaurantOrder[];
-  locale: Locale;
-  timezone?: string;
-  pendingIds: Record<string, boolean>;
-  recentIds: Record<string, boolean>;
-  onUpdateStatus: (orderId: string, status: RestaurantOrderStatus) => Promise<void>;
-}) {
-  const t = useTranslations("adminOperations");
-
-  return (
-    <div className="rounded-[28px] bg-white p-4 shadow-lg shadow-slate-950/5 ring-1 ring-slate-100">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
-          {title}
-        </h3>
-        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-          {orders.length}
-        </span>
-      </div>
-
-      <div className="space-y-3">
-        {orders.length ? (
-          orders.map((order) => (
-            <article
-              key={order._id}
-              className={clsx(
-                "rounded-[24px] border p-4 transition-all duration-500",
-                recentIds[order._id]
-                  ? "border-emerald-300 bg-emerald-50 shadow-[0_18px_44px_rgba(16,185,129,0.18)] ring-2 ring-emerald-200"
-                  : "border-slate-200 bg-slate-50"
-              )}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-lg font-semibold text-slate-950">
-                      {t("orders.table", { table: order.tableNumber })}
-                    </p>
-                    {recentIds[order._id] ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-sm">
-                        <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                        {t("orders.newBadge")}
-                      </span>
-                    ) : null}
-                  </div>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {formatDateTime(order.createdAt, timezone)}
-                  </p>
-                </div>
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
-                  {formatCurrency(order.subtotal, order.currency, locale)}
-                </span>
-              </div>
-
-              <ul className="mt-4 space-y-2">
-                {order.items.map((item, index) => (
-                  <li key={`${order._id}:${item.menuItemId}:${index}`} className="text-sm text-slate-700">
-                    <span className="font-semibold text-slate-950">
-                      {item.quantity}x {resolveLocalizedText(item.nameSnapshot, locale) ?? t("orders.unnamedItem")}
-                    </span>
-                    {item.note ? <span className="block text-xs text-slate-500">{item.note}</span> : null}
-                  </li>
-                ))}
-              </ul>
-
-              {order.guestNote ? (
-                <p className="mt-4 rounded-2xl bg-white px-3 py-2 text-xs text-slate-600 ring-1 ring-slate-200">
-                  {t("orders.guestNote")}: {order.guestNote}
-                </p>
-              ) : null}
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {getOrderActions(order.status).map((nextStatus) => (
-                  <button
-                    key={nextStatus}
-                    type="button"
-                    disabled={Boolean(pendingIds[order._id])}
-                    onClick={() => void onUpdateStatus(order._id, nextStatus)}
-                    className={clsx(
-                      "cursor-pointer rounded-full px-3 py-2 text-xs font-semibold transition",
-                      pendingIds[order._id]
-                        ? "cursor-not-allowed bg-slate-200 text-slate-500"
-                        : getActionButtonClass(nextStatus)
-                    )}
-                  >
-                    {t(`orders.actions.${nextStatus}`)}
-                  </button>
-                ))}
-              </div>
-            </article>
-          ))
-        ) : (
-          <div className="rounded-[22px] border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-            {t("orders.empty")}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ServiceRequestColumn({
-  title,
-  requests,
-  timezone,
-  pendingIds,
-  recentIds,
-  onUpdateStatus,
-}: {
-  title: string;
-  requests: RestaurantServiceRequest[];
-  timezone?: string;
-  pendingIds: Record<string, boolean>;
-  recentIds: Record<string, boolean>;
-  onUpdateStatus: (
-    serviceRequestId: string,
-    status: RestaurantServiceRequestStatus
-  ) => Promise<void>;
-}) {
-  const t = useTranslations("adminOperations");
-
-  return (
-    <div className="rounded-[28px] bg-white p-4 shadow-lg shadow-slate-950/5 ring-1 ring-slate-100">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
-          {title}
-        </h3>
-        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-          {requests.length}
-        </span>
-      </div>
-
-      <div className="space-y-3">
-        {requests.length ? (
-          requests.map((request) => (
-            <article
-              key={request._id}
-              className={clsx(
-                "rounded-[24px] border p-4 transition-all duration-500",
-                recentIds[request._id]
-                  ? "border-emerald-300 bg-emerald-50 shadow-[0_18px_44px_rgba(16,185,129,0.18)] ring-2 ring-emerald-200"
-                  : "border-slate-200 bg-slate-50"
-              )}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-lg font-semibold text-slate-950">
-                      {t("serviceRequests.table", { table: request.tableNumber })}
-                    </p>
-                    {recentIds[request._id] ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-sm">
-                        <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                        {t("serviceRequests.newBadge")}
-                      </span>
-                    ) : null}
-                  </div>
-                  <p className="mt-1 text-sm text-slate-600">
-                    {t(`serviceRequests.types.${request.type}`)}
-                  </p>
-                </div>
-                <ReceiptText className="h-5 w-5 text-slate-400" />
-              </div>
-
-              <p className="mt-3 text-xs text-slate-500">
-                {formatDateTime(request.createdAt, timezone)}
-              </p>
-              {request.note ? (
-                <p className="mt-3 rounded-2xl bg-white px-3 py-2 text-xs text-slate-600 ring-1 ring-slate-200">
-                  {request.note}
-                </p>
-              ) : null}
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {getServiceRequestActions(request.status).map((nextStatus) => (
-                  <button
-                    key={nextStatus}
-                    type="button"
-                    disabled={Boolean(pendingIds[request._id])}
-                    onClick={() => void onUpdateStatus(request._id, nextStatus)}
-                    className={clsx(
-                      "cursor-pointer rounded-full px-3 py-2 text-xs font-semibold transition",
-                      pendingIds[request._id]
-                        ? "cursor-not-allowed bg-slate-200 text-slate-500"
-                        : getActionButtonClass(nextStatus)
-                    )}
-                  >
-                    {t(`serviceRequests.actions.${nextStatus}`)}
-                  </button>
-                ))}
-              </div>
-            </article>
-          ))
-        ) : (
-          <div className="rounded-[22px] border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-            {t("serviceRequests.empty")}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
 }
 
 function resolveLocalizedText(value: LocalizedValue, locale: Locale) {
@@ -1106,13 +1214,13 @@ function scheduleNotificationTone(context: AudioContext, kind: "order" | "servic
   const ringNotes =
     kind === "order"
       ? [
-          { at: 0, frequency: 1046.5, duration: 0.16, gain: 0.12 },
-          { at: 0.18, frequency: 1318.5, duration: 0.18, gain: 0.115 },
-        ]
+        { at: 0, frequency: 1046.5, duration: 0.16, gain: 0.12 },
+        { at: 0.18, frequency: 1318.5, duration: 0.18, gain: 0.115 },
+      ]
       : [
-          { at: 0, frequency: 880, duration: 0.14, gain: 0.11 },
-          { at: 0.16, frequency: 1174.7, duration: 0.16, gain: 0.105 },
-        ];
+        { at: 0, frequency: 880, duration: 0.14, gain: 0.11 },
+        { at: 0.16, frequency: 1174.7, duration: 0.16, gain: 0.105 },
+      ];
 
   const notes = ringRepeats.flatMap((repeatAt) =>
     ringNotes.map((note) => ({ ...note, at: repeatAt + note.at }))

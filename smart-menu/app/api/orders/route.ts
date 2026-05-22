@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sendPushToAll } from "@/app/actions";
+import { extractApiData } from "@/app/lib/restaurantOperations";
 
 export async function POST(req: NextRequest) {
   const backendBase = process.env.BACKEND_URL?.trim().replace(/\/$/, "");
@@ -30,6 +32,24 @@ export async function POST(req: NextRequest) {
       cache: "no-store",
     });
     const data = await response.json().catch(() => null);
+
+    if (response.ok && data) {
+      const orderData = body && typeof body === "object" ? (body as any) : null;
+      const savedOrder = extractApiData<any>(data) || data?.data || data;
+      const table = savedOrder?.tableNumber || orderData?.tableNumber || "—";
+      const itemsCount = Array.isArray(savedOrder?.items)
+        ? savedOrder.items.length
+        : Array.isArray(orderData?.items)
+        ? orderData.items.length
+        : 0;
+      const totalAmount = savedOrder?.subtotal ?? orderData?.subtotal ?? 0;
+
+      void sendPushToAll(
+        `Нова нарачка! 🍔 (Маса ${table})`,
+        `${itemsCount} производи · Вкупно: ${totalAmount} ден`
+      ).catch((err) => console.error("Error sending push notification for order:", err));
+    }
+
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Orders proxy request error:", error);
