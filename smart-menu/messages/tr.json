@@ -618,6 +618,9 @@
       "sesame": {
         "contains": "Susam icerir"
       },
+      "seeds": {
+        "contains": "Tohum icerir"
+      },
       "shellfish": {
         "contains": "Kabuklu deniz urunu icerir"
       },

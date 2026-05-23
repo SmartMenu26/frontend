@@ -133,11 +133,11 @@ const ALLERGEN_ICON_MAP: Record<string, AllergenIconEntry> = {
   },
   seed: {
     icon: Sprout,
-    defaultTooltipKey: "sesame.contains",
+    defaultTooltipKey: "seeds.contains",
   },
   seeds: {
     icon: Sprout,
-    defaultTooltipKey: "sesame.contains",
+    defaultTooltipKey: "seeds.contains",
   },
   peanut: {
     icon: Nut,

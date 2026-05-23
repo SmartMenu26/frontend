@@ -627,6 +627,9 @@
       "sesame": {
         "contains": "Contains sesame"
       },
+      "seeds": {
+        "contains": "Contains seeds"
+      },
       "shellfish": {
         "contains": "Contains shellfish"
       },

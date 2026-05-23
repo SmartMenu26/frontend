@@ -627,6 +627,9 @@
       "sesame": {
         "contains": "Përmban susam"
       },
+      "seeds": {
+        "contains": "Përmban fara"
+      },
       "shellfish": {
         "contains": "Përmban fruta deti"
       },

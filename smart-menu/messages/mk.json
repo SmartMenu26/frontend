@@ -627,6 +627,9 @@
       "sesame": {
         "contains": "Содржи сусам"
       },
+      "seeds": {
+        "contains": "Содржи семки"
+      },
       "shellfish": {
         "contains": "Содржи школки или ракчиња"
       },
