@@ -64,6 +64,8 @@ const OBJECT_ID_REGEX = /^[a-f\\d]{24}$/i;
 const RESTAURANT_HEADER_TITLE_IMAGES: Record<string, string> = {
   "am-health-corner":
     "https://smartmenu-media-prod.s3.eu-north-1.amazonaws.com/restaurants/69e614e90796abf74f9e5421/profile/0473855e-3580-4a1b-91f1-6bf58150dfe3.webp",
+  madrina:
+    "https://smartmenu-media-prod.s3.eu-north-1.amazonaws.com/restaurants/69f9aa70ae601e1fe37f3690/profile/8ecd9ff6-7a4b-435e-809b-5790bf239b7d.webp",
   "zdrava-stanica":
     "https://smartmenu-media-prod.s3.eu-north-1.amazonaws.com/restaurants/6a0331a1eb6a2990a29f7be9/profile/613e9463-1149-4c1f-9df4-354dd929ced4.webp",
 };

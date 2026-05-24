@@ -18,6 +18,7 @@ type Props = {
 export default function RestaurantHeader({
   showName = true,
   name,
+  restaurantSlug,
   titleImageSrc,
   preferTitleImage = false,
 }: Props) {
@@ -62,6 +63,7 @@ export default function RestaurantHeader({
   }, [displayName]);
   const resolvedTitleImageSrc = titleImageSrc?.trim() || "";
   const showLogoTitle = preferTitleImage && Boolean(resolvedTitleImageSrc);
+  const isMadrinaTitleImage = restaurantSlug === "madrina";
 
   return (
     <>
@@ -86,7 +88,10 @@ export default function RestaurantHeader({
                 width={560}
                 height={220}
                 loading="lazy"
-                className="h-20 md:h-44 w-auto max-w-full object-contain"
+                className={[
+                  "h-20 md:h-44 w-auto max-w-full object-contain",
+                  isMadrinaTitleImage ? "rounded-full" : "",
+                ].join(" ")}
               />
             </div>
           ) : (
