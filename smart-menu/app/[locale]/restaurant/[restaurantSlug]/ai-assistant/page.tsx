@@ -82,7 +82,7 @@ export default async function AiAssistantPage({ params, searchParams }: Props) {
     : undefined;
 
   const res = endpoint
-    ? await fetch(endpoint, { next: { revalidate: 86400 } }).catch(() => null)
+    ? await fetch(endpoint, { cache: "no-store" }).catch(() => null)
     : null;
 
   const payload = await res?.json().catch(() => null);
