@@ -1129,7 +1129,7 @@ export default function MenuBrowser({
                         onTouchEnd={resetTouchState}
                         onTouchCancel={resetTouchState}
                         className={[
-                            shouldForcePagedLayout ? "h-[380px]" : "",
+                            shouldForcePagedLayout ? "h-[330px]" : "",
                             shouldForcePagedLayout
                                 ? "overflow-y-auto snap-y snap-mandatory scroll-smooth"
                                 : "overflow-y-visible",
