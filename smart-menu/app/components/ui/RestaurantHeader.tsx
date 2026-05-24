@@ -63,7 +63,8 @@ export default function RestaurantHeader({
   }, [displayName]);
   const resolvedTitleImageSrc = titleImageSrc?.trim() || "";
   const showLogoTitle = preferTitleImage && Boolean(resolvedTitleImageSrc);
-  const isMadrinaTitleImage = restaurantSlug === "madrina";
+  const hasRoundedTitleImage =
+    restaurantSlug === "madrina" || restaurantSlug === "proper-pizza";
 
   return (
     <>
@@ -90,7 +91,7 @@ export default function RestaurantHeader({
                 loading="lazy"
                 className={[
                   "h-20 md:h-44 w-auto max-w-full object-contain",
-                  isMadrinaTitleImage ? "rounded-full" : "",
+                  hasRoundedTitleImage ? "rounded-full" : "",
                 ].join(" ")}
               />
             </div>
