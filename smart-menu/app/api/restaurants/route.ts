@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import {
   buildResponseHeaders,
-  cacheTags,
-  RESTAURANT_REVALIDATE_SECONDS,
 } from "@/app/api/cache";
 
 export async function GET() {
@@ -23,16 +21,11 @@ export async function GET() {
   const url = `${backendBase}/api/restaurants`;
 
   try {
-    const res = await fetch(url, {
-      next: {
-        revalidate: RESTAURANT_REVALIDATE_SECONDS,
-        tags: [cacheTags.restaurants],
-      },
-    });
+    const res = await fetch(url, { cache: "no-store" });
     const data = await res.json().catch(() => ({ ok: false, data: null }));
     return NextResponse.json(data, {
       status: res.status,
-      headers: buildResponseHeaders(res.ok, RESTAURANT_REVALIDATE_SECONDS),
+      headers: buildResponseHeaders(false, 0),
     });
   } catch (error) {
     console.error("Restaurants proxy error:", error);

@@ -12,6 +12,8 @@ import { buildLocalizedPath } from "@/lib/routing";
 
 const HIGHLIGHT_KEYS = ["aiConcierge", "instantMenu", "insights"] as const;
 
+export const dynamic = "force-dynamic";
+
 const BLOG_POSTS = [
   {
     key: "aiVsQr",
@@ -71,7 +73,7 @@ async function loadRestaurants(): Promise<RestaurantRecord[]> {
 
   try {
     const res = await fetch(`${origin}/api/restaurants`, {
-      next: { revalidate: 86400 },
+      cache: "no-store",
     });
     if (!res.ok) {
       console.warn("Failed to fetch restaurants:", res.status);
@@ -136,10 +138,29 @@ export default async function Home({ params }: Props) {
     label: t(`contact.items.${item.key}.label`),
   }));
 
-  const demoRestaurantHref = buildLocalizedPath(
-    "/restaurant/6957e610dfe0f2ca815211f8",
-    locale
-  );
+  const restaurantLogos = restaurants
+    .map((restaurant, index) => {
+      const label =
+        typeof restaurant.name === "string"
+          ? restaurant.name
+          : restaurant.name?.mk ??
+            restaurant.name?.en ??
+            restaurant.name?.sq ??
+            deployments.fallbackRestaurant;
+      const image = restaurant.imageUrl?.trim();
+
+      if (!image) return null;
+
+      return {
+        key: restaurant._id ?? restaurant.slug ?? `restaurant-${index}`,
+        label,
+        image,
+      };
+    })
+    .filter(
+      (restaurant): restaurant is { key: string; label: string; image: string } =>
+        Boolean(restaurant)
+    );
 
   return (
     <>
@@ -239,49 +260,58 @@ export default async function Home({ params }: Props) {
         </div>
       </section>
 
-      {restaurants.length > 0 ? (
+      {restaurantLogos.length > 0 ? (
         <section className="bg-[#F7F7F7] py-16">
           <div className="container mx-auto px-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A5A2A]">
-                  {deployments.eyebrow}
-                </p>
                 <h2 className="mt-3 text-3xl font-semibold text-[#1B1F1E]">{deployments.title}</h2>
               </div>
               <InstallAppButton />
             </div>
 
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {restaurants.slice(0, 3).map((restaurant, index) => {
-                const label =
-                  typeof restaurant.name === "string"
-                    ? restaurant.name
-                    : restaurant.name?.mk ??
-                      restaurant.name?.en ??
-                      restaurant.name?.sq ??
-                      deployments.fallbackRestaurant;
-                const image = restaurant.imageUrl;
-
-                return (
-                  <article
-                    key={restaurant._id ?? restaurant.slug}
-                    className="landing-fade w-full md:w-fit flex gap-3 rounded-3xl border border-black/5 bg-gray p-2 shadow-[0_15px_40px_rgba(15,24,21,0.05)] transition-transform duration-300 hover:scale-[1.02]"
-                    style={{ animationDelay: `${200 + index * 120}ms` }}
-                  >
-                    {image ? (
-                      <div className="relative w-full md:h-54 md:w-54 overflow-hidden rounded-2xl">
-                        <img
-                          src={image}
-                          alt={label}
-                          className="h-full w-full object-cover"
-                          loading="lazy"
-                        />
-                      </div>
-                    ) : null}
-                  </article>
-                );
-              })}
+            <div
+              className="landing-fade mt-10 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]"
+              style={{ animationDelay: "200ms" }}
+            >
+              {restaurantLogos.length > 1 ? (
+                <div className="restaurant-logo-marquee flex w-max">
+                  {[0, 1].map((group) => (
+                    <div
+                      key={group}
+                      className={`flex shrink-0 gap-2 pr-4${
+                        group === 1 ? " restaurant-logo-marquee-duplicate" : ""
+                      }`}
+                      aria-hidden={group === 1}
+                    >
+                      {restaurantLogos.map((restaurant) => (
+                        <div
+                          key={`${restaurant.key}-${group}`}
+                          className="flex h-24 w-36 shrink-0 items-center justify-center  p-2 sm:h-28 sm:w-40 rounded-2xl"
+                        >
+                          <img
+                            src={restaurant.image}
+                            alt={restaurant.label}
+                            className="max-h-full max-w-full object-contain rounded-2xl"
+                            loading="lazy"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex justify-center">
+                  <div className="flex h-24 w-36 items-center justify-center rounded-2xl border border-black/5 bg-white p-4 shadow-[0_15px_35px_rgba(15,24,21,0.06)] sm:h-28 sm:w-44">
+                    <img
+                      src={restaurantLogos[0].image}
+                      alt={restaurantLogos[0].label}
+                      className="max-h-full max-w-full object-contain"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>

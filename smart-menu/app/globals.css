@@ -43,6 +43,15 @@ html {
   }
 }
 
+@keyframes restaurant-logo-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 .landing-fade {
   opacity: 0;
   transform: translateY(12px);
@@ -51,10 +60,31 @@ html {
   will-change: opacity, transform;
 }
 
+.restaurant-logo-marquee {
+  animation: restaurant-logo-marquee 28s linear infinite;
+  will-change: transform;
+}
+
+.restaurant-logo-marquee:hover {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .landing-fade {
     opacity: 1;
     transform: none;
     animation: none;
+  }
+
+  .restaurant-logo-marquee {
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: none;
+    transform: none;
+  }
+
+  .restaurant-logo-marquee-duplicate {
+    display: none;
   }
 }
