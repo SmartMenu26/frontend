@@ -718,6 +718,14 @@ export default function MenuItemDetails({
           onSubmit={handleShareSubmit}
           labels={shareModalLabels}
           googleReviewUrl={googleReviewUrl}
+          googleReviewEventParams={{
+            itemId: id,
+            dish: name,
+            locale,
+            restaurantId,
+            restaurantSlug,
+            rating: 5,
+          }}
         />
       )}
     </>
@@ -1143,6 +1151,7 @@ type ShareFeedbackModalProps = {
   onClose: () => void;
   onSubmit: (payload: ShareFeedbackPayload) => Promise<void>;
   googleReviewUrl?: string;
+  googleReviewEventParams?: Record<string, string | number | undefined>;
   labels: {
     title: string;
     ratingLabel: string;
@@ -1160,6 +1169,7 @@ function ShareFeedbackModal({
   onClose,
   onSubmit,
   googleReviewUrl,
+  googleReviewEventParams,
   labels,
 }: ShareFeedbackModalProps) {
   const [rating, setRating] = useState<number | null>(null);
@@ -1243,6 +1253,7 @@ function ShareFeedbackModal({
 
   const handleReviewClick = () => {
     if (!googleReviewUrl) return;
+    trackEvent("menu_item_google_review_clicked", googleReviewEventParams);
     window.open(googleReviewUrl, "_blank");
   };
 
