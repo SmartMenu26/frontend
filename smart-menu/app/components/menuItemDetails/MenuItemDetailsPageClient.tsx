@@ -71,6 +71,12 @@ const getLocalizedValue = (
   return undefined;
 };
 
+const titleCaseWords = (value: string) =>
+  value
+    .replace(/[-_]+/g, " ")
+    .trim()
+    .replace(/\S+/g, (word) => word.charAt(0).toUpperCase() + word.slice(1));
+
 const getMenuItemPayload = (
   payload: unknown,
   menuItemId: string,
@@ -179,9 +185,11 @@ export default function MenuItemDetailsPageClient({
         const brandColor = getBrandColor(restaurantPayload);
         const localePriority = buildLocalePriority(locale);
         const restaurantName =
-          getLocalizedValue(restaurantPayload?.localizedName, localePriority) ??
-          getLocalizedValue(restaurantPayload?.plainName, localePriority) ??
-          canonicalSlug;
+          titleCaseWords(
+            getLocalizedValue(restaurantPayload?.localizedName, localePriority) ??
+              getLocalizedValue(restaurantPayload?.plainName, localePriority) ??
+              canonicalSlug
+          );
         const googleReviewUrl =
           getLocalizedValue(restaurantPayload?.googleReviewUrl, localePriority) ??
           undefined;
