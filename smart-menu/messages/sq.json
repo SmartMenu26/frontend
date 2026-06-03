@@ -468,19 +468,19 @@
     },
     "highlights": {
       "eyebrow": "Pse restorantet na zgjedhin",
-      "title": "Krijoni një eksperiencë të paharrueshme për çdo mysafir.",
+      "title": "Pse Smart Menu",
       "items": {
-        "instantMenu": {
-          "title": "Përditësime të menjëhershme të menusë",
-          "body": "Publikoni pjata sezonale, artikuj të shitur apo çmime dinamike për sekonda pa shtypur më meny të reja."
+        "increasedOrders": {
+          "title": "Më shumë porosi",
+          "body": "Asistenti ynë AI sugjeron pjatat dhe kombinimet perfekte që nxisin më shumë porosi për çdo tavolinë."
         },
-        "aiConcierge": {
-          "title": "AI Concierge",
-          "body": "Ndihmoni mysafirët të zbulojnë pjata përmes pyetjeve natyrore dhe filtrave dietikë të mundësuar nga asistenti ynë AI."
+        "googleReviews": {
+          "title": "Vlerësime më të mira në Google",
+          "body": "Filtrimi inteligjent i udhëzon mysafirët më të kënaqur drejt lënies së një vlerësimi 5★ në Google."
         },
-        "insights": {
-          "title": "Asistent AI i personalizuar",
-          "body": "Krijoni një agjent AI me tonin e markës suaj që flet me mysafirët, u përgjigjet pyetjeve përmenjëherë dhe ju kthen njohuri që mund t’i shndërroni në oferta të reja."
+        "satisfiedGuests": {
+          "title": "Mysafirë të kënaqur",
+          "body": "Gjetja më e shpejtë e pjatave të preferuara do të thotë mysafirë më të kënaqur dhe një përvojë më e mirë."
         }
       }
     },
@@ -501,8 +501,29 @@
     },
     "deployments": {
       "eyebrow": "Implementime aktive",
-      "title": "Restorantet që tashmë përdorin Smart Menu.",
+      "title": "Restorantet që tashmë përdorin Smart Menu",
       "fallbackRestaurant": "Restorant"
+    },
+    "showcase": {
+      "title": "Menuja juaj si mjet për shitje më të mëdha",
+      "cta": "Bashkohuni tani",
+      "imageAlt": "Ekrani i menusë së restorantit Smart Menu në telefon"
+    },
+    "contactForm": {
+      "title": "Filloni ta rritni restorantin tuaj",
+      "submitLabel": "Na kontakto",
+      "submittingLabel": "Po dërgohet...",
+      "successMessage": "Mesazhi u dërgua. Do t'ju kontaktojmë së shpejti.",
+      "errorMessage": "Nuk mundëm ta dërgojmë mesazhin. Provoni përsëri ose na kontaktoni me telefon.",
+      "imageAlt": "Pamje e aplikacionit Smart Menu",
+      "fields": {
+        "firstName": "Emri *",
+        "lastName": "Mbiemri *",
+        "phone": "Numri i celularit",
+        "email": "Email *",
+        "restaurantName": "Emri i restorantit *",
+        "message": "Mesazh"
+      }
     },
     "contact": {
       "eyebrow": "Le të flasim",

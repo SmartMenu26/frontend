@@ -459,19 +459,19 @@
     },
     "highlights": {
       "eyebrow": "Restoranlar neden bizi seciyor",
-      "title": "Her misafire unutulmaz bir deneyim sunun.",
+      "title": "Neden Smart Menu",
       "items": {
-        "instantMenu": {
-          "title": "Aninda menu guncellemeleri",
-          "body": "Mevsimlik yemekleri, tukenmis urunleri veya dinamik fiyatlari saniyeler icinde yayinlayin; kagit menu bastirmaya gerek kalmaz."
+        "increasedOrders": {
+          "title": "Daha fazla siparis",
+          "body": "AI asistanimiz, masa basina daha fazla siparisi tesvik eden mukemmel yemekleri ve kombinasyonlari onerir."
         },
-        "aiConcierge": {
-          "title": "AI konsiyerj",
-          "body": "Misafirlerin dogal dil sorulari ve diyet filtreleriyle yemekleri kesfetmesini AI asistanimizla kolaylastirin."
+        "googleReviews": {
+          "title": "Daha iyi Google puanlari",
+          "body": "Akilli filtreleme, en memnun misafirleri Google'da 5★ puan birakmaya yonlendirir."
         },
-        "insights": {
-          "title": "Kisisellestirilmis AI asistani",
-          "body": "Marka tonunuzla konusan, her soruyu yanitlayan ve yeni tekliflere donusturebileceginiz icgoruler saglayan ozel bir AI ajanini devreye alin."
+        "satisfiedGuests": {
+          "title": "Memnun misafirler",
+          "body": "Favori yemekleri daha hizli bulmak, daha memnun misafirler ve daha iyi bir deneyim demektir."
         }
       }
     },
@@ -492,8 +492,29 @@
     },
     "deployments": {
       "eyebrow": "Canli kurulumlar",
-      "title": "Smart Menu kullanan restoranlar.",
+      "title": "Smart Menu kullanan restoranlar",
       "fallbackRestaurant": "Restoran"
+    },
+    "showcase": {
+      "title": "Menunuz daha fazla satis icin bir arac",
+      "cta": "Hemen katil",
+      "imageAlt": "Telefonda Smart Menu restoran menu ekrani"
+    },
+    "contactForm": {
+      "title": "Restoraninizi buyutmeye baslayin",
+      "submitLabel": "Bizimle iletisime gecin",
+      "submittingLabel": "Gonderiliyor...",
+      "successMessage": "Mesajiniz gonderildi. Yakinda sizinle iletisime gececegiz.",
+      "errorMessage": "Mesaj gonderilemedi. Lutfen tekrar deneyin veya bizi telefonla arayin.",
+      "imageAlt": "Smart Menu uygulama ekrani onizlemesi",
+      "fields": {
+        "firstName": "Ad *",
+        "lastName": "Soyad *",
+        "phone": "Cep telefonu",
+        "email": "E-posta *",
+        "restaurantName": "Restoran adi *",
+        "message": "Mesaj"
+      }
     },
     "contact": {
       "eyebrow": "Konusalim",

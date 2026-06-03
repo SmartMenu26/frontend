@@ -468,19 +468,19 @@
     },
     "highlights": {
       "eyebrow": "Why restaurants choose us",
-      "title": "Deliver a memorable experience to every guest.",
+      "title": "Why Choose Smart Menu",
       "items": {
-        "instantMenu": {
-          "title": "Instant Menu Updates",
-          "body": "Publish seasonal dishes, sold-out items, or dynamic pricing in seconds without reprinting any paper menus."
+        "increasedOrders": {
+          "title": "Increased Orders",
+          "body": "Our AI assistant suggests the perfect dishes and combinations that encourage more orders per table."
         },
-        "aiConcierge": {
-          "title": "AI Concierge",
-          "body": "Help guests discover dishes through natural language questions and dietary filters powered by our AI assistant."
+        "googleReviews": {
+          "title": "Better Google Ratings",
+          "body": "Smart filtering guides your happiest guests toward leaving a 5★ Google rating."
         },
-        "insights": {
-          "title": "Personalized AI Assistant",
-          "body": "Launch a custom AI agent in your brand voice that chats with guests, answers every question, and feeds you insights you can instantly turn into new offers."
+        "satisfiedGuests": {
+          "title": "Satisfied Guests",
+          "body": "Finding favorite dishes faster means happier guests and a better experience."
         }
       }
     },
@@ -501,8 +501,29 @@
     },
     "deployments": {
       "eyebrow": "Live deployments",
-      "title": "Restaurants already on Smart Menu.",
+      "title": "Restaurants already on Smart Menu",
       "fallbackRestaurant": "Restaurant"
+    },
+    "showcase": {
+      "title": "Your menu as a tool for higher sales",
+      "cta": "Join now",
+      "imageAlt": "Smart Menu restaurant menu screen on a phone"
+    },
+    "contactForm": {
+      "title": "Start growing your restaurant",
+      "submitLabel": "Contact us",
+      "submittingLabel": "Sending...",
+      "successMessage": "Your message was sent. We'll contact you soon.",
+      "errorMessage": "We couldn't send the message. Please try again or contact us by phone.",
+      "imageAlt": "Smart Menu app screen preview",
+      "fields": {
+        "firstName": "First Name *",
+        "lastName": "Last Name *",
+        "phone": "Mobile number",
+        "email": "Email *",
+        "restaurantName": "Restaurant name *",
+        "message": "Message"
+      }
     },
     "contact": {
       "eyebrow": "Let's talk",
