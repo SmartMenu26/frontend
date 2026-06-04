@@ -8,6 +8,8 @@ applications:
             - npm install
         build:
           commands:
+            - printf "BACKEND_URL=%s\n" "$BACKEND_URL" >> .env.production
+            - printf "NEXT_PUBLIC_BACKEND_URL=%s\n" "$BACKEND_URL" >> .env.production
             - npm run build
       artifacts:
         baseDirectory: .next
