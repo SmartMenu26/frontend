@@ -96,10 +96,10 @@ html {
   isolation: isolate;
   overflow: hidden;
   background:
-    radial-gradient(circle at 20% 72%, rgba(56, 108, 66, 0.94), transparent 45%),
-    radial-gradient(circle at 36% 62%, rgba(82, 139, 93, 0.68), transparent 49%),
-    radial-gradient(circle at 70% 48%, rgba(149, 190, 136, 0.42), transparent 43%),
-    linear-gradient(108deg, #ffffff 0%, #f2f8f3 15%, #9fbea5 42%, #d8ead5 72%, #fafcf9 88%, #ffffff 100%);
+    radial-gradient(ellipse 58% 74% at 17% 76%, rgba(56, 108, 66, 0.82), transparent 63%),
+    radial-gradient(ellipse 62% 78% at 36% 62%, rgba(82, 139, 93, 0.52), transparent 67%),
+    radial-gradient(ellipse 64% 72% at 68% 50%, rgba(149, 190, 136, 0.34), transparent 68%),
+    linear-gradient(108deg, #ffffff 0%, #f2f8f3 13%, #b6cfba 38%, #d9ead6 66%, #f5faf3 86%, #ffffff 100%);
 }
 
 .restaurant-carousel-pattern::before {
@@ -118,7 +118,7 @@ html {
   z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.04) 46%, rgba(255, 255, 255, 0.78));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.12) 38%, rgba(255, 255, 255, 0.2) 68%, rgba(255, 255, 255, 0.68));
 }
 
 .smart-menu-showcase-grid {
