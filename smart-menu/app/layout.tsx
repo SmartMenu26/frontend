@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Script from "next/script";
 import { Suspense } from "react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { inter, greatVibes } from "./fonts";
 import { getSiteUrl } from "@/lib/siteMeta";
 import RegisterSW from "./_components/RegisterSW";
@@ -88,7 +87,6 @@ export default function RootLayout({
         <main>
           {children}
         </main>
-        <SpeedInsights />
       </body>
     </html>
   );
