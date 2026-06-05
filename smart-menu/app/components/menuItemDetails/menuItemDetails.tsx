@@ -167,11 +167,14 @@ export default function MenuItemDetails({
   }, [slugOrId, locale, returnKind, returnCategoryId, returnSubcategoryId, returnTable]);
 
   const handleBack = useCallback(() => {
-    if (backUrl) {
-      router.push(backUrl);
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
       return;
     }
-    router.back();
+
+    if (backUrl) {
+      router.push(backUrl);
+    }
   }, [backUrl, router]);
 
   const favoritesKey = useMemo(

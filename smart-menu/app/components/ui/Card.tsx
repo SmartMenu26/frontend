@@ -13,6 +13,7 @@ const PRIORITY_CARD_COUNT = 2;
 
 type CardVariant = "default" | "popular";
 type CardLayout = "stacked" | "list";
+type CardListSize = "default" | "large";
 
 type CardProps = {
   title: string;
@@ -29,6 +30,7 @@ type CardProps = {
   index?: number;
   kind?: string;
   layout?: CardLayout;
+  listSize?: CardListSize;
 };
 
 export default function Card({
@@ -46,6 +48,7 @@ export default function Card({
   index,
   kind,
   layout = "stacked",
+  listSize = "default",
 }: CardProps) {
   const resolvedImageUrl = imageUrl?.trim() || CARD_IMAGE_PLACEHOLDER;
   const normalizedKind = kind?.toLowerCase();
@@ -73,6 +76,7 @@ export default function Card({
   const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
   const imageLoaded = loadedImageUrl === resolvedImageUrl;
   const isListLayout = layout === "list";
+  const isLargeListLayout = isListLayout && listSize === "large";
 
   useEffect(() => {
     const image = imageRef.current;
@@ -101,7 +105,8 @@ export default function Card({
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#355B4B]/50",
         isListLayout
           ? [
-              "flex w-full items-center gap-3 px-1 py-2",
+              "flex w-full items-center gap-3",
+              isLargeListLayout ? "px-3 py-3" : "px-1 py-2",
               "rounded-none border-none bg-transparent",
               "transition-colors duration-150",
               "hover:bg-[#F6F8F7]",
@@ -113,8 +118,13 @@ export default function Card({
         .join(" ")}
     >
       {isListLayout ? (
-        <div className="flex w-full items-center gap-4">
-          <div className="relative h-[64px] w-[64px] flex-shrink-0 overflow-hidden rounded-2xl border border-[#E1E6E3] bg-[#F8FBF9]">
+        <div className={["flex w-full items-center", isLargeListLayout ? "gap-2" : "gap-4"].join(" ")}>
+          <div
+            className={[
+              "relative flex-shrink-0 overflow-hidden rounded-2xl border border-[#E1E6E3] bg-[#F8FBF9]",
+              isLargeListLayout ? "h-[92px] w-[92px]" : "h-[64px] w-[64px]",
+            ].join(" ")}
+          >
             <div
               aria-hidden
               className={[
@@ -132,7 +142,7 @@ export default function Card({
               loading={shouldPrioritizeImage ? "eager" : "lazy"}
               fetchPriority={shouldPrioritizeImage ? "high" : "low"}
               quality={75}
-              sizes="96px"
+              sizes={isLargeListLayout ? "92px" : "64px"}
               placeholder="blur"
               blurDataURL={BLUR_PLACEHOLDER}
               ref={imageRef}
@@ -140,33 +150,69 @@ export default function Card({
               className="h-full w-full object-cover"
             />
           </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="text-base font-[15px] leading-snug text-[#0B1F17] line-clamp-2">
-              {title}
-            </h3>
-            {description && (
-              <p className="mt-1 text-[13px] text-[#6B726E] line-clamp-1">{description}</p>
-            )}
-          </div>
-          <div className="ml-2 flex flex-col items-start gap-1 text-[#0F241A]">
-            <div className="flex items-center gap-2">
-              {priceLabel ? (
-                <span className="text-[14px] font-semibold whitespace-nowrap">
-                  {priceLabel}
-                </span>
-              ) : null}
-              <ArrowUpRight
-                size={18}
-                aria-hidden
-                className="text-[#6E7571] transition-transform duration-200 group-hover:translate-x-0.5"
-              />
+          {isLargeListLayout ? (
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="min-w-0 flex-1 text-[15px] font-semibold leading-snug text-[#0B1F17] line-clamp-2">
+                  {title}
+                </h3>
+                <div className="flex w-[58px] shrink-0 flex-col items-end gap-1 text-[#0F241A]">
+                  <div className="flex items-center gap-1">
+                    {priceLabel ? (
+                      <span className="text-[13px] font-semibold whitespace-nowrap">
+                        {priceLabel}
+                      </span>
+                    ) : null}
+                    <ArrowUpRight
+                      size={15}
+                      aria-hidden
+                      className="text-[#6E7571] transition-transform duration-200 group-hover:translate-x-0.5"
+                    />
+                  </div>
+                  {weightLabel ? (
+                    <span className="max-w-full rounded-full bg-[#E7F2FF] px-1.5 py-1 text-[10px] font-medium leading-none whitespace-nowrap text-[#2C6CBF] shadow-[0_6px_16px_rgba(44,108,191,0.14)] transition-all duration-200 group-hover:bg-[#DCEEFF]">
+                      {weightLabel}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+              {description && (
+                <p className="mt-1 text-[12.5px] leading-snug text-[#6B726E] line-clamp-2">
+                  {description}
+                </p>
+              )}
             </div>
-            {weightLabel ? (
-              <span className="rounded-full bg-[#E7F2FF] px-2.5 py-1 text-[11px] font-medium leading-none whitespace-nowrap text-[#2C6CBF] shadow-[0_6px_16px_rgba(44,108,191,0.14)] transition-all duration-200 group-hover:bg-[#DCEEFF]">
-                {weightLabel}
-              </span>
-            ) : null}
-          </div>
+          ) : (
+            <>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-[15px] leading-snug text-[#0B1F17] line-clamp-2">
+                  {title}
+                </h3>
+                {description && (
+                  <p className="mt-1 text-[13px] text-[#6B726E] line-clamp-1">{description}</p>
+                )}
+              </div>
+              <div className="ml-2 flex flex-col items-start gap-1 text-[#0F241A]">
+                <div className="flex items-center gap-2">
+                  {priceLabel ? (
+                    <span className="text-[14px] font-semibold whitespace-nowrap">
+                      {priceLabel}
+                    </span>
+                  ) : null}
+                  <ArrowUpRight
+                    size={18}
+                    aria-hidden
+                    className="text-[#6E7571] transition-transform duration-200 group-hover:translate-x-0.5"
+                  />
+                </div>
+                {weightLabel ? (
+                  <span className="rounded-full bg-[#E7F2FF] px-2.5 py-1 text-[11px] font-medium leading-none whitespace-nowrap text-[#2C6CBF] shadow-[0_6px_16px_rgba(44,108,191,0.14)] transition-all duration-200 group-hover:bg-[#DCEEFF]">
+                    {weightLabel}
+                  </span>
+                ) : null}
+              </div>
+            </>
+          )}
         </div>
       ) : (
         <>
