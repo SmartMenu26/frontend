@@ -14,6 +14,7 @@ import { defaultLocale, type Locale } from "@/i18n";
 import { buildLocalizedPath } from "@/lib/routing";
 import { incrementMenuItemView } from "@/app/lib/menuItemViews";
 import { preloadImage } from "@/app/lib/imagePreload";
+import { X } from "lucide-react";
 
 const ITEMS_PER_PAGE = 4;
 const PAGE_VIEWPORT_PX = 520;
@@ -39,6 +40,42 @@ type Props = {
     onMealTypeChange: (next: MealKind) => void;
     initialCategoryId?: string;
     initialSubcategoryId?: string;
+    displayMode?: "compact" | "fullPage";
+};
+
+const MENU_MODE_LABELS: Record<
+    Locale,
+    {
+        open: string;
+        openAria: string;
+        exit: string;
+        exitAria: string;
+    }
+> = {
+    mk: {
+        open: "Цело мени",
+        openAria: "Цело мени",
+        exit: "Затвори",
+        exitAria: "Затвори мени",
+    },
+    sq: {
+        open: "Menu e plotë",
+        openAria: "Menu e plotë",
+        exit: "Mbyll",
+        exitAria: "Mbyll menunë",
+    },
+    en: {
+        open: "Full menu",
+        openAria: "Full menu",
+        exit: "Close",
+        exitAria: "Close menu",
+    },
+    tr: {
+        open: "Tam menü",
+        openAria: "Tam menü",
+        exit: "Kapat",
+        exitAria: "Menüyü kapat",
+    },
 };
 
 const pickDefaultSubcategoryId = (categoryId?: string, source?: Category[]) => {
@@ -55,6 +92,7 @@ export default function MenuBrowser({
     onMealTypeChange,
     initialCategoryId,
     initialSubcategoryId,
+    displayMode = "compact",
 }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -64,6 +102,8 @@ export default function MenuBrowser({
         searchParams?.get("utm_table") ??
         searchParams?.get("t") ??
         undefined;
+    const isFullPage = displayMode === "fullPage";
+    const modeLabels = MENU_MODE_LABELS[locale] ?? MENU_MODE_LABELS[defaultLocale];
 
     const selectionStorageKey = useMemo(
         () => `menu-browser:${restaurantId}:${mealType}`,
@@ -231,7 +271,16 @@ export default function MenuBrowser({
         return chunks;
     }, [items]);
 
-    const shouldForcePagedLayout = loadingItems || loadingCategories || chunkedItems.length > 1;
+    const displayedItemGroups = useMemo(
+        () => (isFullPage ? (items.length ? [items] : []) : chunkedItems),
+        [chunkedItems, isFullPage, items]
+    );
+
+    const shouldForcePagedLayout =
+        !isFullPage && (loadingItems || loadingCategories || chunkedItems.length > 1);
+    const shouldShowPageDots =
+        !isFullPage && !loadingItems && !loadingCategories && chunkedItems.length > 1;
+    const activePageDotIndex = Math.min(pageIndicator.index, Math.max(0, chunkedItems.length - 1));
 
     const markProgrammaticScroll = useCallback((duration = 400) => {
         if (typeof window === "undefined") return;
@@ -592,7 +641,7 @@ export default function MenuBrowser({
         const previousScrollBehavior = container.style.scrollBehavior;
         container.style.scrollBehavior = "auto";
 
-        if (hasPendingPage && chunkedItems.length > 1) {
+        if (shouldForcePagedLayout && hasPendingPage && chunkedItems.length > 1) {
             markProgrammaticScroll(200);
             scrollToPage(pendingPageIndex ?? 0, "auto");
             applied = true;
@@ -627,6 +676,7 @@ export default function MenuBrowser({
         loadingItems,
         loadingCategories,
         chunkedItems.length,
+        shouldForcePagedLayout,
         updateCardScrollState,
         markProgrammaticScroll,
         scrollToPage,
@@ -780,6 +830,7 @@ export default function MenuBrowser({
 
     useEffect(() => {
         if (typeof window === "undefined") return;
+        if (isFullPage) return;
         if (!cardsVisible) return;
         if (loadingItems || loadingCategories) return;
         if (chunkedItems.length !== 1) return;
@@ -943,10 +994,11 @@ export default function MenuBrowser({
                 teardown = null;
             }
         };
-    }, [cardsVisible, loadingItems, loadingCategories, chunkedItems.length]);
+    }, [cardsVisible, isFullPage, loadingItems, loadingCategories, chunkedItems.length]);
 
     useEffect(() => {
         if (typeof window === "undefined") return;
+        if (isFullPage) return;
         if (!cardsVisible) return;
         if (loadingItems || loadingCategories) return;
         if (scrollHintShownRef.current) return;
@@ -1022,7 +1074,7 @@ export default function MenuBrowser({
                 }
             }
         };
-    }, [cardsVisible, loadingItems, loadingCategories, chunkedItems.length, markProgrammaticScroll]);
+    }, [cardsVisible, isFullPage, loadingItems, loadingCategories, chunkedItems.length, markProgrammaticScroll]);
 
     // Removed URL-sync effect to keep menu links clean
 
@@ -1055,22 +1107,129 @@ export default function MenuBrowser({
         [selectedCategoryId, selectedSubcategoryId, selectionStorageKey, pageIndicator.index]
     );
 
+    const buildMenuBrowserQueryString = useCallback(() => {
+        const params = new URLSearchParams(searchParams?.toString() ?? "");
+
+        if (mealType === "drink") {
+            params.set("kind", mealType);
+        } else {
+            params.delete("kind");
+        }
+
+        if (selectedCategoryId) {
+            params.set("categoryId", selectedCategoryId);
+        } else {
+            params.delete("categoryId");
+        }
+
+        if (selectedSubcategoryId) {
+            params.set("subcategoryId", selectedSubcategoryId);
+        } else {
+            params.delete("subcategoryId");
+        }
+
+        if (tableParam) {
+            params.set("t", tableParam);
+        }
+
+        return params.toString();
+    }, [mealType, searchParams, selectedCategoryId, selectedSubcategoryId, tableParam]);
+
+    const handleOpenFullMenu = useCallback(() => {
+        const slugOrId = restaurantSlug ?? restaurantId;
+        const queryString = buildMenuBrowserQueryString();
+        const href = buildLocalizedPath(
+            `/restaurant/${slugOrId}/menu${queryString ? `?${queryString}` : ""}`,
+            locale
+        );
+        const container = cardsContainerRef.current;
+
+        persistSelectionState({
+            scrollTop: container?.scrollTop ?? 0,
+            pageIndex: pageIndicator.index,
+        });
+        router.push(href);
+    }, [
+        buildMenuBrowserQueryString,
+        locale,
+        pageIndicator.index,
+        persistSelectionState,
+        restaurantId,
+        restaurantSlug,
+        router,
+    ]);
+
+    const handleExitFullMenu = useCallback(() => {
+        const slugOrId = restaurantSlug ?? restaurantId;
+        const queryString = buildMenuBrowserQueryString();
+        const fallbackHref = buildLocalizedPath(
+            `/restaurant/${slugOrId}${queryString ? `?${queryString}` : ""}`,
+            locale
+        );
+
+        router.push(fallbackHref);
+    }, [
+        buildMenuBrowserQueryString,
+        locale,
+        restaurantId,
+        restaurantSlug,
+        router,
+    ]);
+
 
 
     return (
         <section
             aria-labelledby="menu-browser-heading"
             className={[
-                "bg-[#F7F7F7] h-fit flex flex-col justify-start items-center",
+                "bg-[#F7F7F7] flex flex-col justify-start items-center",
+                isFullPage
+                    ? "min-h-dvh pb-[calc(env(safe-area-inset-bottom)+0.5rem)]"
+                    : "h-fit",
                 shouldForcePagedLayout ? "min-h-[56vh]" : "",
             ]
                 .filter(Boolean)
                 .join(" ")}
         >
-            <div className="container mx-auto space-y-1 py-5 pl-4">
+            <div
+                className={[
+                    "mx-auto w-full space-y-1",
+                    isFullPage
+                        ? "max-w-3xl px-4 pb-2 pt-[calc(env(safe-area-inset-top)+0.75rem)]"
+                        : "container py-3 pl-4",
+                ].join(" ")}
+            >
                 <h2 id="menu-browser-heading" className="sr-only">
                     Мени
                 </h2>
+                <div
+                    className={[
+                        "flex justify-end",
+                        isFullPage
+                            ? "sticky top-0 z-20 -mx-4 bg-[#F7F7F7]/95 px-4 py-2 backdrop-blur"
+                            : "pr-4 pb-2",
+                    ].join(" ")}
+                >
+                    <button
+                        type="button"
+                        aria-label={isFullPage ? modeLabels.exitAria : modeLabels.openAria}
+                        onClick={isFullPage ? handleExitFullMenu : handleOpenFullMenu}
+                        className={[
+                            "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5",
+                            "text-[13px] font-medium text-[#2F3A37]  transition",
+                            "hover:border-[#BFCBC4] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#355B4B]/30",
+                        ].join(" ")}
+                    >
+                        {isFullPage ? (
+                            <X className="h-4 w-4" aria-hidden strokeWidth={2} />
+                        ) : (
+                            <span className="text-base leading-none" aria-hidden>
+                                ⛶
+                            </span>
+                        )}
+                        <span>{isFullPage ? modeLabels.exit : modeLabels.open}</span>
+                    </button>
+                </div>
                 <MealTypeToggle value={mealType} onChange={onMealTypeChange} className="ml-auto" />
                 <nav
                     ref={categoryContainerRef}
@@ -1136,7 +1295,7 @@ export default function MenuBrowser({
                             "overflow-x-hidden",
                             "[-webkit-overflow-scrolling:touch]",
                             "[&::-webkit-scrollbar]:hidden",
-                            "py-4 scroll-pt-2",
+                            "scroll-pt-2",
                             "transition-opacity transition-transform duration-150 ease-out",
                             "transform",
                             restoringScroll ? "opacity-95 scale-[0.995]" : "opacity-100 scale-100",
@@ -1147,7 +1306,8 @@ export default function MenuBrowser({
                         {/* INNER STRIP */}
                         <div
                             className={[
-                                "flex flex-col gap-15 pr-5 pt-1",
+                                "flex flex-col",
+                                isFullPage ? "gap-3 pb-2 pt-4" : "gap-15 pr-5",
                                 "transition-all duration-200 ease-out transform-gpu",
                                 cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
                             ].join(" ")}
@@ -1158,6 +1318,7 @@ export default function MenuBrowser({
                                     className={[
                                         "snap-start snap-always flex flex-col pt-2",
                                         shouldForcePagedLayout ? "min-h-[330px]" : "",
+                                        isFullPage ? "gap-3" : "",
                                     ]
                                         .filter(Boolean)
                                         .join(" ")}
@@ -1172,14 +1333,15 @@ export default function MenuBrowser({
                                         </div>
                                     ))}
                                 </div>
-                            ) : chunkedItems.length ? (
-                                chunkedItems.map((group, pageIdx) => (
+                            ) : displayedItemGroups.length ? (
+                                displayedItemGroups.map((group, pageIdx) => (
                                     <div
                                         role="listitem"
                                         key={`menu-page-${pageIdx}`}
                                         className={[
                                             "snap-start snap-always flex flex-col",
                                             shouldForcePagedLayout ? "min-h-[330px]" : "",
+                                            isFullPage ? "gap-3" : "",
                                         ]
                                             .filter(Boolean)
                                             .join(" ")}
@@ -1187,7 +1349,11 @@ export default function MenuBrowser({
                                         {group.map((it, index) => (
                                             <div
                                                 key={it.id}
-                                                className="w-full border-b border-[#E1E6E3] last:border-b-0"
+                                                className={
+                                                    isFullPage
+                                                        ? "w-full overflow-hidden rounded-[18px] bg-white shadow-[0_3px_10px_rgba(15,24,21,0.04)] ring-1 ring-[#E1E6E3]"
+                                                        : "w-full border-b border-[#E1E6E3] last:border-b-0"
+                                                }
                                                 data-menu-card
                                             >
                                                     <Card
@@ -1198,6 +1364,7 @@ export default function MenuBrowser({
                                                         kind={it.kind ?? mealType}
                                                         description={it.description}
                                                         layout="list"
+                                                        listSize={isFullPage ? "large" : "default"}
                                                         onPointerEnter={() => warmMenuItemImage(it.imageUrl)}
                                                         onTouchStart={() => warmMenuItemImage(it.imageUrl)}
                                                         onFocus={() => warmMenuItemImage(it.imageUrl)}
@@ -1239,6 +1406,7 @@ export default function MenuBrowser({
                                     className={[
                                         "snap-start snap-always flex items-center justify-center text-sm text-[#64706A]",
                                         shouldForcePagedLayout ? "min-h-[330px]" : "",
+                                        isFullPage ? "min-h-[40dvh]" : "",
                                     ]
                                         .filter(Boolean)
                                         .join(" ")}
@@ -1249,22 +1417,22 @@ export default function MenuBrowser({
                         </div>
                     </div>
 
-                    {!loadingItems && !loadingCategories && pageIndicator.total > 1 && (
+                    {shouldShowPageDots && (
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex flex-col items-center justify-center gap-2 pr-1">
-                            {Array.from({ length: pageIndicator.total }).map((_, idx) => (
+                            {Array.from({ length: chunkedItems.length }).map((_, idx) => (
                                 <button
                                     type="button"
                                     key={`scroll-dot-${idx}`}
                                     className={[
                                         "pointer-events-auto h-2.5 w-2.5 rounded-full border-2 border-[#355B4B] transition cursor-pointer",
                                         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#355B4B]",
-                                        idx === pageIndicator.index
+                                        idx === activePageDotIndex
                                             ? "bg-[#355B4B] border-[#355B4B] scale-110"
                                             : "bg-transparent",
                                     ].join(" ")}
                                     aria-label={`Прикажи група ${idx + 1}`}
                                     onClick={() => scrollToPage(idx)}
-                                    disabled={idx === pageIndicator.index}
+                                    disabled={idx === activePageDotIndex}
                                 />
                             ))}
                         </div>

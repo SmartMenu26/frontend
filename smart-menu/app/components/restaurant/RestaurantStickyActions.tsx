@@ -27,6 +27,7 @@ type RestaurantStickyActionsProps = {
   restaurantSlug?: string;
   onRequestWaiter?: () => void;
   onRequestBill?: () => void;
+  onVisibilityChange?: (visible: boolean) => void;
 };
 
 type FeedbackToastState = {
@@ -53,6 +54,7 @@ export default function RestaurantStickyActions({
   restaurantSlug,
   onRequestWaiter,
   onRequestBill,
+  onVisibilityChange,
 }: RestaurantStickyActionsProps) {
   const t = useTranslations("restaurantStickyActions");
   const locale = useLocale() as Locale;
@@ -92,6 +94,11 @@ export default function RestaurantStickyActions({
     [restaurantId, restaurantSlug, table]
   );
   const isAnySheetOpen = isBillSheetOpen || isCartSheetOpen;
+  const isStickyActionsVisible = isVisible && !isAnySheetOpen;
+
+  useEffect(() => {
+    onVisibilityChange?.(isStickyActionsVisible);
+  }, [isStickyActionsVisible, onVisibilityChange]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -694,9 +701,9 @@ export default function RestaurantStickyActions({
       <div
         className={[
           "pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 transition-all duration-300 ease-out md:px-6",
-          isVisible && !isAnySheetOpen ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
+          isStickyActionsVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
         ].join(" ")}
-        aria-hidden={!isVisible || isAnySheetOpen}
+        aria-hidden={!isStickyActionsVisible}
       >
         <div className="mx-auto mb-3 flex w-full max-w-[42rem] justify-center">
           <div

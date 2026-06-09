@@ -111,7 +111,8 @@ export default function LanguageSwitcher({
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="cursor-pointer flex items-center gap-2 rounded-full border border-white/60 bg-white px-3 py-1 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B1F1E]/50"
+        aria-label={`Change language, current language ${currentLabel}`}
+        className="cursor-pointer flex items-center gap-1.5 rounded-full border border-white/60 bg-white px-2 py-1 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B1F1E]/50"
       >
         <img
           src={currentFlagSrc}
@@ -121,7 +122,6 @@ export default function LanguageSwitcher({
           sizes={FLAG_BUTTON_SIZES}
           className="h-6 w-6 rounded-full object-cover"
         />
-        <span className="text-sm font-semibold text-[#1B1F1E]">{currentLabel}</span>
         <svg
           className={clsx(
             "h-4 w-4 text-[#1B1F1E] transition-transform",
@@ -138,7 +138,7 @@ export default function LanguageSwitcher({
       </button>
 
       {open && (
-        <div className="absolute bottom-full right-0 mb-2 w-32 rounded-2xl border border-black/10 bg-white p-2 shadow-xl">
+        <div className="absolute bottom-full right-0 mb-2 w-20 rounded-2xl border border-black/10 bg-white p-2 shadow-xl">
           <ul role="listbox" aria-label="Select language" className="cursor-pointer flex flex-col gap-1">
             {remainingLocales.map((locale) => (
               <li key={locale}>
