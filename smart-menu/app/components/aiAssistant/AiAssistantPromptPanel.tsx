@@ -73,6 +73,7 @@ export default function AiAssistantPromptPanel<TCandidate = unknown>({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             restaurantId,
+            restaurantName,
             message: payload,
           }),
         });
@@ -96,7 +97,14 @@ export default function AiAssistantPromptPanel<TCandidate = unknown>({
         onPromptSettled?.();
       }
     },
-    [restaurantId, onResult, onPromptPending, onPromptSettled, defaultErrorMessage]
+    [
+      restaurantId,
+      restaurantName,
+      onResult,
+      onPromptPending,
+      onPromptSettled,
+      defaultErrorMessage,
+    ]
   );
 
   const sendPrompt = useCallback(

@@ -12,6 +12,7 @@ applications:
             - printf "NEXT_PUBLIC_BACKEND_URL=%s\n" "$BACKEND_URL" >> .env.production
             - printf "CONTACT_EMAIL_FROM=%s\n" "$CONTACT_EMAIL_FROM" >> .env.production
             - printf "CONTACT_EMAIL_TO=%s\n" "$CONTACT_EMAIL_TO" >> .env.production
+            - printf "AI_CREDITS_ALERT_EMAIL_TO=%s\n" "$AI_CREDITS_ALERT_EMAIL_TO" >> .env.production
             - printf "SMTP_HOST=%s\n" "$SMTP_HOST" >> .env.production
             - printf "SMTP_PORT=%s\n" "$SMTP_PORT" >> .env.production
             - printf "SMTP_SECURE=%s\n" "$SMTP_SECURE" >> .env.production

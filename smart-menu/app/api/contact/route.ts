@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+import { getSmtpConfig, sendSmartMenuEmail } from "@/app/lib/email";
 
 const CONTACT_EMAIL_TO = process.env.CONTACT_EMAIL_TO ?? "restaurantsmart26@gmail.com";
 
@@ -23,27 +23,6 @@ function escapeHtml(value: string) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
-}
-
-function getSmtpConfig() {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT ?? 587);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-
-  if (!host || !user || !pass || Number.isNaN(port)) {
-    return null;
-  }
-
-  return {
-    host,
-    port,
-    secure: process.env.SMTP_SECURE === "true" || port === 465,
-    auth: {
-      user,
-      pass,
-    },
-  };
 }
 
 export async function POST(request: Request) {
@@ -76,7 +55,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const transporter = nodemailer.createTransport(smtpConfig);
   const subject = `Smart Menu contact request - ${restaurantName}`;
   const text = [
     `First name: ${firstName}`,
@@ -96,7 +74,7 @@ export async function POST(request: Request) {
   ];
 
   try {
-    await transporter.sendMail({
+    await sendSmartMenuEmail({
       to: CONTACT_EMAIL_TO,
       from: process.env.CONTACT_EMAIL_FROM ?? smtpConfig.auth.user,
       replyTo: email,
